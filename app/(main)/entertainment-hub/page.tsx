@@ -419,7 +419,7 @@ const VideoPlatform = () => {
                   {/* Thumbnail Container */}
                   <div className="relative">
                     <img
-                      src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.thumbnail_alt || dataItem.imageUrl}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                      src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl|| dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
                       alt={dataItem.displayName || dataItem.musicTitle || ''}
                       className={`w-full rounded-lg aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain' : 'object-cover'}`}
                     />
