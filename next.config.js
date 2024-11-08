@@ -33,6 +33,10 @@ const nextConfig = {
         source: '/auth/:path*',
         destination: 'http://54.165.196.203:8000/users/:path*',
       },
+      {
+        source: '/uploads/:path*',
+        destination: 'http://54.165.196.203:8000/users/:path*',
+      },
     ];
   },
 };
