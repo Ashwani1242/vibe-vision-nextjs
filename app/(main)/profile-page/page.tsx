@@ -122,8 +122,8 @@ const ProfilePage = () => {
                 id: content._id,
                 title: content.musicTitle || 'No Title Found',
                 genres: ['test', 'test'],
-                coverArt: content.audioUrl || '',
-                audioUrl: content.imageUrl || content.thumbnail_alt || '',
+                audioUrl: content.audioUrl || '',
+                coverArt: content.imageUrl || content.thumbnail_alt || '',
                 duration: audioRef.current?.duration || 180,
                 timestamp: new Date().toISOString()
             };
@@ -356,7 +356,7 @@ const ProfilePage = () => {
                                     {/* Thumbnail Container */}
                                     <div className="relative">
                                         <img
-                                            src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.thumbnail_alt || dataItem.imageUrl}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                                            src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
                                             alt={dataItem.displayName || dataItem.musicTitle || ''}
                                             className={`w-full rounded-lg aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain' : 'object-cover'}`}
                                         />
@@ -368,7 +368,7 @@ const ProfilePage = () => {
                                     {/* Video Info */}
                                     <div className="mt-3 flex gap-3">
                                         <div className="flex-1">
-                                            <h3 className="font-semibold line-clamp-2">{dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}</h3>
+                                            <h3 className="font-semibold line-clamp-2">{dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}</h3>
                                         </div>
                                         <Button variant="ghost" size="icon" className="h-8 w-8">
                                             <MoreVertical className="h-4 w-4" />

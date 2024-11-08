@@ -209,14 +209,15 @@ const VideoPlatform = () => {
   const playGeneratedSong = (content: ContentItem) => {
 
     // setGeneratedSongs([])
+    console.log(content)
 
     if (!isPlaying) {
       const newSong: Song = {
         id: content._id,
         title: content.musicTitle || 'No Title Found',
         genres: ['test', 'test'],
-        coverArt: content.audioUrl || '',
-        audioUrl: content.imageUrl || content.thumbnail_alt || '',
+        audioUrl: `${BASE_URL}/${content.audioUrl}` || '',
+        coverArt: `${BASE_URL}/${content.imageUrl}` || content.thumbnail_alt || '',
         duration: audioRef.current?.duration || 180,
         timestamp: new Date().toISOString()
       };
