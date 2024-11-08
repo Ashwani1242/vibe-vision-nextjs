@@ -783,7 +783,7 @@ const MusicStudio = () => {
                         <CollaborativePlaylists />
                     </section> */}
                 </div>
-                {currentTrack && <MusicPlayer />}
+                {/* {currentTrack && <MusicPlayer />} */}
             </div>
         </Layout>
     );
