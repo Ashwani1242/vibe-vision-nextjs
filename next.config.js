@@ -9,29 +9,48 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        // Proxy all requests starting with /api to your backend
         source: '/:path*',
         destination: 'http://54.165.196.203:8000/:path*',
       },
       {
-        // Proxy all requests starting with /api to your backend
+        source: '/auth/:path*',
+        destination: 'http://54.165.196.203:8000/auth/:path*',
+      },
+      {
         source: '/auth/login',
         destination: 'http://54.165.196.203:8000/auth/login',
       },
       {
-        // Proxy all requests starting with /api to your backend
         source: '/auth/signup',
         destination: 'http://54.165.196.203:8000/auth/login',
       },
       {
-        // Proxy all requests starting with /auth to your backend
         source: '/api/:path*',
-        destination: 'http://54.165.196.203:8000/auth/:path*',
+        destination: 'http://54.165.196.203:8000/api/:path*',
       },
-      // Add more routes here if needed, for example:
       {
-        source: '/auth/:path*',
-        destination: 'http://54.165.196.203:8000/users/:path*',
+        source: '/api/generate-video/:path*',
+        destination: 'http://54.165.196.203:8000/api/generate-video/:path*',
+      },
+      {
+        source: '/api/generate-video/roast-video',
+        destination: 'http://54.165.196.203:8000/api/generate-video/roast-video',
+      },
+      {
+        source: '/api/generate-video/story-time',
+        destination: 'http://54.165.196.203:8000/api/generate-video/story-time',
+      },
+      {
+        source: '/api/generate-audio/:path*',
+        destination: 'http://54.165.196.203:8000/api/generate-audio/:path*',
+      },
+      {
+        source: '/api/generate-audio/kids-music',
+        destination: 'http://54.165.196.203:8000/api/generate-audio/kids-music',
+      },
+      {
+        source: '/api/generate-audio/jukebox',
+        destination: 'http://54.165.196.203:8000/api/generate-audio/jukebox',
       },
       {
         source: '/uploads/:path*',
