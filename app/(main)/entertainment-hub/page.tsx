@@ -414,7 +414,7 @@ const VideoPlatform = () => {
               {!(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
                 <CardContent
                   onClick={() => { openVideoModal(`${BASE_URL}/${dataItem.videoUrl}`, dataItem) }}
-                  className="p-0 h-[240px] bg-neutral-950 rounded-3xl relative">
+                  className="p-0 h-[240px]/ bg-neutral-950 rounded-3xl relative">
                   <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
                   {/* Thumbnail Container */}
                   <div className="relative">
@@ -431,7 +431,7 @@ const VideoPlatform = () => {
                   {/* Video Info */}
                   <div className="mt-3 flex gap-3">
                     <div className="flex-1">
-                      <h3 className="font-semibold line-clamp-2">{dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}</h3>
+                      <h3 className="font-semibold line-clamp-2">{dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}</h3>
                     </div>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <MoreVertical className="h-4 w-4" />
@@ -440,7 +440,7 @@ const VideoPlatform = () => {
                 </CardContent>
                 :
                 <CardContent
-                  className="bg-neutral-950 w-fit/ w-full h-[240px] /h-fit flex flex-row gap-6 p-8 text-center bg-cover justify-center items-center rounded-3xl relative">
+                  className="bg-neutral-950 w-fit/ w-full h-[240px]/ /h-fit flex flex-row gap-6 p-8 text-center bg-cover justify-center items-center rounded-3xl relative">
                   {/* <div className='h-full w-full p-0'> */}
                   <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
                   <div className={`relative h-full w-full flex justify-center items-center group cursor-pointer`}>
@@ -537,13 +537,13 @@ const VideoPlatform = () => {
                         <AudioLinesIcon className="size-4" />
                         Download Audio
                       </Button>
-                      <Button
+                      {currentVideoContent?.contentType === 'roast-my-pic' && <Button
                         className='w-full xl:h-full p-4 bg-neutral-900 flex xl:flex-col justify-center items-center gap-4 rounded-3xl'
                         onClick={() => handleDownloadImage(`${BASE_URL}/${currentVideoContent?.imageUrl || null}`, currentVideoContent?.displayName || 'Roast Image')}
                       >
                         <Image className="size-4" />
                         Download Image
-                      </Button>
+                      </Button>}
                     </div>
                     <Button
                       className='w-full xl:h-full p-4 bg-neutral-900 flex xl:flex-col justify-center items-center gap-4 rounded-3xl'
