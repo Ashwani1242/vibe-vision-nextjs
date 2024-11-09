@@ -444,7 +444,7 @@ export function Header({
           </div>
 
           {/* Search */}
-          <div className="flex-1 max-w-2xl mx-auto">
+          <div className="flex-1 max-w-2xl mx-auto invisible pointer-events-none">
             <PlaceholdersAndVanishInput
               placeholders={searchPlaceholders}
               onChange={handleSearchChange}

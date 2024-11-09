@@ -34,6 +34,7 @@ import EnhancedMusicPlayer from '@/components/media/music-player';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
+import ScrollingText from '@/components/ui/scroll-text';
 
 type ContentItem = {
   _id: string;
@@ -362,7 +363,7 @@ const VideoPlatform = () => {
     };
     fetchData();
 
-    
+
   }, [BASE_URL]);
 
   useEffect(() => {
@@ -378,7 +379,7 @@ const VideoPlatform = () => {
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, [closeVideoModal])
-  
+
 
   const formatTime = (time: number | null): string => {
     if (time === null || isNaN(time)) return '0:00';
@@ -409,20 +410,20 @@ const VideoPlatform = () => {
         </ScrollArea>
 
         {/* Videos Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 p-4">
           {filteredData.map((dataItem) => (
-            <Card key={dataItem._id} className="border-0 shadow-none ">
+            <Card key={dataItem._id} className="border-0 shadow-none h-80 ">
               {!(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
                 <CardContent
                   onClick={() => { openVideoModal(`${BASE_URL}/${dataItem.videoUrl}`, dataItem) }}
-                  className="p-0 h-[240px]/ bg-neutral-950 rounded-3xl relative">
+                  className="bg-[#0f0f0f] w-fit/ h-80 min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-3xl relative">
                   <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
                   {/* Thumbnail Container */}
                   <div className="relative">
                     <img
-                      src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl|| dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                      src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
                       alt={dataItem.displayName || dataItem.musicTitle || ''}
-                      className={`w-full rounded-lg aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain' : 'object-cover'}`}
+                      className={`w-full rounded-3xl aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
                     />
                     <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 text-sm rounded">
                       {/* {video.duration} */}
@@ -441,26 +442,27 @@ const VideoPlatform = () => {
                 </CardContent>
                 :
                 <CardContent
-                  className="bg-neutral-950 w-fit/ w-full h-[240px]/ /h-fit flex flex-row gap-6 p-8 text-center bg-cover justify-center items-center rounded-3xl relative">
+                  className="bg-[#0f0f0f] w-fit/ h-80 min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-3xl relative">
                   {/* <div className='h-full w-full p-0'> */}
                   <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
-                  <div className={`relative h-full w-full flex justify-center items-center group cursor-pointer`}>
-                    <div
-                      style={{
-                        backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
-                        filter: "blur(14px)",
-                        opacity: 0.5,
-                      }}
-                      className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-36 bg-cover rounded-full' >
-                    </div>
-                    <div
-                      style={{
-                        backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
-                        animation: false ? 'slowRotate 15s linear infinite' : '',
-                      }}
-                      className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-36 flex flex-col bg-cover justify-center items-center rounded-full'>
-                      <style>
-                        {`
+                  <div className='w-full bg-neutral-900 relative flex flex-row px-8 py-12 rounded-3xl'>
+                    <div className={`relative h-full w-full flex justify-center items-center group cursor-pointer`}>
+                      <div
+                        style={{
+                          backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                          filter: "blur(14px)",
+                          opacity: 0.5,
+                        }}
+                        className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-36 bg-cover rounded-full' >
+                      </div>
+                      <div
+                        style={{
+                          backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                          animation: false ? 'slowRotate 15s linear infinite' : '',
+                        }}
+                        className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-36 flex flex-col bg-cover justify-center items-center rounded-full'>
+                        <style>
+                          {`
                     @keyframes slowRotate {
                         from {
                             transform: rotate(0deg);
@@ -470,34 +472,35 @@ const VideoPlatform = () => {
                         }
                     }
                 `}
-                      </style>
-                      <div className='size-8 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
-                        {false && <AudioLines />}
+                        </style>
+                        <div className='size-8 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
+                          {false && <AudioLines />}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full items-center justify-center text-center text-nowrap bg-neutral-/800 rounded-xl p-4 max-w-48 overflow-hidden whitespace-nowrap flex flex-col gap-2">
+                      {/* <h3 className="text-white animate-marquee inline-block text-md">{`${dataItem.musicTitle}`}</h3> */}
+                      <ScrollingText text={dataItem.musicTitle || "Jukebox Music"} />
+                      <p className="text-gray-200 text-xs">Vibe Vision Music.</p>
+                      <div onClick={() => playGeneratedSong(dataItem)} className='p-2 cursor-pointer hover:scale-105 duration-300'>
+                        {currentSong?.id !== dataItem._id ?
+                          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" className="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z" />
+                          </svg>
+                          :
+                          <PauseCircleIcon className='size-10' />
+                        }
                       </div>
                     </div>
                   </div>
-                  <div className="w-full items-center justify-center flex flex-col gap-2">
-                    <h3 className="text-white text-md">{`${dataItem.musicTitle}`}</h3>
-                    <p className="text-gray-200 text-xs">Vibe Vision Music.</p>
-                    <div onClick={() => playGeneratedSong(dataItem)} className='p-2 cursor-pointer hover:scale-105 duration-300'>
-                      {currentSong?.id !== dataItem._id ?
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" className="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z" />
-                        </svg>
-                        :
-                        <PauseCircleIcon className='size-10' />
-                      }
-                    </div>
-                  </div>
-                  {/* <div className="mt-3 flex gap-3">
+                  <div className="mt-3 flex gap-3 px-4">
                       <div className="flex-1">
                         <h3 className="font-semibold line-clamp-2">{dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}</h3>
                       </div>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
-                    </div> */}
-                  {/* </div> */}
+                    </div>
                 </CardContent>
               }
             </Card>

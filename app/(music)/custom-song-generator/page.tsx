@@ -257,14 +257,13 @@ export default function SongGeneratorPage(): JSX.Element {
     }
 
     const handleGenerateMusic = async () => {
+        let currentTime = Date.now();
         const token = localStorageInstance?.getItem('token');
 
         if (!prompt.trim()) {
             setError('Please ensure prompt is provided.');
             return;
         }
-
-        let currentTime = Date.now();
 
         const finalPrompt = `Create a ${selectedGenres} song with the theme of ${selectedThemes} not more than 1 minute long. "${prompt}". The music should capture the essence of ${selectedThemes}. Ensure that elements typical of ${selectedGenres} music, like its instruments, rhythm, and mood, are present.`;
 
