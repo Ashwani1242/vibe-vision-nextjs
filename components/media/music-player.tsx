@@ -32,6 +32,7 @@ import {
   VolumeX,
   Repeat,
   ChevronUp,
+  ChevronDown,
   Share2,
   Download,
   Heart,
@@ -434,11 +435,11 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
               <div className="p-4 w-full">
                 <div className="flex items-center justify-between gap-4">
                   {/* Song Info */}
-                  <div className="flex items-center gap-4 min-w-[240px]">
+                  <div className="flex flex-1 items-center gap-4 m/in-w-[240px]">
                     <img
                       src={currentSong.coverArt}
                       alt={currentSong.title}
-                      className="w-12 h-12 rounded"
+                      className="size-8 sm:size-12 rounded"
                     />
                     <div>
                       <h3 className="font-medium">{currentSong.title}</h3>
@@ -449,7 +450,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                   </div>
 
                   {/* Player Controls */}
-                  <div className="md:flex-1">
+                  <div className="flex-1">
                     <div className="flex justify-center items-center gap-4 mb-2">
                       <Button
                         variant="ghost"
@@ -501,7 +502,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                         className={`hover:text-white /text-gray-400 flex md:hidden`}
                       >
                         {!isMusicPlayerFullScreen ? <ChevronUp className="h-5 w-5" />
-                          : <Minimize2 className="h-5 w-5" />}
+                          : <ChevronDown className="h-5 w-5" />}
                       </Button>
                     </div>
                     <div className="hidden md:flex items-center gap-2">
