@@ -85,7 +85,7 @@ const MessageToast: React.FC<ToastProps> = ({ message, visible, onClose }) => {
                 <div></div>
                 <div></div>
             </div>
-            {message}
+            <div className='max-w-60 md:max-w-96 text-sm md:text-base'> {message} </div>
         </div>
     );
 };

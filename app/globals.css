@@ -273,17 +273,17 @@
 }
 
 /* From Uiverse.io by ClawHack1 */ 
-.loader {
+.now-playing {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: fit-content;
+  height: 36px;
   position: relative;
   /* background-color: #956afa; */
 }
 
-.loader:before {
+.now-playing:before {
   content: "";
   position: absolute;
   top: -10px;
@@ -293,14 +293,14 @@
   border-radius: 50%;
 }
 
-.loader-inner {
+.now-playing-inner {
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
 }
 
-.loader-block {
+.now-playing-block {
   display: inline-block;
   width: 4px;
   height: 10px;
@@ -310,35 +310,35 @@
   animation: loader_562 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
 }
 
-.loader-block:nth-child(1) {
+.now-playing-block:nth-child(1) {
   animation-delay: 0.1s;
 }
 
-.loader-block:nth-child(2) {
+.now-playing-block:nth-child(2) {
   animation-delay: 0.2s;
 }
 
-.loader-block:nth-child(3) {
+.now-playing-block:nth-child(3) {
   animation-delay: 0.3s;
 }
 
-.loader-block:nth-child(4) {
+.now-playing-block:nth-child(4) {
   animation-delay: 0.4s;
 }
 
-.loader-block:nth-child(5) {
+.now-playing-block:nth-child(5) {
   animation-delay: 0.5s;
 }
 
-.loader-block:nth-child(6) {
+.now-playing-block:nth-child(6) {
   animation-delay: 0.6s;
 }
 
-.loader-block:nth-child(7) {
+.now-playing-block:nth-child(7) {
   animation-delay: 0.7s;
 }
 
-.loader-block:nth-child(8) {
+.now-playing-block:nth-child(8) {
   animation-delay: 0.8s;
 }
 

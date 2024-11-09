@@ -243,6 +243,8 @@ export default function SongGeneratorPage(): JSX.Element {
         };
 
         try {
+            showToast();
+
             const response = await axios.post(
                 apiUrl,
                 data,
@@ -661,7 +663,7 @@ export default function SongGeneratorPage(): JSX.Element {
                 {/* <Alert> Mesage </Alert>  */}
                 {/* <MessageToast /> */}
                 <MessageToast
-                    message="Your creation is in progress!"
+                    message="Your creation is in progress! You can keep track in your profile."
                     visible={toastVisible}
                     onClose={() => setToastVisible(false)}
                 />

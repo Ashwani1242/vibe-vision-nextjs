@@ -240,6 +240,8 @@ export default function SongGeneratorPage(): JSX.Element {
         };
 
         try {
+            showToast();
+            
             const response = await axios.post(
                 apiUrl,
                 data,
