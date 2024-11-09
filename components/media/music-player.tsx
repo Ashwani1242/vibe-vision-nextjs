@@ -31,6 +31,7 @@ import {
   Volume2,
   VolumeX,
   Repeat,
+  ChevronUp,
   Share2,
   Download,
   Heart,
@@ -139,7 +140,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
     setImageUrl(currentSong?.coverArt || null)
     setMusicUrl(currentSong?.audioUrl || null)
   }, [])
-  
+
 
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -431,7 +432,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
               :
 
               <div className="p-4 w-full">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between gap-4">
                   {/* Song Info */}
                   <div className="flex items-center gap-4 min-w-[240px]">
                     <img
@@ -448,13 +449,13 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                   </div>
 
                   {/* Player Controls */}
-                  <div className="flex-1">
+                  <div className="md:flex-1">
                     <div className="flex justify-center items-center gap-4 mb-2">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsShuffle(!isShuffle)}
-                        className={`hover:text-white ${isShuffle ? 'text-primary' : 'text-gray-400'}`}
+                        className={`hover:text-white hidden md:flex ${isShuffle ? 'text-primary' : 'text-gray-400'}`}
                       >
                         <Shuffle className="h-5 w-5" />
                       </Button>
@@ -488,12 +489,22 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsRepeat(!isRepeat)}
-                        className={`hover:text-white ${isRepeat ? 'text-primary' : 'text-gray-400'}`}
+                        className={`hover:text-white hidden md:flex ${isRepeat ? 'text-primary' : 'text-gray-400'}`}
                       >
                         <Repeat className="h-5 w-5" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        // onClick={() => setIsMusicPlayerFullScreen(val => !val)}
+                        onClick={maximizeScreen}
+                        className={`hover:text-white /text-gray-400 flex md:hidden`}
+                      >
+                        {!isMusicPlayerFullScreen ? <ChevronUp className="h-5 w-5" />
+                          : <Minimize2 className="h-5 w-5" />}
+                      </Button>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="hidden md:flex items-center gap-2">
                       <span className="text-sm text-gray-400">
                         {formatTime(currentTime)}
                       </span>
@@ -511,7 +522,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                   </div>
 
                   {/* Additional Controls */}
-                  <div className="flex items-center gap-2 min-w-[240px] justify-end">
+                  <div className="hidden md:flex items-center gap-2 min-w-[240px] justify-end">
                     <Button
                       variant="ghost"
                       size="icon"
