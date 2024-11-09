@@ -230,6 +230,8 @@ const VideoPlatform = () => {
     } else {
       audioRef.current?.pause()
     }
+
+    setIsPlaying(val => !val);
   }
 
   const openVideoModal = (videourl: string, videoContent: ContentItem) => {
@@ -423,7 +425,7 @@ const VideoPlatform = () => {
                     <img
                       src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
                       alt={dataItem.displayName || dataItem.musicTitle || ''}
-                      className={`w-full rounded-3xl aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
+                      className={`w-full h-60 rounded-3xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
                     />
                     <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 text-sm rounded">
                       {/* {video.duration} */}
@@ -488,19 +490,36 @@ const VideoPlatform = () => {
                             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z" />
                           </svg>
                           :
-                          <PauseCircleIcon className='size-10' />
+                          // <PauseCircleIcon className='size-10' />
+                          <div className='flex flex-col justify-center items-center'>
+                            {/* /* From Uiverse.io by ClawHack1  */}
+                            <div className="loader">
+                              <div className="loader-inner">
+                                <div className="loader-block"></div>
+                                <div className="loader-block"></div>
+                                <div className="loader-block"></div>
+                                <div className="loader-block"></div>
+                                <div className="loader-block"></div>
+                                <div className="loader-block"></div>
+                                <div className="loader-block"></div>
+                                <div className="loader-block"></div>
+                              </div>
+                            </div>
+
+                            Now Playing
+                          </div>
                         }
                       </div>
                     </div>
                   </div>
                   <div className="mt-3 flex gap-3 px-4">
-                      <div className="flex-1">
-                        <h3 className="font-semibold line-clamp-2">{dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}</h3>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
+                    <div className="flex-1">
+                      <h3 className="font-semibold line-clamp-2">{dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}</h3>
                     </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardContent>
               }
             </Card>
