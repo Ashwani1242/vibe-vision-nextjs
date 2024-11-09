@@ -146,41 +146,57 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const maximizeScreen = () => {
+  const isTouchDevice = (): boolean => {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  };
+
+  const isMobileDevice = (): boolean => {
+    return /Mobi|Android/i.test(navigator.userAgent);
+  };
+
+  const maximizeScreen = (): void => {
+    if (isTouchDevice() || isMobileDevice()) {
+      return;
+    }
+
     if (playerScreenRef.current) {
-      if (playerScreenRef.current.requestFullscreen) {
-        playerScreenRef.current.requestFullscreen();
-        setIsMusicPlayerFullScreen(true)
-      } else if ((playerScreenRef.current as any).mozRequestFullScreen) {
-        (playerScreenRef.current as any).mozRequestFullScreen();
-        setIsMusicPlayerFullScreen(true)
-      } else if ((playerScreenRef.current as any).webkitRequestFullscreen) {
-        (playerScreenRef.current as any).webkitRequestFullscreen();
-        setIsMusicPlayerFullScreen(true)
-      } else if ((playerScreenRef.current as any).msRequestFullscreen) {
-        (playerScreenRef.current as any).msRequestFullscreen();
-        setIsMusicPlayerFullScreen(true)
+      const element = playerScreenRef.current as HTMLElement;
+
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if ((element as any).mozRequestFullScreen) {
+        (element as any).mozRequestFullScreen(); // For Firefox
+      } else if ((element as any).webkitRequestFullscreen) {
+        (element as any).webkitRequestFullscreen(); // For Safari
+      } else if ((element as any).msRequestFullscreen) {
+        (element as any).msRequestFullscreen(); // For Internet Explorer/Edge
       }
+
+      setIsMusicPlayerFullScreen(true);
     }
   };
 
-  const minimizeScreen = () => {
+  const minimizeScreen = (): void => {
+    if (isTouchDevice() || isMobileDevice()) {
+      return;
+    }
+
     if (document.fullscreenElement) {
       if (document.exitFullscreen) {
         document.exitFullscreen();
-        setIsMusicPlayerFullScreen(false)
       } else if ((document as any).mozCancelFullScreen) {
-        (document as any).mozCancelFullScreen();
-        setIsMusicPlayerFullScreen(false)
+        (document as any).mozCancelFullScreen(); // For Firefox
       } else if ((document as any).webkitExitFullscreen) {
-        (document as any).webkitExitFullscreen();
-        setIsMusicPlayerFullScreen(false)
+        (document as any).webkitExitFullscreen(); // For Safari
       } else if ((document as any).msExitFullscreen) {
-        (document as any).msExitFullscreen();
-        setIsMusicPlayerFullScreen(false)
+        (document as any).msExitFullscreen(); // For Internet Explorer/Edge
       }
+
+      setIsMusicPlayerFullScreen(false);
     }
   };
+
+
 
   //-----------------------------------------------------------------------------
 
@@ -272,13 +288,13 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
         currentSong && (
           <div
             ref={playerScreenRef}
-            className={`fixed bottom-0 left-0 right-0 flex flex-col-reverse bg-background/95 backdrop-blur border-t`}>
-            {isMusicPlayerFullScreen && <div
+            className={`fixed bottom-0 left-0 right-0 flex flex-col-reverse bg-background/95 backdrop-blur border-t ${isMusicPlayerFullScreen && 'h-screen'}`}>
+            {/* {isMusicPlayerFullScreen && <div
               style={{ backgroundImage: `url(${currentSong.coverArt || imageUrl})` }}
-              className='w-full h-full absolute pointer-events-none bg-cover blur-md opacity-40' />}
+              className='w-full h-full absolute pointer-events-none bg-cover blur-md opacity-40' />} */}
             <div
               style={{ backgroundImage: isMusicPlayerFullScreen ? `url(${currentSong.coverArt})` : '', }}
-              className='absolute w-full h-full bg-no-repeat bg-cover opacity-30 blur-md pointer-events-none'>
+              className='absolute w-full h-full bg-no-repeat bg-cover opacity-5 md:opacity-30 blur-md pointer-events-none'>
             </div>
             <Progress
               value={(currentTime / duration) * 100}
@@ -288,13 +304,13 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
               // <div className="p-4 w-full">
               <div className="flex items-center h-full/ w-full justify-center flex-col gap-4 p-16 relative">
                 {/* Song Info */}
-                <div className="flex items-center gap-4 w-full min-w-[240px] m-20">
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full min-w-[240px] m-20">
                   <img
                     src={currentSong.coverArt}
                     alt={currentSong.title}
-                    className="size-48 rounded"
+                    className="size-full md:size-48 rounded"
                   />
-                  <div className='flex flex-col justify-end h-full px-8 gap-4'>
+                  <div className='flex flex-col justify-end h-full md:px-8 gap-4'>
                     <h3 className="font-bold text-5xl">{currentSong.title}</h3>
                     <h3 className="font-bold text-xl opacity-50">VibeVision Music.</h3>
                     {/* <p className="text-sm text-gray-400">
@@ -367,7 +383,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                 </div>
 
                 {/* Additional Controls */}
-                <div className="flex items-center gap-2 w-full min-w-[240px] justify-end">
+                <div className="flex items-center gap-2 w-full min-w-[240px]/ justify-center md:justify-end">
                   <Button
                     variant="ghost"
                     size="icon"
