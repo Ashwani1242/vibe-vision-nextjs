@@ -47,6 +47,7 @@ import {
   Minimize2,
   Maximize2
 } from 'lucide-react';
+import ScrollingText from '../ui/scroll-text';
 
 // Define an interface for playlist items
 interface PlaylistItem {
@@ -156,6 +157,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
 
   const maximizeScreen = (): void => {
     if (isTouchDevice() || isMobileDevice()) {
+      setIsMusicPlayerFullScreen(true);
       return;
     }
 
@@ -171,13 +173,14 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
       } else if ((element as any).msRequestFullscreen) {
         (element as any).msRequestFullscreen(); // For Internet Explorer/Edge
       }
-
-      setIsMusicPlayerFullScreen(true);
     }
+
+    setIsMusicPlayerFullScreen(true);
   };
 
   const minimizeScreen = (): void => {
     if (isTouchDevice() || isMobileDevice()) {
+      setIsMusicPlayerFullScreen(false);
       return;
     }
 
@@ -191,9 +194,9 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
       } else if ((document as any).msExitFullscreen) {
         (document as any).msExitFullscreen(); // For Internet Explorer/Edge
       }
-
-      setIsMusicPlayerFullScreen(false);
     }
+
+    setIsMusicPlayerFullScreen(false);
   };
 
 
@@ -288,13 +291,27 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
         currentSong && (
           <div
             ref={playerScreenRef}
-            className={`fixed bottom-0 left-0 right-0 flex flex-col-reverse bg-background/95 backdrop-blur border-t ${isMusicPlayerFullScreen && 'h-screen'}`}>
+
+            className={`fixed bottom-0 left-0 right-0 flex flex-col-reverse bg-background backdrop-blur border-t ${isMusicPlayerFullScreen && 'h-screen w-screen top-0'}`}>
             {/* {isMusicPlayerFullScreen && <div
               style={{ backgroundImage: `url(${currentSong.coverArt || imageUrl})` }}
               className='w-full h-full absolute pointer-events-none bg-cover blur-md opacity-40' />} */}
+            {isMusicPlayerFullScreen &&
+              <div className='absolute top-4 flex w-full px-4'>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  // onClick={() => setIsMusicPlayerFullScreen(val => !val)}
+                  onClick={minimizeScreen}
+                  className={`hover:text-white 'text-gray-400' scale-150 flex`}
+                >
+                  <ChevronDown className="h-5 w-5" />
+                </Button>
+              </div>}
+
             <div
               style={{ backgroundImage: isMusicPlayerFullScreen ? `url(${currentSong.coverArt})` : '', }}
-              className='absolute w-full h-full bg-no-repeat bg-cover opacity-5 md:opacity-30 blur-md pointer-events-none'>
+              className='absolute w-full h-full bg-no-repeat bg-cover opacity-30 md:opacity-30 blur-md pointer-events-none'>
             </div>
             <Progress
               value={(currentTime / duration) * 100}
@@ -302,17 +319,20 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
             />
             {isMusicPlayerFullScreen ?
               // <div className="p-4 w-full">
-              <div className="flex items-center h-full/ w-full justify-center flex-col gap-4 p-16 relative">
+              <div className="flex items-center h-full/ w-full justify-center flex-col gap-4 py-16 px-8 md:px-16 relative">
+
+
                 {/* Song Info */}
-                <div className="flex flex-col sm:flex-row items-center gap-4 w-full min-w-[240px] m-20">
-                  <img
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full min-w-[240px] md:m-20">
+                  {!(isMobileDevice() || isTouchDevice()) && <img
                     src={currentSong.coverArt}
                     alt={currentSong.title}
                     className="size-full md:size-48 rounded"
-                  />
-                  <div className='flex flex-col justify-end h-full md:px-8 gap-4'>
-                    <h3 className="font-bold text-5xl">{currentSong.title}</h3>
-                    <h3 className="font-bold text-xl opacity-50">VibeVision Music.</h3>
+                  />}
+                  <div className='flex flex-col justify-end w-full h-full md:px-8 md:gap-4'>
+                    {/* <ScrollingText text={currentSong.title} /> */}
+                    <h3 className="font-bold text-base md:text-5xl">{currentSong.title}</h3>
+                    <h3 className="font-bold text-xs opacity-50">VibeVision Music.</h3>
                     {/* <p className="text-sm text-gray-400">
                                             {currentSong.genres.join(', ')}
                                         </p> */}
@@ -321,10 +341,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
 
                 {/* Player Controls */}
                 <div className="w-full">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400">
-                      {formatTime(currentTime)}
-                    </span>
+                  <div className="flex flex-col items-center gap-2">
                     <Slider
                       value={[currentTime]}
                       max={duration}
@@ -332,9 +349,14 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                       onValueChange={handleTimeChange}
                       className="flex-1"
                     />
-                    <span className="text-sm text-gray-400">
-                      {formatTime(duration)}
-                    </span>
+                    <div className='flex w-full justify-between items-center text-xs md:textx-sm'>
+                      <span className="text-gray-400">
+                        {formatTime(currentTime)}
+                      </span>
+                      <span className="text-gray-400">
+                        {formatTime(duration)}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex justify-center items-center gap-4 mb-2">
                     <Button
@@ -383,7 +405,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                 </div>
 
                 {/* Additional Controls */}
-                <div className="flex items-center gap-2 w-full min-w-[240px]/ justify-center md:justify-end">
+                <div className="flex items-center gap-2 w-full md:min-w-[240px] justify-center md:justify-end">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -437,7 +459,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                     size="icon"
                     // onClick={() => setIsMusicPlayerFullScreen(val => !val)}
                     onClick={minimizeScreen}
-                    className={`hover:text-white 'text-gray-400'`}
+                    className={`hover:text-white 'text-gray-400' hidden md:flex`}
                   >
                     {!isMusicPlayerFullScreen ? <Maximize2 className="h-5 w-5" />
                       : <Minimize2 className="h-5 w-5" />}
@@ -448,10 +470,17 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
 
               :
 
-              <div className="p-4 w-full">
-                <div className="flex items-center justify-between gap-4">
+              <div className="p-4 w-full relative">
+                <div className="flex items-center justify-between gap-4 relative">
+                  <div
+                    onClick={() => {
+                      if ((isMobileDevice() || isTouchDevice()) && !isMusicPlayerFullScreen) {
+                        maximizeScreen()
+                      }
+                    }}
+                    className='bg-red-400/ bg-transparent absolute size-full top-0 left-0 z-10 md:hidden' />
                   {/* Song Info */}
-                  <div className="flex flex-1 items-center gap-4 m/in-w-[240px]">
+                  <div className="flex flex-1 md:flex-none items-center gap-4 md:min-w-[240px] z-0">
                     <img
                       src={currentSong.coverArt}
                       alt={currentSong.title}
@@ -466,7 +495,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                   </div>
 
                   {/* Player Controls */}
-                  <div className="flex-1">
+                  <div className="md:flex-1 z-20">
                     <div className="flex justify-center items-center gap-4 mb-2">
                       <Button
                         variant="ghost"
@@ -515,7 +544,7 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                         size="icon"
                         // onClick={() => setIsMusicPlayerFullScreen(val => !val)}
                         onClick={maximizeScreen}
-                        className={`hover:text-white /text-gray-400 flex md:hidden`}
+                        className={`hover:text-white /text-gray-400 hidden`}
                       >
                         {!isMusicPlayerFullScreen ? <ChevronUp className="h-5 w-5" />
                           : <ChevronDown className="h-5 w-5" />}
