@@ -49,6 +49,7 @@ import { Icon } from '@radix-ui/react-select';
 import axios from 'axios';
 import { BASE_URL } from '@/config';
 import EnhancedMusicPlayer from '@/components/media/music-player';
+import MessageToast from '@/components/ui/MessageToast';
 
 interface Song {
     id: string;
@@ -241,7 +242,7 @@ export default function SongGeneratorPage(): JSX.Element {
 
         try {
             showToast();
-            
+
             const response = await axios.post(
                 apiUrl,
                 data,
@@ -654,6 +655,12 @@ export default function SongGeneratorPage(): JSX.Element {
 
                 {/* Music Player */}
                 <EnhancedMusicPlayer currentSong={currentSong || null} />
+
+                <MessageToast
+                    message="Your creation is in progress! You can keep track in your profile."
+                    visible={toastVisible}
+                    onClose={() => setToastVisible(false)}
+                />
             </div >
         </Layout>
     );

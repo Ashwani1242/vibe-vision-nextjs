@@ -137,7 +137,7 @@ const ProfilePage = () => {
             audioRef.current?.pause()
         }
 
-        setIsPlaying(val => !val);
+        // setIsPlaying(val => !val);
     }
 
     const openVideoModal = (videourl: string, videoContent: ContentItem) => {
@@ -383,8 +383,8 @@ const ProfilePage = () => {
                                     className="bg-[#0f0f0f] w-fit/ h-80 min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-3xl relative">
                                     {/* <div className='h-full w-full p-0'> */}
                                     <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
-                                    <div className='w-full bg-neutral-900 relative flex flex-row px-8 py-12 rounded-3xl'>
-                                        <div className={`relative h-full w-full flex justify-center items-center group cursor-pointer`}>
+                                    <div className='w-full bg-neutral-900 relative flex flex-row justify-around items-center px-8 py-12 rounded-3xl'>
+                                        <div className={`relative h-full/ size-36 /w-full flex justify-center items-center group cursor-pointer`}>
                                             <div
                                                 style={{
                                                     backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
@@ -429,16 +429,16 @@ const ProfilePage = () => {
                                                     // <PauseCircleIcon className='size-10' />
                                                     <div className='flex flex-col justify-center items-center'>
                                                         {/* /* From Uiverse.io by ClawHack1  */}
-                                                        <div className="loader">
-                                                            <div className="loader-inner">
-                                                                <div className="loader-block"></div>
-                                                                <div className="loader-block"></div>
-                                                                <div className="loader-block"></div>
-                                                                <div className="loader-block"></div>
-                                                                <div className="loader-block"></div>
-                                                                <div className="loader-block"></div>
-                                                                <div className="loader-block"></div>
-                                                                <div className="loader-block"></div>
+                                                        <div className="now-playing">
+                                                            <div className="now-playing-inner">
+                                                                <div className="now-playing-block"></div>
+                                                                <div className="now-playing-block"></div>
+                                                                <div className="now-playing-block"></div>
+                                                                <div className="now-playing-block"></div>
+                                                                <div className="now-playing-block"></div>
+                                                                <div className="now-playing-block"></div>
+                                                                <div className="now-playing-block"></div>
+                                                                <div className="now-playing-block"></div>
                                                             </div>
                                                         </div>
 

@@ -79,6 +79,7 @@ import {
 import { BASE_URL } from '@/config';
 import axios from 'axios';
 import { Layout } from '@/components/layout/layout';
+import MessageToast from '@/components/ui/MessageToast';
 
 const genres: Genre[] = [
   {
@@ -194,12 +195,19 @@ export default function EnhancedStoryGenerator() {
   const [generatedScript, setGeneratedScript] = useState<string>('');
   const [videoTitle, setVideoTitle] = useState<string>('');
 
-  const [localStorageInstance,  setLocalStorageInstance] = useState<Storage | null>(null)
-  
+  const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
+
+  const [toastVisible, setToastVisible] = useState(false);
+
+  const showToast = () => {
+      setToastVisible(true);
+      // The toast will auto-close after 2 seconds because of the useEffect in the Toast component
+  };
+
   useEffect(() => {
     setLocalStorageInstance(localStorage);
   }, [])
-  
+
 
   // Dynamic background classes
   const getBackgroundClass = () => {
@@ -229,6 +237,8 @@ export default function EnhancedStoryGenerator() {
     setLoading(true);
 
     try {
+      showToast()
+      
       const response = await axios.post(
         `${BASE_URL}/api/generate-video/story-time`,
         {
@@ -926,6 +936,12 @@ export default function EnhancedStoryGenerator() {
               </ScrollArea>
             </DialogContent>
           </Dialog>
+
+          <MessageToast
+            message="Your creation is in progress! You can keep track in your profile."
+            visible={toastVisible}
+            onClose={() => setToastVisible(false)}
+          />
         </div>
       </div>
     </Layout >
