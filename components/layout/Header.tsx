@@ -110,10 +110,6 @@ export function Header({
   const [data, setData] = useState<ContentItem[]>([]);
   const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
 
-const filteredData = activeCategory
-        ? data.filter((dataItem) => dataItem.contentType === activeCategory)
-        : data;
-
   // Initialize localStorage safely
   const storage = useMemo(() => {
     if (typeof window !== 'undefined') {
