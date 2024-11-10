@@ -328,11 +328,11 @@ const ProfilePage = () => {
             <div className="w-full bg-background pt-24/ /pl-20 pb-36">
 
                 <div className='h-80 flex items-center text-white p-20 gap-8'>
-                    <div className='size-40 border-4 border-white rounded-full p-6'>
+                    <div className='size-24 md:size-40 border-4 border-white rounded-full p-6'>
                         <User2Icon className='size-full' />
                     </div>
-                    <div className='flex flex-col gap-4 '>
-                        <span className='text-3xl font-semibold'> {localStorageInstance?.getItem('loggedInUser')} </span>
+                    <div className='flex flex-col gap-2 md:gap-4'>
+                        <span className='text-2xl md:text-3xl font-semibold'> {localStorageInstance?.getItem('loggedInUser')} </span>
                         <span className='text-xl text-gray-300/60'> {localStorageInstance?.getItem('loggedInUserEmail')} </span>
                     </div>
                 </div>
@@ -481,7 +481,7 @@ const ProfilePage = () => {
                         ))
                         :
                         (
-                            <div className='flex flex-col w-full items-center justify-end gap-4 text-gray-300 h-96'>
+                            <div className='flex flex-col w-full items-center justify-start pt-16 gap-4 text-gray-300 h-96'>
                                 <img className='size-20 opacity-60' src="https://img.icons8.com/external-vitaliy-gorbachev-blue-vitaly-gorbachev/60/external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev.png" alt="external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev" />
                                 Nothing to see here
                             </div>
