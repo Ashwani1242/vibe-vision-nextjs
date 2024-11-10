@@ -356,64 +356,65 @@ const ProfilePage = () => {
                 </ScrollArea>
 
                 {/* Videos Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 p-4">
-                    {filteredData.map((dataItem) => (
-                        <Card key={dataItem._id} className="border-0 shadow-none ">
-                            {!(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
-                                <CardContent
-                                    onClick={() => { openVideoModal(`${BASE_URL}/${dataItem.videoUrl}`, dataItem) }}
-                                    className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
-                                    <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
-                                    {/* Thumbnail Container */}
-                                    <div className="relative">
-                                        <img
-                                            src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
-                                            alt={dataItem.displayName || dataItem.musicTitle || ''}
-                                            className={`w-full h-60 rounded-xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
-                                        />
-                                        <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 text-sm rounded">
-                                            {/* {video.duration} */}
-                                        </div>
-                                    </div>
-
-                                    {/* Video Info */}
-                                    <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
-                                        <div className='size-8'>
-                                            <UserCircleIcon className=" size-full" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="font-semibold line-clamp-2 text-nowrap">
-                                                {dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}
-                                            </h3>
-                                            <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
-                                                {dataItem.userPrompt || 'AI Generated Video'}
-                                            </h3>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                                :
-                                <CardContent
-                                    className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
-                                    {/* <div className='h-full w-full p-0'> */}
-                                    <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
-                                    <div className='w-full bg-neutral-900 max-h-60 relative flex flex-row justify-around items-center px-8 py-12 rounded-xl'>
-                                        <div className={`relative h-full/ size-36 /w-full flex justify-center items-center group cursor-pointer`}>
-                                            <div
-                                                style={{
-                                                    backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
-                                                    filter: "blur(14px)",
-                                                    opacity: 0.5,
-                                                }}
-                                                className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-36 bg-cover rounded-full' >
+                <div className={`grid grid-cols-1 ${filteredData.length !== 0 && 'sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'} gap-4 p-4`}>
+                    {filteredData.length !== 0 ?
+                        filteredData.map((dataItem) => (
+                            <Card key={dataItem._id} className="border-0 shadow-none ">
+                                {!(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
+                                    <CardContent
+                                        onClick={() => { openVideoModal(`${BASE_URL}/${dataItem.videoUrl}`, dataItem) }}
+                                        className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
+                                        <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
+                                        {/* Thumbnail Container */}
+                                        <div className="relative">
+                                            <img
+                                                src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                                                alt={dataItem.displayName || dataItem.musicTitle || ''}
+                                                className={`w-full h-60 rounded-xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
+                                            />
+                                            <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 text-sm rounded">
+                                                {/* {video.duration} */}
                                             </div>
-                                            <div
-                                                style={{
-                                                    backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
-                                                    animation: currentSong?.id === dataItem._id ? 'slowRotate 15s linear infinite' : '',
-                                                }}
-                                                className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-36 flex flex-col bg-cover justify-center items-center rounded-full'>
-                                                <style>
-                                                    {`
+                                        </div>
+
+                                        {/* Video Info */}
+                                        <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                                            <div className='size-8'>
+                                                <UserCircleIcon className=" size-full" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold line-clamp-2 text-nowrap">
+                                                    {dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}
+                                                </h3>
+                                                <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                                                    {dataItem.userPrompt || 'AI Generated Video'}
+                                                </h3>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                    :
+                                    <CardContent
+                                        className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
+                                        {/* <div className='h-full w-full p-0'> */}
+                                        <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
+                                        <div className='w-full bg-neutral-900 max-h-60 relative flex flex-row justify-around items-center px-8 py-12 rounded-xl'>
+                                            <div className={`relative h-full/ size-36 /w-full flex justify-center items-center group cursor-pointer`}>
+                                                <div
+                                                    style={{
+                                                        backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                                                        filter: "blur(14px)",
+                                                        opacity: 0.5,
+                                                    }}
+                                                    className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-36 bg-cover rounded-full' >
+                                                </div>
+                                                <div
+                                                    style={{
+                                                        backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                                                        animation: currentSong?.id === dataItem._id ? 'slowRotate 15s linear infinite' : '',
+                                                    }}
+                                                    className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-36 flex flex-col bg-cover justify-center items-center rounded-full'>
+                                                    <style>
+                                                        {`
                                                         @keyframes slowRotate {
                                                             from {
                                                                 transform: rotate(0deg);
@@ -423,61 +424,69 @@ const ProfilePage = () => {
                                                             }
                                                         }
                                                     `}
-                                                </style>
-                                                <div className='size-8 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
-                                                    {currentSong?.id === dataItem._id && <AudioLines />}
+                                                    </style>
+                                                    <div className='size-8 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
+                                                        {currentSong?.id === dataItem._id && <AudioLines />}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="w-full items-center justify-center text-center text-nowrap bg-neutral-/800 rounded-xl p-4 max-w-48 overflow-hidden whitespace-nowrap flex flex-col gap-2">
+                                                {/* <h3 className="text-white animate-marquee inline-block text-md">{`${dataItem.musicTitle}`}</h3> */}
+                                                <ScrollingText text={dataItem.musicTitle || "Jukebox Music"} />
+                                                <p className="text-gray-200 text-xs">Vibe Vision Music.</p>
+                                                <div onClick={() => playGeneratedSong(dataItem)} className='p-2 cursor-pointer hover:scale-105 duration-300'>
+                                                    {currentSong?.id !== dataItem._id ?
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" className="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z" />
+                                                        </svg>
+                                                        :
+                                                        // <PauseCircleIcon className='size-10' />
+                                                        <div className='flex flex-col justify-center items-center'>
+                                                            {/* /* From Uiverse.io by ClawHack1  */}
+                                                            <div className="now-playing">
+                                                                <div className="now-playing-inner">
+                                                                    <div className="now-playing-block"></div>
+                                                                    <div className="now-playing-block"></div>
+                                                                    <div className="now-playing-block"></div>
+                                                                    <div className="now-playing-block"></div>
+                                                                    <div className="now-playing-block"></div>
+                                                                    <div className="now-playing-block"></div>
+                                                                    <div className="now-playing-block"></div>
+                                                                    <div className="now-playing-block"></div>
+                                                                </div>
+                                                            </div>
+
+                                                            Now Playing
+                                                        </div>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="w-full items-center justify-center text-center text-nowrap bg-neutral-/800 rounded-xl p-4 max-w-48 overflow-hidden whitespace-nowrap flex flex-col gap-2">
-                                            {/* <h3 className="text-white animate-marquee inline-block text-md">{`${dataItem.musicTitle}`}</h3> */}
-                                            <ScrollingText text={dataItem.musicTitle || "Jukebox Music"} />
-                                            <p className="text-gray-200 text-xs">Vibe Vision Music.</p>
-                                            <div onClick={() => playGeneratedSong(dataItem)} className='p-2 cursor-pointer hover:scale-105 duration-300'>
-                                                {currentSong?.id !== dataItem._id ?
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" className="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z" />
-                                                    </svg>
-                                                    :
-                                                    // <PauseCircleIcon className='size-10' />
-                                                    <div className='flex flex-col justify-center items-center'>
-                                                        {/* /* From Uiverse.io by ClawHack1  */}
-                                                        <div className="now-playing">
-                                                            <div className="now-playing-inner">
-                                                                <div className="now-playing-block"></div>
-                                                                <div className="now-playing-block"></div>
-                                                                <div className="now-playing-block"></div>
-                                                                <div className="now-playing-block"></div>
-                                                                <div className="now-playing-block"></div>
-                                                                <div className="now-playing-block"></div>
-                                                                <div className="now-playing-block"></div>
-                                                                <div className="now-playing-block"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        Now Playing
-                                                    </div>
-                                                }
+                                        <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                                            <div className='size-8'>
+                                                <UserCircleIcon className=" size-full" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold line-clamp-2 text-nowrap">
+                                                    {dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}
+                                                </h3>
+                                                <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                                                    {dataItem.userPrompt || 'AI Generated Video'}
+                                                </h3>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
-                                        <div className='size-8'>
-                                            <UserCircleIcon className=" size-full" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="font-semibold line-clamp-2 text-nowrap">
-                                            {dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}
-                                            </h3>
-                                            <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
-                                                {dataItem.userPrompt || 'AI Generated Video'}
-                                            </h3>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            }
-                        </Card>
-                    ))}
+                                    </CardContent>
+                                }
+                            </Card>
+                        ))
+                        :
+                        (
+                            <div className='flex flex-col w-full items-center justify-end gap-4 text-gray-300 h-96'>
+                                <img className='size-20 opacity-60' src="https://img.icons8.com/external-vitaliy-gorbachev-blue-vitaly-gorbachev/60/external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev.png" alt="external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev" />
+                                Nothing to see here
+                            </div>
+                        )
+                    }
                 </div>
 
                 {videoModal && (
@@ -575,7 +584,7 @@ const ProfilePage = () => {
                         <DialogHeader>
                             <DialogTitle className="text-white text-xl">Attention!</DialogTitle>
                             <DialogDescription className="text-purple-200 text-base">
-                                Since the website is in development as of now, your generated content will be deleted from the server when the server gets updated next time. 
+                                Since the website is in development as of now, your generated content will be deleted from the server when the server gets updated next time.
                             </DialogDescription>
                         </DialogHeader>
                     </DialogContent>
