@@ -59,6 +59,7 @@ interface Song {
     audioUrl: string;
     duration: number;
     timestamp: string;
+    lyrics: string;
 }
 
 interface GenerateSongPayload {
@@ -205,7 +206,8 @@ export default function SongGeneratorPage(): JSX.Element {
                 coverArt: imageUrl,
                 audioUrl: musicUrl,
                 duration: audioRef.current?.duration || 180,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                lyrics: lyrics
             };
 
             setGeneratedSongs(prev => [newSong, ...prev]);
@@ -260,6 +262,7 @@ export default function SongGeneratorPage(): JSX.Element {
 
             setMusicUrl(`${BASE_URL}/${response.data.musicUrl}`);
             setImageUrl(`${BASE_URL}/${response.data.imageUrl}`);
+            setLyrics(response.data.songLyrics)
             setGeneratedLyrics(response.data.lyrics);
             setMusicTitle(response.data.songTitle);
 
@@ -271,7 +274,8 @@ export default function SongGeneratorPage(): JSX.Element {
                 coverArt: imageUrl,
                 audioUrl: musicUrl,
                 duration: 180,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                lyrics: lyrics
             };
 
 

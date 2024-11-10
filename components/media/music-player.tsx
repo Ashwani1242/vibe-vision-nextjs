@@ -45,9 +45,11 @@ import {
   MusicIcon,
   Info,
   Minimize2,
-  Maximize2
+  Maximize2,
+  MicVocal
 } from 'lucide-react';
 import ScrollingText from '../ui/scroll-text';
+import SongLyrics from '../ui/song-lyrics';
 
 // Define an interface for playlist items
 interface PlaylistItem {
@@ -103,6 +105,7 @@ interface Song {
   audioUrl: string;
   duration: number;
   timestamp: string;
+  lyrics: string;
 }
 
 interface CurrentSong {
@@ -119,31 +122,21 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
   const [isShuffle, setIsShuffle] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [showPlaylist, setShowPlaylist] = useState<boolean>(false);
   const [currentSongIndex, setCurrentSongIndex] = useState<number>(0);
   const [playlist] = useState<PlaylistItem[]>(defaultPlaylist);
-  const [isRadioMode, setIsRadioMode] = useState<boolean>(false);
   const [showLyrics, setShowLyrics] = useState<boolean>(false);
+
+  // const [showLyrics, setShowLyrics] = useState<boolean>(false)
 
 
 
   // -------------------------------------------------------------------------------
 
 
-  const [generatedSongs, setGeneratedSongs] = useState<Song[]>([]);
+  // const [generatedSongs, setGeneratedSongs] = useState<Song[]>([]);
   // const currentSong: Song | null = currentSongIndex !== null ? generatedSongs[currentSongIndex] : null;
   const playerScreenRef = useRef<HTMLDivElement>(null)
   const [isMusicPlayerFullScreen, setIsMusicPlayerFullScreen] = useState<boolean>(false)
-
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [musicUrl, setMusicUrl] = useState<string | null>(null)
-
-  useEffect(() => {
-    setImageUrl(currentSong?.coverArt || null)
-    setMusicUrl(currentSong?.audioUrl || null)
-  }, [])
-
-
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -200,6 +193,9 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
   };
 
 
+  const handleShowLyrics = () => {
+    setShowLyrics(val => !val)
+  }
 
   //-----------------------------------------------------------------------------
 
@@ -291,36 +287,64 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
         currentSong && (
           <div
             ref={playerScreenRef}
-
             className={`fixed bottom-0 left-0 right-0 flex flex-col-reverse bg-background backdrop-blur border-t ${isMusicPlayerFullScreen && 'h-screen w-screen top-0'}`}>
             {/* {isMusicPlayerFullScreen && <div
               style={{ backgroundImage: `url(${currentSong.coverArt || imageUrl})` }}
               className='w-full h-full absolute pointer-events-none bg-cover blur-md opacity-40' />} */}
             {isMusicPlayerFullScreen &&
-              <div className='absolute top-4 flex w-full px-4'>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  // onClick={() => setIsMusicPlayerFullScreen(val => !val)}
-                  onClick={minimizeScreen}
-                  className={`hover:text-white 'text-gray-400' scale-150 flex`}
-                >
-                  <ChevronDown className="h-5 w-5" />
-                </Button>
-              </div>}
+              <div className='absolute top-4 flex w-full justify-center px-4'>
+                <div className='w-full flex justify-between'>
+                  <Button
+                    variant="ghost"
+                    // size="icon"
+                    onClick={minimizeScreen}
+                    className={`hover:text-white 'text-gray-400' scale-150/ flex`}
+                  >
+                    <ChevronDown className="h-5 w-5" />
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    onClick={handleShowLyrics}
+                    className={`hover:text-white 'text-gray-400' scale-150/ bg-red-400/ flex`} >
+                    <MicVocal className="h-5 w-5" />
+                    Lyrics
+                    {
+                      showLyrics ?
+                        <ChevronUp className="h-5 w-5" />
+                        :
+                        <ChevronDown className="h-5 w-5" />
+                    }
+                  </Button>
+                </div>
+
+                {showLyrics &&
+                  <div className='absolute flex flex-col gap-2 top-full bg-black/80 rounded-lg border p-4 border-gray-800 z-10 md:right-0 h-[480px] m-4 w-96'>
+                    <div className='text-xl px-4 pt-2' >Lyrics</div>
+                    <ScrollArea
+                      className='size-full p-4'>
+                      <SongLyrics lyrics={currentSong.lyrics} bgImage={currentSong.coverArt} />
+                    </ScrollArea>
+                  </div>
+                }
+              </div>
+            }
+
+
 
             <div
               style={{ backgroundImage: isMusicPlayerFullScreen ? `url(${currentSong.coverArt})` : '', }}
               className='absolute w-full h-full bg-no-repeat bg-cover opacity-30 md:opacity-30 blur-md pointer-events-none'>
             </div>
+
             <Progress
               value={(currentTime / duration) * 100}
               className="h-1"
             />
+
             {isMusicPlayerFullScreen ?
               // <div className="p-4 w-full">
               <div className="flex items-center h-full/ w-full justify-center flex-col gap-4 py-16 px-8 md:px-16 relative">
-
 
                 {/* Song Info */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full min-w-[240px] md:m-20">

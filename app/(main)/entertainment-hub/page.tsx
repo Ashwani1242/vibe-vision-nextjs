@@ -49,6 +49,7 @@ type ContentItem = {
   createdAt: string;
   enhancedPrompt: string;
   userPrompt: string;
+  songLyrics: string
 };
 
 interface Song {
@@ -59,6 +60,7 @@ interface Song {
   audioUrl: string;
   duration: number;
   timestamp: string;
+  lyrics: string
 }
 
 const VideoPlatform = () => {
@@ -221,7 +223,8 @@ const VideoPlatform = () => {
         audioUrl: `${BASE_URL}/${content.audioUrl}` || '',
         coverArt: `${BASE_URL}/${content.imageUrl}` || content.thumbnail_alt || '',
         duration: audioRef.current?.duration || 180,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        lyrics: content.songLyrics || 'No Lyrics Found'
       };
 
       setGeneratedSongs(prev => [newSong, ...prev]);

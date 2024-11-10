@@ -16,7 +16,7 @@ const MessageToast: React.FC<ToastProps> = ({ message, visible, onClose }) => {
 
     return (
         <div
-            className={`fixed z-[3000] flex gap-4 items-center bottom-4 right-4 transform transition-transform duration-700 ${!visible ? '-translate-x-0' : 'translate-x-[150%]'} px-6 py-4 text-lg bg-neutral-950 border border-gray-800 text-white rounded shadow-lg`} >
+            className={`fixed z-[3000] flex gap-4 items-center bottom-4 right-4 transform transition-transform duration-700 ${visible ? '-translate-x-0' : 'translate-x-[150%]'} px-6 py-4 text-lg bg-neutral-950 border border-gray-800 text-white rounded shadow-lg`} >
             <style>
                 {`
 .spinner {

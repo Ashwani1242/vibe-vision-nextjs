@@ -59,6 +59,7 @@ interface Song {
     audioUrl: string;
     duration: number;
     timestamp: string;
+    lyrics: string;
 }
 
 interface GenerateSongPayload {
@@ -103,13 +104,6 @@ export default function SongGeneratorPage(): JSX.Element {
     const [generatedSongs, setGeneratedSongs] = useState<Song[]>([]);
     const [currentSongIndex, setCurrentSongIndex] = useState<number | null>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [currentTime, setCurrentTime] = useState<number>(0);
-    const [duration, setDuration] = useState<number>(0);
-    const [volume, setVolume] = useState<number>(0.7);
-    const [isMuted, setIsMuted] = useState<boolean>(false);
-    const [isRepeat, setIsRepeat] = useState<boolean>(false);
-    const [isShuffle, setIsShuffle] = useState<boolean>(false);
-    const [isLiked, setIsLiked] = useState<boolean>(false);
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const currentSong: Song | null = currentSongIndex !== null ? generatedSongs[currentSongIndex] : null;
@@ -202,7 +196,8 @@ export default function SongGeneratorPage(): JSX.Element {
                 coverArt: imageUrl,
                 audioUrl: musicUrl,
                 duration: audioRef.current?.duration || 180,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                lyrics: lyrics
             };
 
             setGeneratedSongs(prev => [newSong, ...prev]);
@@ -258,6 +253,7 @@ export default function SongGeneratorPage(): JSX.Element {
 
             setMusicUrl(`${BASE_URL}/${response.data.musicUrl}`);
             setImageUrl(`${BASE_URL}/${response.data.imageUrl}`);
+            setLyrics(response.data.SongLyrics)
             setGeneratedLyrics(response.data.lyrics);
             setMusicTitle(response.data.songTitle);
 
@@ -269,7 +265,8 @@ export default function SongGeneratorPage(): JSX.Element {
                 coverArt: imageUrl,
                 audioUrl: musicUrl,
                 duration: 180,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                lyrics: lyrics
             };
 
 
