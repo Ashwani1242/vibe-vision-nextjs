@@ -394,7 +394,7 @@ const VideoPlatform = () => {
 
   return (
     <Layout>
-      <div className="w-full bg-background pt-24/ /pl-20">
+      <div className="w-full bg-background pt-24/ /pl-20 pb-36">
         {/* Categories ScrollArea */}
         <ScrollArea className="w-full border-b">
           <div className="flex p-4 gap-2">
@@ -419,14 +419,14 @@ const VideoPlatform = () => {
               {!(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
                 <CardContent
                   onClick={() => { openVideoModal(`${BASE_URL}/${dataItem.videoUrl}`, dataItem) }}
-                  className="bg-[#0f0f0f] w-fit/ h-80 min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-3xl relative">
+                  className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
                   <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
                   {/* Thumbnail Container */}
                   <div className="relative">
                     <img
                       src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
                       alt={dataItem.displayName || dataItem.musicTitle || ''}
-                      className={`w-full h-60 rounded-3xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
+                      className={`w-full h-60 rounded-xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
                     />
                     <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 text-sm rounded">
                       {/* {video.duration} */}
@@ -450,10 +450,10 @@ const VideoPlatform = () => {
                 </CardContent>
                 :
                 <CardContent
-                  className="bg-[#0f0f0f] w-fit/ h-80 min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-3xl relative">
+                  className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
                   {/* <div className='h-full w-full p-0'> */}
                   <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
-                  <div className='w-full bg-neutral-900 relative flex flex-row justify-around items-center px-8 py-12 rounded-3xl'>
+                  <div className='w-full bg-neutral-900 max-h-60 relative flex flex-row justify-around items-center px-8 py-12 rounded-xl'>
                     <div className={`relative h-full/ size-36 /w-full flex justify-center items-center group cursor-pointer`}>
                       <div
                         style={{

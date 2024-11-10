@@ -322,7 +322,7 @@ const ProfilePage = () => {
 
     return (
         <Layout>
-            <div className="w-full bg-background pt-24/ /pl-20">
+            <div className="w-full bg-background pt-24/ /pl-20 pb-36">
 
                 <div className='h-80 flex items-center text-white p-20 gap-8'>
                     <div className='size-40 border-4 border-white rounded-full p-6'>
@@ -390,10 +390,10 @@ const ProfilePage = () => {
                                 </CardContent>
                                 :
                                 <CardContent
-                                    className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-3xl relative">
+                                    className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
                                     {/* <div className='h-full w-full p-0'> */}
                                     <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
-                                    <div className='w-full bg-neutral-900 relative flex flex-row justify-around items-center px-8 py-12 rounded-3xl'>
+                                    <div className='w-full bg-neutral-900 max-h-60 relative flex flex-row justify-around items-center px-8 py-12 rounded-xl'>
                                         <div className={`relative h-full/ size-36 /w-full flex justify-center items-center group cursor-pointer`}>
                                             <div
                                                 style={{
