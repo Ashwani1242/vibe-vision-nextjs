@@ -127,7 +127,7 @@ export function Header({
     setUnreadCount(0);
   };
 
-  
+
   const markNotificationAsRead = (id: number) => {
     setNotifications(prev =>
       prev.map(notification =>
@@ -136,7 +136,7 @@ export function Header({
     );
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
-  
+
   const getBreadcrumbs = useMemo((): Breadcrumb[] => {
     const paths = pathname.split("/").filter(Boolean);
     if (paths.length === 0) return [{ label: "Home", path: "/" }];
@@ -150,7 +150,7 @@ export function Header({
       return acc;
     }, [{ label: "Home", path: "/" }]);
   }, [pathname]);
-  
+
   const handleLogout = () => {
     if (storage) {
       storage.removeItem('token');
@@ -159,9 +159,9 @@ export function Header({
     }
     router.push('/');
   };
-  
+
   const username = storage?.getItem('loggedInUser') || '';
-  
+
   const fetchData = async () => {
     setData([])
     if (typeof window !== 'undefined') {
@@ -321,15 +321,20 @@ const UserMenu = ({
         <>
           <DropdownMenuLabel>My Account | {username}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" /> Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem>
+
+          <Link href="/profile-page">
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" /> Profile
+            </DropdownMenuItem>
+          </Link>
+          {/* <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" /> Settings
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Upload className="mr-2 h-4 w-4" /> Studio
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
+          <Link href="/comedy-lab">
+            <DropdownMenuItem>
+              <Upload className="mr-2 h-4 w-4" /> Studio
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="text-red-600" onClick={onLogout}>
             <LogOut className="mr-2 h-4 w-4" /> Log out
@@ -440,10 +445,33 @@ const NotificationsPanel = ({
                   <Badge variant={'secondary'} className="">{dataItem.contentType}</Badge>
                 </div>
               </div>
-                {
-                  true &&
-                  (
-                    (dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
+              {
+                true &&
+                (
+                  (dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
+                    (
+                      <div className={`relative size-20 flex justify-center items-center group cursor-pointer`}>
+                        <div
+                          style={{
+                            backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                            filter: "blur(14px)",
+                            opacity: 0.5,
+                          }}
+                          className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-20 bg-cover rounded-full' >
+                        </div>
+                        <div
+                          style={{
+                            backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                          }}
+                          className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-20 flex flex-col bg-cover justify-center items-center rounded-full'>
+                          <div className='size-6 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
+                            {false && <AudioLines />}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                    :
+                    (
                       (
                         <div className={`relative size-20 flex justify-center items-center group cursor-pointer`}>
                           <div
@@ -452,42 +480,19 @@ const NotificationsPanel = ({
                               filter: "blur(14px)",
                               opacity: 0.5,
                             }}
-                            className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-20 bg-cover rounded-full' >
+                            className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-20 bg-cover rounded-xl' >
                           </div>
                           <div
                             style={{
                               backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
                             }}
-                            className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-20 flex flex-col bg-cover justify-center items-center rounded-full'>
-                            <div className='size-6 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
-                              {false && <AudioLines />}
-                            </div>
+                            className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-20 flex flex-col bg-cover justify-center items-center rounded-xl'>
                           </div>
                         </div>
                       )
-                      :
-                      (
-                        (
-                          <div className={`relative size-20 flex justify-center items-center group cursor-pointer`}>
-                            <div
-                              style={{
-                                backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
-                                filter: "blur(14px)",
-                                opacity: 0.5,
-                              }}
-                              className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-20 bg-cover rounded-xl' >
-                            </div>
-                            <div
-                              style={{
-                                backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
-                              }}
-                              className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-20 flex flex-col bg-cover justify-center items-center rounded-xl'>
-                            </div>
-                          </div>
-                        )
-                      )
-                  )
-                }
+                    )
+                )
+              }
             </div>
           ))}
         </div>

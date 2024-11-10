@@ -4,7 +4,7 @@ import Link from "next/link"
 import {
   Home,
   Music2,
-  Mic2,
+  Video,
   Tv,
   Clock,
   ListVideo,
@@ -43,8 +43,8 @@ interface NavItem {
 const authenticatedNavItems: NavItem[] = [
   { icon: Home, label: "Home", href: "/" },
   { icon: Tv, label: "Entertainment Hub", href: "/entertainment-hub", badge: "Hot", badgeVariant: "destructive" },
+  { icon: Video, label: "Video Studio", href: "/comedy-lab" },
   { icon: Music2, label: "Music Studio", href: "/music-studio" },
-  { icon: Mic2, label: "Comedy Lab", href: "/comedy-lab" },
   { icon: User, label: "Profile", href: "/profile-page" },
 ]
 
@@ -219,7 +219,7 @@ export function Sidebar({ isOpen, isCollapsed, onClose }: SidebarProps) {
           variant="ghost"
           size="icon"
           className={cn(
-            "absolute right-2 top-2 lg:hidden",
+            "absolute right-2 top-2 hidden",
             isCollapsed && "right-1 top-1"
           )}
           onClick={onClose}
