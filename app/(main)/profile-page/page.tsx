@@ -24,6 +24,7 @@ import {
     SkipBack,
     SkipForward,
     User2Icon,
+    UserCircleIcon,
     Video,
     Volume2,
     VolumeX
@@ -67,6 +68,7 @@ const ProfilePage = () => {
     const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null)
     const [currentVideoContent, setCurrentVideoContent] = useState<ContentItem | null>(null)
     const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
+    const [showMessageDialog, setShowMessageDialog] = useState<boolean>(false);
     const videoModalRef = useRef<HTMLDivElement>(null)
 
 
@@ -304,6 +306,9 @@ const ProfilePage = () => {
         };
     }, [closeVideoModal])
 
+    useEffect(() => {
+        setShowMessageDialog(true)
+    }, [])
 
 
 
@@ -354,14 +359,14 @@ const ProfilePage = () => {
                             {!(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
                                 <CardContent
                                     onClick={() => { openVideoModal(`${BASE_URL}/${dataItem.videoUrl}`, dataItem) }}
-                                    className="bg-[#0f0f0f] w-fit/ h-80 min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-3xl relative">
+                                    className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
                                     <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
                                     {/* Thumbnail Container */}
                                     <div className="relative">
                                         <img
                                             src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
                                             alt={dataItem.displayName || dataItem.musicTitle || ''}
-                                            className={`w-full h-60 rounded-3xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
+                                            className={`w-full h-60 rounded-xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
                                         />
                                         <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 text-sm rounded">
                                             {/* {video.duration} */}
@@ -369,18 +374,23 @@ const ProfilePage = () => {
                                     </div>
 
                                     {/* Video Info */}
-                                    <div className="mt-3 flex gap-3">
-                                        <div className="flex-1">
-                                            <h3 className="font-semibold line-clamp-2">{dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}</h3>
+                                    <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                                        <div className='size-8'>
+                                            <UserCircleIcon className=" size-full" />
                                         </div>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                                            <MoreVertical className="h-4 w-4" />
-                                        </Button>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold line-clamp-2 text-nowrap">
+                                                {dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}
+                                            </h3>
+                                            <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                                                {dataItem.userPrompt || 'AI Generated Video'}
+                                            </h3>
+                                        </div>
                                     </div>
                                 </CardContent>
                                 :
                                 <CardContent
-                                    className="bg-[#0f0f0f] w-fit/ h-80 min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-3xl relative">
+                                    className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-3xl relative">
                                     {/* <div className='h-full w-full p-0'> */}
                                     <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
                                     <div className='w-full bg-neutral-900 relative flex flex-row justify-around items-center px-8 py-12 rounded-3xl'>
@@ -448,13 +458,18 @@ const ProfilePage = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="mt-3 flex gap-3 px-4">
-                                        <div className="flex-1">
-                                            <h3 className="font-semibold line-clamp-2">{dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}</h3>
+                                    <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                                        <div className='size-8'>
+                                            <UserCircleIcon className=" size-full" />
                                         </div>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                                            <MoreVertical className="h-4 w-4" />
-                                        </Button>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold line-clamp-2 text-nowrap">
+                                            {dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}
+                                            </h3>
+                                            <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                                                {dataItem.userPrompt || 'AI Generated Video'}
+                                            </h3>
+                                        </div>
                                     </div>
                                 </CardContent>
                             }
@@ -549,6 +564,17 @@ const ProfilePage = () => {
                                 </Button>
                             ))}
                         </div>
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+                    <DialogContent className="bg-black/90 border-purple-500/20">
+                        <DialogHeader>
+                            <DialogTitle className="text-white text-xl">Attention!</DialogTitle>
+                            <DialogDescription className="text-purple-200 text-base">
+                                Since the website is in development as of now, your generated content will be deleted from the server when the server gets updated next time. 
+                            </DialogDescription>
+                        </DialogHeader>
                     </DialogContent>
                 </Dialog>
             </div>

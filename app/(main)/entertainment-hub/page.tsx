@@ -23,6 +23,7 @@ import {
   Shuffle,
   SkipBack,
   SkipForward,
+  UserCircleIcon,
   Video,
   Volume2,
   VolumeX
@@ -433,13 +434,18 @@ const VideoPlatform = () => {
                   </div>
 
                   {/* Video Info */}
-                  <div className="mt-3 flex gap-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold line-clamp-2">{dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}</h3>
+                  <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                    <div className='size-8'>
+                      <UserCircleIcon className=" size-full" />
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
+                    <div className="flex-1">
+                      <h3 className="font-semibold line-clamp-2 text-nowrap">
+                        {dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}
+                      </h3>
+                      <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                        {dataItem.userPrompt || 'AI Generated Video'}
+                      </h3>
+                    </div>
                   </div>
                 </CardContent>
                 :
@@ -512,13 +518,18 @@ const VideoPlatform = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 flex gap-3 px-4">
-                    <div className="flex-1">
-                      <h3 className="font-semibold line-clamp-2">{dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}</h3>
+                  <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                    <div className='size-8'>
+                      <UserCircleIcon className=" size-full" />
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
+                    <div className="flex-1">
+                      <h3 className="font-semibold line-clamp-2 text-nowrap">
+                        {dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}
+                      </h3>
+                      <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                        {dataItem.userPrompt || 'AI Generated Video'}
+                      </h3>
+                    </div>
                   </div>
                 </CardContent>
               }
