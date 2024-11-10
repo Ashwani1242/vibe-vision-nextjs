@@ -23,6 +23,7 @@ import {
     Shuffle,
     SkipBack,
     SkipForward,
+    TriangleAlert,
     User2Icon,
     UserCircleIcon,
     Video,
@@ -40,7 +41,9 @@ import ScrollingText from '@/components/ui/scroll-text';
 
 type ContentItem = {
     _id: string;
+    userName: string;
     contentType: string;
+    status: string;
     videoUrl?: string;
     audioUrl?: string;
     imageUrl?: string | null;
@@ -114,6 +117,7 @@ const ProfilePage = () => {
     const filteredData = activeCategory
         ? data.filter((dataItem) => dataItem.contentType === activeCategory)
         : data;
+
 
     // const sortedData: number = filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     // const filteredData = data.filter((dataItem) => dataItem.contentType === currentCategory);
@@ -290,7 +294,6 @@ const ProfilePage = () => {
         };
 
         fetchData();
-        // Empty dependency array ensures this useEffect runs only once on mount
     }, [BASE_URL]);
 
     useEffect(() => {
@@ -360,61 +363,64 @@ const ProfilePage = () => {
                     {filteredData.length !== 0 ?
                         filteredData.map((dataItem) => (
                             <Card key={dataItem._id} className="border-0 shadow-none ">
-                                {!(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
-                                    <CardContent
-                                        onClick={() => { openVideoModal(`${BASE_URL}/${dataItem.videoUrl}`, dataItem) }}
-                                        className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
-                                        <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
-                                        {/* Thumbnail Container */}
-                                        <div className="relative">
-                                            <img
-                                                src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
-                                                alt={dataItem.displayName || dataItem.musicTitle || ''}
-                                                className={`w-full h-60 rounded-xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
-                                            />
-                                            <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 text-sm rounded">
-                                                {/* {video.duration} */}
-                                            </div>
-                                        </div>
+                                {
+                                    dataItem.status === 'success' ?
+                                        (
+                                            !(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
+                                                <CardContent
+                                                    onClick={() => { openVideoModal(`${BASE_URL}/${dataItem.videoUrl}`, dataItem) }}
+                                                    className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
+                                                    <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
+                                                    {/* Thumbnail Container */}
+                                                    <div className="relative">
+                                                        <img
+                                                            src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                                                            alt={dataItem.displayName || dataItem.musicTitle || ''}
+                                                            className={`w-full h-60 rounded-xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
+                                                        />
+                                                        <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 text-sm rounded">
+                                                            {/* {video.duration} */}
+                                                        </div>
+                                                    </div>
 
-                                        {/* Video Info */}
-                                        <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
-                                            <div className='size-8'>
-                                                <UserCircleIcon className=" size-full" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold line-clamp-2 text-nowrap">
-                                                    {dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}
-                                                </h3>
-                                                <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
-                                                    {dataItem.userPrompt || 'AI Generated Video'}
-                                                </h3>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                    :
-                                    <CardContent
-                                        className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
-                                        {/* <div className='h-full w-full p-0'> */}
-                                        <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
-                                        <div className='w-full bg-neutral-900 max-h-60 relative flex flex-row justify-around items-center px-8 py-12 rounded-xl'>
-                                            <div className={`relative h-full/ size-36 /w-full flex justify-center items-center group cursor-pointer`}>
-                                                <div
-                                                    style={{
-                                                        backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
-                                                        filter: "blur(14px)",
-                                                        opacity: 0.5,
-                                                    }}
-                                                    className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-36 bg-cover rounded-full' >
-                                                </div>
-                                                <div
-                                                    style={{
-                                                        backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
-                                                        animation: currentSong?.id === dataItem._id ? 'slowRotate 15s linear infinite' : '',
-                                                    }}
-                                                    className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-36 flex flex-col bg-cover justify-center items-center rounded-full'>
-                                                    <style>
-                                                        {`
+                                                    {/* Video Info */}
+                                                    <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                                                        <div className='size-8'>
+                                                            <UserCircleIcon className=" size-full" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h3 className="font-semibold line-clamp-2 text-nowrap">
+                                                                {dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}
+                                                            </h3>
+                                                            <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                                                                {dataItem.userName || 'AI Generated Video'}
+                                                            </h3>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                                :
+                                                <CardContent
+                                                    className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
+                                                    {/* <div className='h-full w-full p-0'> */}
+                                                    <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
+                                                    <div className='w-full bg-neutral-900 max-h-60 relative flex flex-row justify-around items-center px-8 py-12 rounded-xl'>
+                                                        <div className={`relative h-full/ size-36 /w-full flex justify-center items-center group cursor-pointer`}>
+                                                            <div
+                                                                style={{
+                                                                    backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                                                                    filter: "blur(14px)",
+                                                                    opacity: 0.5,
+                                                                }}
+                                                                className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-36 bg-cover rounded-full' >
+                                                            </div>
+                                                            <div
+                                                                style={{
+                                                                    backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                                                                    animation: currentSong?.id === dataItem._id ? 'slowRotate 15s linear infinite' : '',
+                                                                }}
+                                                                className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-36 flex flex-col bg-cover justify-center items-center rounded-full'>
+                                                                <style>
+                                                                    {`
                                                         @keyframes slowRotate {
                                                             from {
                                                                 transform: rotate(0deg);
@@ -424,58 +430,115 @@ const ProfilePage = () => {
                                                             }
                                                         }
                                                     `}
-                                                    </style>
-                                                    <div className='size-8 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
-                                                        {currentSong?.id === dataItem._id && <AudioLines />}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="w-full items-center justify-center text-center text-nowrap bg-neutral-/800 rounded-xl p-4 max-w-48 overflow-hidden whitespace-nowrap flex flex-col gap-2">
-                                                {/* <h3 className="text-white animate-marquee inline-block text-md">{`${dataItem.musicTitle}`}</h3> */}
-                                                <ScrollingText text={dataItem.musicTitle || "Jukebox Music"} />
-                                                <p className="text-gray-200 text-xs">Vibe Vision Music.</p>
-                                                <div onClick={() => playGeneratedSong(dataItem)} className='p-2 cursor-pointer hover:scale-105 duration-300'>
-                                                    {currentSong?.id !== dataItem._id ?
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" className="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z" />
-                                                        </svg>
-                                                        :
-                                                        // <PauseCircleIcon className='size-10' />
-                                                        <div className='flex flex-col justify-center items-center'>
-                                                            {/* /* From Uiverse.io by ClawHack1  */}
-                                                            <div className="now-playing">
-                                                                <div className="now-playing-inner">
-                                                                    <div className="now-playing-block"></div>
-                                                                    <div className="now-playing-block"></div>
-                                                                    <div className="now-playing-block"></div>
-                                                                    <div className="now-playing-block"></div>
-                                                                    <div className="now-playing-block"></div>
-                                                                    <div className="now-playing-block"></div>
-                                                                    <div className="now-playing-block"></div>
-                                                                    <div className="now-playing-block"></div>
+                                                                </style>
+                                                                <div className='size-8 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
+                                                                    {currentSong?.id === dataItem._id && <AudioLines />}
                                                                 </div>
                                                             </div>
-
-                                                            Now Playing
                                                         </div>
+                                                        <div className="w-full items-center justify-center text-center text-nowrap bg-neutral-/800 rounded-xl p-4 max-w-48 overflow-hidden whitespace-nowrap flex flex-col gap-2">
+                                                            {/* <h3 className="text-white animate-marquee inline-block text-md">{`${dataItem.musicTitle}`}</h3> */}
+                                                            <ScrollingText text={dataItem.musicTitle || "Jukebox Music"} />
+                                                            <p className="text-gray-200 text-xs">Vibe Vision Music.</p>
+                                                            <div onClick={() => playGeneratedSong(dataItem)} className='p-2 cursor-pointer hover:scale-105 duration-300'>
+                                                                {currentSong?.id !== dataItem._id ?
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" className="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z" />
+                                                                    </svg>
+                                                                    :
+                                                                    // <PauseCircleIcon className='size-10' />
+                                                                    <div className='flex flex-col justify-center items-center'>
+                                                                        {/* /* From Uiverse.io by ClawHack1  */}
+                                                                        <div className="now-playing">
+                                                                            <div className="now-playing-inner">
+                                                                                <div className="now-playing-block"></div>
+                                                                                <div className="now-playing-block"></div>
+                                                                                <div className="now-playing-block"></div>
+                                                                                <div className="now-playing-block"></div>
+                                                                                <div className="now-playing-block"></div>
+                                                                                <div className="now-playing-block"></div>
+                                                                                <div className="now-playing-block"></div>
+                                                                                <div className="now-playing-block"></div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        Now Playing
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                                                        <div className='size-8'>
+                                                            <UserCircleIcon className=" size-full" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h3 className="font-semibold line-clamp-2 text-nowrap">
+                                                                {dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}
+                                                            </h3>
+                                                            <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                                                                {dataItem.userName || 'AI Generated Video'}
+                                                            </h3>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                        )
+                                        :
+                                        dataItem.status === 'waiting' ?
+                                            (
+                                                <CardContent
+                                                    className="bg-[#0f0f0f]/ bg-blue-900/30 border-2 border-blue-600 w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-center pb-4 rounded-xl relative">
+                                                    <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
+                                                    <div className="text-center">
+                                                        <div
+                                                            className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500 mx-auto"
+                                                        ></div>
+                                                        <h2 className="text-zinc-900 dark:text-white mt-4">Processing...</h2>
+                                                        <p className="text-zinc-600 dark:text-zinc-400">
+                                                            Your {dataItem.contentType} is being generated...
+                                                        </p>
+                                                        <div className='pt-1 text-xs opacity-40'>{dataItem.userPrompt}</div>
+                                                    </div>
+                                                    {
+                                                        dataItem.contentType === 'roast-my-pic' &&
+                                                        (
+                                                            <img
+                                                                src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                                                                alt={dataItem.displayName || dataItem.musicTitle || ''}
+                                                                className={`size-24 aspect-square rounded-xl object-cover absolute bottom-4 right-4 hidden`}
+                                                            />
+                                                        )
                                                     }
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
-                                            <div className='size-8'>
-                                                <UserCircleIcon className=" size-full" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold line-clamp-2 text-nowrap">
-                                                    {dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}
-                                                </h3>
-                                                <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
-                                                    {dataItem.userPrompt || 'AI Generated Video'}
-                                                </h3>
-                                            </div>
-                                        </div>
-                                    </CardContent>
+                                                </CardContent>
+                                            )
+                                            :
+                                            (
+                                                <CardContent
+                                                    className="bg-[#0f0f0f]/ bg-red-900/30 border-2 border-red-600 w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-center pb-4 rounded-xl relative">
+                                                    <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
+                                                    <div className="text-center">
+                                                        <TriangleAlert className='size-16 text-red-500 mx-auto' />
+                                                        <h2 className="text-zinc-900 dark:text-white mt-4">Error Generating Content!</h2>
+                                                        <p className="text-zinc-600 dark:text-zinc-400">
+                                                            The server wasn't able to generate your {dataItem.contentType}!
+                                                        </p>
+                                                        <div className='pt-1 text-sm opacity-60'>Please Try Again!</div>
+                                                        <div className='pt-1 text-xs opacity-40'>{dataItem.userPrompt}</div>
+                                                    </div>
+                                                    {
+                                                        dataItem.contentType === 'roast-my-pic' &&
+                                                        (
+                                                            <img
+                                                                src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                                                                alt={dataItem.displayName || dataItem.musicTitle || ''}
+                                                                className={`size-24 aspect-square rounded-xl object-cover absolute bottom-4 right-4 hidden`}
+                                                            />
+                                                        )
+                                                    }
+                                                </CardContent>
+                                            )
+                                }
+                                {
                                 }
                             </Card>
                         ))

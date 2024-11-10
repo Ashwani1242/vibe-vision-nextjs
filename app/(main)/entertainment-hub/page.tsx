@@ -39,7 +39,9 @@ import ScrollingText from '@/components/ui/scroll-text';
 
 type ContentItem = {
   _id: string;
+  userName: string;
   contentType: string;
+  status: string;
   videoUrl?: string;
   audioUrl?: string;
   imageUrl?: string | null;
@@ -107,8 +109,11 @@ const VideoPlatform = () => {
   const [data, setData] = useState<ContentItem[]>([]);
 
   const filteredData = activeCategory
-    ? data.filter((dataItem) => dataItem.contentType === activeCategory)
-    : data;
+    ? data.filter(
+      (dataItem) => dataItem.contentType === activeCategory && dataItem.status === 'success'
+    )
+    : data.filter((dataItem) => dataItem.status === 'success');
+
 
   // const sortedData: number = filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   // const filteredData = data.filter((dataItem) => dataItem.contentType === currentCategory);
@@ -447,7 +452,7 @@ const VideoPlatform = () => {
                           {dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}
                         </h3>
                         <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
-                          {dataItem.userPrompt || 'AI Generated Video'}
+                          {dataItem.userName || 'AI Generated Video'}
                         </h3>
                       </div>
                     </div>
@@ -531,7 +536,7 @@ const VideoPlatform = () => {
                           {dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}
                         </h3>
                         <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
-                          {dataItem.userPrompt || 'AI Generated Video'}
+                          {dataItem.userName || 'AI Generated Video'}
                         </h3>
                       </div>
                     </div>
@@ -542,7 +547,7 @@ const VideoPlatform = () => {
             :
             (
               <div className='flex flex-col w-full items-center justify-end gap-4 text-gray-300 h-96'>
-                <img className='size-20 opacity-60' src="https://img.icons8.com/external-vitaliy-gorbachev-blue-vitaly-gorbachev/60/external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev.png" alt="external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev"/>
+                <img className='size-20 opacity-60' src="https://img.icons8.com/external-vitaliy-gorbachev-blue-vitaly-gorbachev/60/external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev.png" alt="external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev" />
                 Nothing to see here
               </div>
             )

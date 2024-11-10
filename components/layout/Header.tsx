@@ -12,6 +12,12 @@ import {
   ChevronRight,
   Sun,
   Moon,
+  CircleCheckBig,
+  Loader,
+  TriangleAlert,
+  AudioLines,
+  RefreshCw,
+  LibraryBig,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -33,6 +39,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
 import { useTheme } from "next-themes";
+import axios from "axios";
+import { BASE_URL } from "@/config";
 
 interface Notification {
   id: number;
@@ -43,6 +51,23 @@ interface Notification {
   type: string;
   avatar: string;
 }
+
+type ContentItem = {
+  _id: string;
+  userName: string;
+  contentType: string;
+  status: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  imageUrl?: string | null;
+  thumbnail_alt?: string | null;
+  musicTitle?: string | null;
+  displayName?: string | null;
+  createdAt: string;
+  enhancedPrompt: string;
+  userPrompt: string;
+  songLyrics: string;
+};
 
 interface HeaderProps {
   onSidebarOpen: () => void;
@@ -65,9 +90,9 @@ export function Header({
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  
+
   const [mounted, setMounted] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(5);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
@@ -81,6 +106,9 @@ export function Header({
       avatar: "/avatars/john.png",
     },
   ]);
+
+  const [data, setData] = useState<ContentItem[]>([]);
+  const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
 
   // Initialize localStorage safely
   const storage = useMemo(() => {
@@ -99,6 +127,7 @@ export function Header({
     setUnreadCount(0);
   };
 
+  
   const markNotificationAsRead = (id: number) => {
     setNotifications(prev =>
       prev.map(notification =>
@@ -107,7 +136,7 @@ export function Header({
     );
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
-
+  
   const getBreadcrumbs = useMemo((): Breadcrumb[] => {
     const paths = pathname.split("/").filter(Boolean);
     if (paths.length === 0) return [{ label: "Home", path: "/" }];
@@ -121,7 +150,7 @@ export function Header({
       return acc;
     }, [{ label: "Home", path: "/" }]);
   }, [pathname]);
-
+  
   const handleLogout = () => {
     if (storage) {
       storage.removeItem('token');
@@ -130,8 +159,36 @@ export function Header({
     }
     router.push('/');
   };
-
+  
   const username = storage?.getItem('loggedInUser') || '';
+  
+  const fetchData = async () => {
+    setData([])
+    if (typeof window !== 'undefined') {
+      setLocalStorageInstance(window.localStorage);
+      const token = window.localStorage.getItem('token');
+
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/api/content/get-user-content`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+          }
+        );
+        console.log(response.data);
+        setData(response.data);
+      } catch (error) {
+        console.error("Error fetching content data:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [BASE_URL]);
 
   if (!mounted) return null;
 
@@ -180,12 +237,13 @@ export function Header({
               size="icon"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               aria-label="Toggle theme"
+              className="hidden"
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
             {/* User Menu */}
-            <UserMenu 
+            <UserMenu
               isAuthenticated={isAuthenticated}
               username={username}
               onLogout={handleLogout}
@@ -196,11 +254,11 @@ export function Header({
             {/* Notifications */}
             {isAuthenticated && (
               <NotificationsPanel
-                notifications={notifications}
+                data={data}
                 unreadCount={unreadCount}
                 showNotifications={showNotifications}
                 setShowNotifications={setShowNotifications}
-                markAllAsRead={markAllAsRead}
+                reloadFunction={fetchData}
                 markNotificationAsRead={markNotificationAsRead}
               />
             )}
@@ -218,11 +276,10 @@ export function Header({
               )}
               <Link
                 href={breadcrumb.path}
-                className={`text-sm hover:text-primary transition-colors ${
-                  index === getBreadcrumbs.length - 1
-                    ? 'text-foreground font-medium'
-                    : 'text-muted-foreground'
-                }`}
+                className={`text-sm hover:text-primary transition-colors ${index === getBreadcrumbs.length - 1
+                  ? 'text-foreground font-medium'
+                  : 'text-muted-foreground'
+                  }`}
               >
                 {breadcrumb.label}
               </Link>
@@ -294,24 +351,24 @@ const UserMenu = ({
 
 // Extracted NotificationsPanel component
 const NotificationsPanel = ({
-  notifications,
+  data,
   unreadCount,
   showNotifications,
   setShowNotifications,
-  markAllAsRead,
+  reloadFunction,
   markNotificationAsRead
 }: {
-  notifications: Notification[];
+  data: ContentItem[];
   unreadCount: number;
   showNotifications: boolean;
   setShowNotifications: (show: boolean) => void;
-  markAllAsRead: () => void;
+  reloadFunction: () => void;
   markNotificationAsRead: (id: number) => void;
 }) => (
   <Sheet open={showNotifications} onOpenChange={setShowNotifications}>
     <SheetTrigger asChild>
       <Button variant="ghost" size="icon" className="relative">
-        <Bell className="h-5 w-5" />
+        <LibraryBig className="h-5 w-5" />
         {unreadCount > 0 && (
           <Badge
             variant="destructive"
@@ -322,40 +379,115 @@ const NotificationsPanel = ({
         )}
       </Button>
     </SheetTrigger>
-    <SheetContent className="w-[400px] sm:w-[540px]">
+    <SheetContent className="w-[400px] sm:w-[540px] pt-12">
       <SheetHeader>
         <SheetTitle className="flex justify-between items-center">
-          <span>Notifications</span>
-          <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-            Mark all as read
+          <span>Generations</span>
+          <Button variant="ghost" size="sm" onClick={reloadFunction}>
+            <RefreshCw className={`${data.length === 0 && 'animate-spin duration-500'}`} />
+            Reload
           </Button>
         </SheetTitle>
       </SheetHeader>
       <ScrollArea className="h-[calc(100vh-100px)] mt-4">
         <div className="space-y-4">
-          {notifications.map((notification) => (
+          {data.map((dataItem) => (
             <div
-              key={notification.id}
-              className={`p-4 rounded-lg transition-colors ${
-                notification.isRead ? 'bg-background' : 'bg-muted'
-              }`}
-              onClick={() => markNotificationAsRead(notification.id)}
-            >
+              key={dataItem._id}
+              className={`p-4 rounded-lg transition-colors bg-muted flex flex-row justify-between border ${dataItem.status === 'success' ? 'border-green-400 text-green-400' : dataItem.status === 'waiting' ? 'border-yellow-500 text-yellow-500 animate-pulse' : 'border-red-500 text-red-500'}`} >
               <div className="flex items-start gap-4">
-                <Avatar>
-                  <AvatarImage src={notification.avatar} />
-                  <AvatarFallback>{notification.title[0]}</AvatarFallback>
-                </Avatar>
+                {
+                  dataItem.status === 'success' ?
+                    (
+                      <CircleCheckBig className="size-8" />
+                    )
+                    :
+                    (
+                      dataItem.status === 'waiting' ?
+                        (
+                          <div
+                            style={{
+                              animation: 'slowRotate 5s linear infinite',
+                            }}>
+                            <style>
+                              {
+                                `
+                                  @keyframes slowRotate {
+                                    from {
+                                      transform: rotate(0deg);
+                                    }
+                                    to {
+                                      transform: rotate(360deg);
+                                    }
+                                  }
+                                `
+                              }
+                            </style>
+                            <Loader className='size-8' />
+                          </div>
+                        )
+                        :
+                        (
+                          <TriangleAlert className="size-8" />
+                        )
+                    )
+                }
                 <div className="flex-1">
-                  <h4 className="text-sm font-semibold">{notification.title}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {notification.message}
+                  <h4 className="text-sm text-white font-semibold">{dataItem.contentType === 'story-time' ? (dataItem.userPrompt) : (dataItem.displayName || dataItem.musicTitle || '')}</h4>
+                  <p className="text-sm text-muted-foreground/">
+                    {dataItem.status === 'success' ? 'Status: Done!' : dataItem.status === 'waiting' ? 'Status: Generating' : 'Failed to generate!'}
                   </p>
-                  <span className="text-xs text-muted-foreground">
-                    {notification.time}
-                  </span>
+                  <Badge variant={'secondary'} className="">{dataItem.contentType}</Badge>
                 </div>
               </div>
+                {
+                  true &&
+                  (
+                    (dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
+                      (
+                        <div className={`relative size-20 flex justify-center items-center group cursor-pointer`}>
+                          <div
+                            style={{
+                              backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                              filter: "blur(14px)",
+                              opacity: 0.5,
+                            }}
+                            className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-20 bg-cover rounded-full' >
+                          </div>
+                          <div
+                            style={{
+                              backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                            }}
+                            className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-20 flex flex-col bg-cover justify-center items-center rounded-full'>
+                            <div className='size-6 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
+                              {false && <AudioLines />}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                      :
+                      (
+                        (
+                          <div className={`relative size-20 flex justify-center items-center group cursor-pointer`}>
+                            <div
+                              style={{
+                                backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                                filter: "blur(14px)",
+                                opacity: 0.5,
+                              }}
+                              className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-20 bg-cover rounded-xl' >
+                            </div>
+                            <div
+                              style={{
+                                backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                              }}
+                              className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-20 flex flex-col bg-cover justify-center items-center rounded-xl'>
+                            </div>
+                          </div>
+                        )
+                      )
+                  )
+                }
             </div>
           ))}
         </div>
