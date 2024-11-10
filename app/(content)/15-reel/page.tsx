@@ -137,6 +137,7 @@ export default function RoastVideoCreator() {
     const handleGenerate = async () => {
         let currentTime = Date.now();
         const token = localStorageInstance?.getItem('token');
+        const loggedInUser = localStorageInstance?.getItem('loggedInUser');
 
         if (!imageFile) {
             //   alert('Please upload an image before submitting.');
@@ -151,6 +152,7 @@ export default function RoastVideoCreator() {
         formData.append('voice', selectedVoice);
         formData.append('style', settings.roastStyle);
         formData.append('duration', String(settings.duration));
+        formData.append('userName', String(loggedInUser));
         // formData.append('user_id', String(currentUserToken));
 
         try {

@@ -211,6 +211,7 @@ export default function SongGeneratorPage(): JSX.Element {
 
     const handleGenerateMusic = async () => {
         const token = localStorageInstance?.getItem('token');
+        const loggedInUser = localStorageInstance?.getItem('loggedInUser');
 
         if (!prompt.trim()) {
             setError('Please ensure prompt is provided.');
@@ -232,7 +233,8 @@ export default function SongGeneratorPage(): JSX.Element {
             prompt: finalPrompt,
             instrumental: isInstrumental,
             currentTime: currentTime,
-            contentType: "jukebox",
+            userName: loggedInUser,
+            contentType: "kids-music",
         };
 
         try {

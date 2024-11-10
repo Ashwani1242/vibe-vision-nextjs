@@ -227,6 +227,7 @@ export default function EnhancedStoryGenerator() {
   const handleGenerate = async () => {
     let currentTime = Date.now();
     const token = localStorageInstance?.getItem('token');
+    const loggedInUser = localStorageInstance?.getItem('loggedInUser');
 
     if (!prompt.trim()) {
       setError('Please enter a prompt.');
@@ -246,6 +247,7 @@ export default function EnhancedStoryGenerator() {
           theme: `${genre}, with ${genreDescription}`,
           tone: settings.tone,
           ageGroup: settings.ageGroup,
+          userName: loggedInUser,
           duration: settings.duration * 2,
           currentTime
         },
