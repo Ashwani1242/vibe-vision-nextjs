@@ -564,7 +564,7 @@ const ProfilePage = () => {
                                 </Button>
                                 <video src={currentVideoUrl || ''} controls className="xl:h-full xl:max-w-96 max-h-96 xl:max-h-full rounded-xl object-contain"></video>
                                 <ScrollArea className='flex-1 h-full rounded-xl'>
-                                    <div className='flex flex-col gap-4 bg-neutral-950 rounded-xl h-full p-8'>
+                                    <div className='flex flex-col gap-4 bg-neutral-950 rounded-xl h-full p-4 xl:p-8'>
                                         <h1 className='text-2xl'>Video Description</h1>
                                         <div className='flex flex-col 2xl:flex-row py-4 items-start justify-between'>
                                             <div className='text-xl'>{(currentVideoContent?.contentType === 'story-time' ? currentVideoContent?.userPrompt : currentVideoContent?.displayName) || 'Video Name'}</div>
@@ -572,7 +572,7 @@ const ProfilePage = () => {
                                         </div>
                                         <div className='text-lg bg-neutral-900 p-4 rounded-xl'>User Prompt <br /> {currentVideoContent?.userPrompt || 'no prompt'}</div>
                                         <div className='text-lg bg-neutral-900 p-4 rounded-xl'>Generated Text<br /> {currentVideoContent?.enhancedPrompt || 'no prompt'}</div>
-                                        <div className="gap-4 flex flex-auto flex-row w-full">
+                                        <div className="gap-4 flex flex-auto flex-col xl:flex-row w-full">
                                             {currentVideoContent?.contentType === 'roast-my-pic' && <div className='p-8 rounded-xl flex flex-col items-center gap-6 bg-neutral-900 w-full'>
                                                 Image Used
                                                 <img src={`${BASE_URL}/${currentVideoContent?.imageUrl}`} className='size-44 rounded-xl object-cover duration-200 hover:scale-105 cursor-pointer' onClick={() => { openLink(`${BASE_URL}/${currentVideoContent?.imageUrl}`) }} alt="No Image Found" />

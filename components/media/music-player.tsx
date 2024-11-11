@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import ScrollingText from '../ui/scroll-text';
 import SongLyrics from '../ui/song-lyrics';
+import axios from 'axios';
 
 // Define an interface for playlist items
 interface PlaylistItem {
@@ -196,6 +197,31 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
   const handleShowLyrics = () => {
     setShowLyrics(val => !val)
   }
+
+  const handleDownloadAudio = async (audioUrl: string | null, displayName: string) => {
+    if (audioUrl) {
+      try {
+        // Fetch the video file as a blob using Axios
+        const response = await axios.get(audioUrl, {
+          responseType: 'blob',
+        });
+
+        const blob = new Blob([response.data], { type: 'audio/mp3' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${displayName}.mp3`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url); // Clean up the URL object
+      } catch (error) {
+        console.error("Error downloading audio:", error);
+      }
+    }
+  };
 
   //-----------------------------------------------------------------------------
 
@@ -433,10 +459,11 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setIsLiked(!isLiked)}
-                    className={`hover:text-white ${isLiked ? 'text-red-500' : 'text-gray-400'}`}
+                    // onClick={() => setIsLiked(!isLiked)}
+                    onClick={() => { handleDownloadAudio(currentSong.audioUrl, currentSong.title) }}
+                    className={`hover:text-white ${isLiked ? 'text-red-500/' : 'text-gray-400/'}`}
                   >
-                    <Heart className="h-5 w-5" />
+                    <Download className="h-5 w-5" />
                   </Button>
                   <div className="flex items-center gap-2">
                     <Button
@@ -596,10 +623,11 @@ export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => setIsLiked(!isLiked)}
-                      className={`hover:text-white ${isLiked ? 'text-red-500' : 'text-gray-400'}`}
+                      // onClick={() => setIsLiked(!isLiked)}
+                      onClick={() => { handleDownloadAudio(currentSong.audioUrl, currentSong.title) }}
+                      className={`hover:text-white ${isLiked ? 'text-red-500/' : 'text-gray-400/'}`}
                     >
-                      <Heart className="h-5 w-5" />
+                      <Download className="h-5 w-5" />
                     </Button>
                     <div className="flex items-center gap-2">
                       <Button
