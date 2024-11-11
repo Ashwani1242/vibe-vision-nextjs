@@ -33,6 +33,18 @@ const nextConfig = {
         destination: `${BASE_URL}/api/:path*`,
       },
       {
+        source: '/api/content/:path*',
+        destination: `${BASE_URL}/api/content/:path*`,
+      },
+      {
+        source: '/api/content/get-user-content',
+        destination: `${BASE_URL}/api/content/get-user-content`,
+      },
+      {
+        source: '/api/content/get-all-content',
+        destination: `${BASE_URL}/api/content/get-all-content`,
+      },
+      {
         source: '/api/generate-video/:path*',
         destination: `${BASE_URL}/api/generate-video/:path*`,
       },
