@@ -390,7 +390,7 @@ const NotificationsPanel = ({
           <span>Generations</span>
           <Button variant="ghost" size="sm" onClick={reloadFunction}>
             <RefreshCw className={`${data.length === 0 && 'animate-spin duration-500'}`} />
-            Reload
+            {/* Reload */}
           </Button>
         </SheetTitle>
       </SheetHeader>
@@ -399,7 +399,7 @@ const NotificationsPanel = ({
           {data.map((dataItem) => (
             <div
               key={dataItem._id}
-              className={`p-4 rounded-lg transition-colors bg-muted flex flex-row justify-between border ${dataItem.status === 'success' ? 'border-green-400 text-green-400' : dataItem.status === 'waiting' ? 'border-yellow-500 text-yellow-500 animate-pulse' : 'border-red-500 text-red-500'}`} >
+              className={`p-4 mr-4 rounded-lg transition-colors bg-muted flex flex-row justify-between border/ ${dataItem.status === 'success' ? 'border-green-400 text-green-400' : dataItem.status === 'waiting' ? 'border-yellow-500 text-yellow-500 animate-pulse' : 'border-red-500 text-red-500'}`} >
               <div className="flex items-start gap-4">
                 {
                   dataItem.status === 'success' ?
