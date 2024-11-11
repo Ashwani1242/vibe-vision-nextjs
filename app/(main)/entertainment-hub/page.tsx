@@ -556,6 +556,8 @@ const VideoPlatform = () => {
           }
         </div>
 
+        
+
         {videoModal &&
           (
             <div className="fixed z-50 h-screen w-screen p-0 xl:px-44 xl:py-20 top-0 left-0 bg-black/20 backdrop-blur flex justify-center items-center">
