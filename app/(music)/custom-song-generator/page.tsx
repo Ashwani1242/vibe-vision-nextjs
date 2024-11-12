@@ -655,7 +655,7 @@ export default function SongGeneratorPage(): JSX.Element {
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="gap-6 flex flex-col w-full h-[360px] flex-auto">
+                                                                    <div className="gap-6 flex flex-col w-full xl:h-[360px] flex-auto">
                                                                         <Button
                                                                             className='w-full h-full flex-1 p-4 bg-neutral-900 flex xl:flex-col justify-center items-center gap-4 rounded-3xl'
                                                                             onClick={() => { handleDownloadAudio(dataItem.audioUrl || '', dataItem.musicTitle || '') }}
