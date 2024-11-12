@@ -247,6 +247,14 @@ export default function SongGeneratorPage(): JSX.Element {
         };
 
         try {
+
+            const controller = new AbortController();
+            const signal = controller.signal;
+
+            setTimeout(() => {
+                controller.abort(); // Abort after 60 seconds if the request hasn't completed
+            }, 180000);
+
             showToast();
 
             const response = await axios.post(
@@ -257,6 +265,7 @@ export default function SongGeneratorPage(): JSX.Element {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
+                    signal
                 }
             );
 
@@ -284,7 +293,7 @@ export default function SongGeneratorPage(): JSX.Element {
             setGeneratedSongs(prev => [newSong, ...prev]);
 
         } catch (error: any) {
-            console.error('Error generating music:', error.response ? error.response.data : error.message);
+            console.error('Error generating music (client):', error.response ? error.response.data : error.message);
             setError('Failed to generate music. Please try again.');
         } finally {
             setIsLoading(false);
