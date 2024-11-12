@@ -169,8 +169,8 @@ export default function RoastVideoCreator() {
             );
 
             setRoastScript(response.data.summary || 'No summary generated.');
-            setVideoUrl(`${BASE_URL}/${response.data.video}`); // Set video file path
-            setIsVideoGenerated(true); // Mark video as generated
+            setVideoUrl(`${BASE_URL}/${response.data.video}`);
+            setIsVideoGenerated(true);
             console.log(`${BASE_URL}/${response.data.video}`);
         } catch (error) {
             console.error('Error generating summary:', error);
