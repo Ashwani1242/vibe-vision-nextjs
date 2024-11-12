@@ -27,6 +27,8 @@ import {
     VolumeX,
     Repeat,
     Share2,
+    UserCircleIcon,
+    TriangleAlert,
     Heart,
     MoreHorizontal,
     Shuffle,
@@ -50,17 +52,7 @@ import { BASE_URL } from '@/config';
 import EnhancedMusicPlayer from '@/components/media/music-player';
 import { ToastProvider } from '@/components/ui/toast';
 import MessageToast from '@/components/ui/MessageToast';
-
-interface Song {
-    id: string;
-    title: string;
-    genres: string[];
-    coverArt: string;
-    audioUrl: string;
-    duration: number;
-    timestamp: string;
-    lyrics: string;
-}
+import ScrollingText from '@/components/ui/scroll-text';
 
 interface GenerateSongPayload {
     title: string;
@@ -90,6 +82,34 @@ const formatTime = (time: number | null): string => {
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
+
+type ContentItem = {
+    _id: string;
+    userName: string;
+    contentType: string;
+    status: string;
+    videoUrl?: string;
+    audioUrl?: string;
+    imageUrl?: string | null;
+    thumbnail_alt?: string | null;
+    musicTitle?: string | null;
+    displayName?: string | null;
+    createdAt: string;
+    enhancedPrompt: string;
+    userPrompt: string;
+    songLyrics: string;
+};
+
+interface Song {
+    id: string;
+    title: string;
+    genres: string[];
+    coverArt: string;
+    audioUrl: string;
+    duration: number;
+    timestamp: string;
+    lyrics: string;
+}
 
 export default function SongGeneratorPage(): JSX.Element {
     // Form state
@@ -144,6 +164,45 @@ export default function SongGeneratorPage(): JSX.Element {
     }, [])
 
 
+    const [data, setData] = useState<ContentItem[]>([]);
+
+    const filteredData = data.filter((dataItem) => dataItem.contentType === 'jukebox')
+    const mostRecentData = filteredData.slice().reverse();
+
+    const fetchData = async () => {
+        if (typeof window !== 'undefined') {
+            // Access localStorage on the client side
+            setLocalStorageInstance(window.localStorage);
+            const token = window.localStorage.getItem('token');
+
+            try {
+                const response = await axios.get(
+                    `${BASE_URL}/api/content/get-user-content`,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                    }
+                );
+                console.log(response.data);
+                setData(response.data);
+            } catch (error) {
+                console.error("Error fetching content data:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        // Fetch data immediately and set an interval to fetch every 15 seconds
+        fetchData();
+        const interval = setInterval(fetchData, 15000); // 15000 ms = 15 seconds
+
+        // Cleanup function to clear the interval when the component unmounts
+        return () => clearInterval(interval);
+    }, [BASE_URL]);
+
+
     //     const alt_musicUrl = `${BASE_URL}/uploads/6729fde142e71c53dbec2d78_jukebox_1730976610659_music.mp3`
     //     const alt_imageUrl = `${BASE_URL}/uploads/6729fde142e71c53dbec2d78_jukebox_1730976610659_image.png`
     //     // const alt_imageUrl = `https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg`
@@ -196,18 +255,18 @@ export default function SongGeneratorPage(): JSX.Element {
         );
     };
 
-    const playGeneratedSong = () => {
+    const playGeneratedSong = (content: ContentItem) => {
 
         if (!isPlaying) {
             const newSong: Song = {
-                id: '',
-                title: musicTitle,
-                genres: selectedGenres,
-                coverArt: imageUrl,
-                audioUrl: musicUrl,
+                id: content._id,
+                title: content.musicTitle || 'No Title Found',
+                genres: ['test', 'test'],
+                audioUrl: content.audioUrl || '',
+                coverArt: content.imageUrl || content.thumbnail_alt || '',
                 duration: audioRef.current?.duration || 180,
                 timestamp: new Date().toISOString(),
-                lyrics: lyrics
+                lyrics: content.songLyrics || 'No Lyrics Found'
             };
 
             setGeneratedSongs(prev => [newSong, ...prev]);
@@ -217,6 +276,8 @@ export default function SongGeneratorPage(): JSX.Element {
         } else {
             audioRef.current?.pause()
         }
+
+        // setIsPlaying(val => !val);
     }
 
     const handleGenerateMusic = async () => {
@@ -257,6 +318,8 @@ export default function SongGeneratorPage(): JSX.Element {
 
             showToast();
 
+            fetchData()
+
             const response = await axios.post(
                 apiUrl,
                 data,
@@ -294,17 +357,17 @@ export default function SongGeneratorPage(): JSX.Element {
 
         } catch (error: any) {
             console.error('Error generating music (client):', error.response ? error.response.data : error.message);
-            setError('Failed to generate music. Please try again.');
+            // setError('Failed to generate music. Please try again.');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleDownloadAudio = async () => {
-        if (musicUrl) {
+    const handleDownloadAudio = async (audioUrl: string | null, displayName: string) => {
+        if (audioUrl) {
             try {
                 // Fetch the video file as a blob using Axios
-                const response = await axios.get(musicUrl, {
+                const response = await axios.get(audioUrl, {
                     responseType: 'blob',
                 });
 
@@ -313,14 +376,14 @@ export default function SongGeneratorPage(): JSX.Element {
 
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${musicTitle}.mp3`;
+                a.download = `${displayName}.mp3`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
 
                 URL.revokeObjectURL(url); // Clean up the URL object
             } catch (error) {
-                console.error("Error downloading video:", error);
+                console.error("Error downloading audio:", error);
             }
         }
     };
@@ -510,11 +573,177 @@ export default function SongGeneratorPage(): JSX.Element {
                         {/* Generated Songs List */}
                         <Card className="bg-black/20 backdrop-blur">
                             <CardHeader>
-                                <CardTitle>Generated Song</CardTitle>
+                                <CardTitle>My Generations</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <ScrollArea className="h-[calc(100vh-400px)]/ h-full">
-                                    {isLoading ?
+                                <ScrollArea className="h-[calc(100vh-400px)]/ h-full max-h-[800px] overflow-y-scroll flex flex-col gap-4">
+
+
+                                    {mostRecentData.length !== 0 ?
+                                        mostRecentData.map((dataItem) => (
+                                            <Card key={dataItem._id} className="border-0 shadow-none m-4">
+                                                {
+                                                    dataItem.status === 'success' ?
+                                                        (
+                                                            <CardContent
+                                                                className="bg-[#0f0f0f] h-fit p-4 min-h-96 w-full flex flex-col justify-between pb-4 rounded-xl relative">
+                                                                <div className='w-full h-full rounded-3xl flex flex-col items-center xl:flex-row gap-8'>
+                                                                    <div
+                                                                        className="bg-neutral-900 w-fit h-full flex flex-col gap-6 text-center bg-cover justify-center items-center rounded-3xl p-6">
+                                                                        <div className={`relative size-36 group cursor-pointer `}>
+                                                                            <div
+                                                                                style={{
+                                                                                    backgroundImage: `url('${dataItem.imageUrl}')`,
+                                                                                    filter: "blur(14px)",
+                                                                                    opacity: 0.5,
+                                                                                }}
+                                                                                className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-36 bg-cover rounded-full' >
+                                                                            </div>
+                                                                            <div
+                                                                                style={{
+                                                                                    backgroundImage: `url('${dataItem.imageUrl}')`,
+                                                                                    animation: currentSong?.id !== dataItem._id ? 'slowRotate 15s linear infinite' : '',
+                                                                                }}
+                                                                                className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-36 flex flex-col bg-cover justify-center items-center rounded-full'>
+                                                                                <style>
+                                                                                    {`
+                                                                            @keyframes slowRotate {
+                                                                                from {
+                                                                                    transform: rotate(0deg);
+                                                                                }
+                                                                                to {
+                                                                                    transform: rotate(360deg);
+                                                                                }
+                                                                            }
+                                                                        `}
+                                                                                </style>
+                                                                                <div className='size-12 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
+                                                                                    {currentSong?.id !== dataItem._id && <AudioLines />}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="w-full items-center justify-center text-center text-nowrap bg-neutral-/800 rounded-xl p-4 max-w-48 overflow-hidden whitespace-nowrap flex flex-col gap-2">
+                                                                            {/* <h3 className="text-white animate-marquee inline-block text-md">{`${dataItem.musicTitle}`}</h3> */}
+                                                                            <ScrollingText text={dataItem.musicTitle || "Jukebox Music"} />
+                                                                            <p className="text-gray-200 text-xs">Vibe Vision Music.</p>
+                                                                            <div onClick={() => playGeneratedSong(dataItem)} className='p-2 cursor-pointer hover:scale-105 duration-300'>
+                                                                                {currentSong?.id !== dataItem._id ?
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" className="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                                                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z" />
+                                                                                    </svg>
+                                                                                    :
+                                                                                    // <PauseCircleIcon className='size-10' />
+                                                                                    <div className='flex flex-col justify-center items-center'>
+                                                                                        {/* /* From Uiverse.io by ClawHack1  */}
+                                                                                        <div className="now-playing">
+                                                                                            <div className="now-playing-inner">
+                                                                                                <div className="now-playing-block"></div>
+                                                                                                <div className="now-playing-block"></div>
+                                                                                                <div className="now-playing-block"></div>
+                                                                                                <div className="now-playing-block"></div>
+                                                                                                <div className="now-playing-block"></div>
+                                                                                                <div className="now-playing-block"></div>
+                                                                                                <div className="now-playing-block"></div>
+                                                                                                <div className="now-playing-block"></div>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        Now Playing
+                                                                                    </div>
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="gap-6 flex flex-col w-full h-[360px] flex-auto">
+                                                                        <Button
+                                                                            className='w-full h-full flex-1 p-4 bg-neutral-900 flex xl:flex-col justify-center items-center gap-4 rounded-3xl'
+                                                                            onClick={() => { handleDownloadAudio(dataItem.audioUrl || '', dataItem.musicTitle || '') }}
+                                                                        >
+                                                                            <Download className="size-4" />
+                                                                            Download
+                                                                        </Button>
+                                                                        <Button
+                                                                            className='w-full h-full flex-1 p-4 bg-neutral-900 flex xl:flex-col justify-center items-center gap-4 rounded-3xl'
+                                                                            onClick={() => setShowShareDialog(true)}
+                                                                        >
+                                                                            <Share className="size-4" />
+                                                                            Share
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
+                                                            </CardContent>
+                                                        )
+                                                        :
+                                                        dataItem.status === 'waiting' ?
+                                                            (
+                                                                <CardContent
+                                                                    className="bg-[#0f0f0f] animate-pulse h-full w-full p-0 flex flex-col justify-center rounded-xl relative">
+                                                                    <div className="w-full h-96 rounded-3xl bg-[#0f0f0f] animate-pulse flex flex-col items-center justify-center">
+                                                                        <div
+                                                                            className="p-2 animate-spin drop-shadow-2xl bg-gradient-to-bl from-pink-400 via-purple-400 to-indigo-600 md:w-20 md:h-20 h-16 w-16 aspect-square rounded-full"
+                                                                        >
+                                                                            <div
+                                                                                className="rounded-full h-full w-full bg-slate-100 dark:bg-zinc-900 background-blur-md"
+                                                                            ></div>
+                                                                        </div>
+
+                                                                        <div className="loader">
+                                                                            <p>Generating</p>
+                                                                            <div className="words">
+                                                                                <span className="word">Music</span>
+                                                                                <span className="word">Lyrics</span>
+                                                                                <span className="word">Verses</span>
+                                                                                <span className="word">Chorus</span>
+                                                                                <span className="word">Music</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </CardContent>
+                                                            )
+                                                            :
+                                                            (
+                                                                <CardContent
+                                                                    className="bg-[#0f0f0f]/ bg-red-900/30 border-2/ border-red-600 h-fit min-h-96 w-full p-0 flex flex-col justify-center pb-4 rounded-xl relative">
+                                                                    <div className="text-center">
+                                                                        <TriangleAlert className='size-16 text-red-500 mx-auto' />
+                                                                        <h2 className="text-zinc-900 dark:text-white mt-4">Error Generating Content!</h2>
+                                                                        <p className="text-zinc-600 dark:text-zinc-400">
+                                                                            The server wasn't able to generate your {dataItem.contentType}!
+                                                                        </p>
+                                                                        <div className='pt-1 text-sm opacity-60'>Please Try Again!</div>
+                                                                        <div className='pt-1 text-xs opacity-40'>{dataItem.userPrompt}</div>
+                                                                    </div>
+                                                                    {
+                                                                        dataItem.contentType === 'roast-my-pic' &&
+                                                                        (
+                                                                            <img
+                                                                                src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                                                                                alt={dataItem.displayName || dataItem.musicTitle || ''}
+                                                                                className={`size-24 aspect-square rounded-xl object-cover absolute bottom-4 right-4 hidden`}
+                                                                            />
+                                                                        )
+                                                                    }
+                                                                </CardContent>
+                                                            )
+                                                }
+                                            </Card>
+                                        ))
+                                        :
+                                        (
+                                            <div className='flex flex-col w-full items-center justify-start pt-16 gap-4 text-gray-300 h-96'>
+                                                <img className='size-20 opacity-60' src="https://img.icons8.com/external-vitaliy-gorbachev-blue-vitaly-gorbachev/60/external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev.png" alt="external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev" />
+                                                Your Generated Songs will be shown here
+                                            </div>
+                                        )
+                                    }
+
+
+
+
+
+
+                                    {/* {isLoading ?
                                         (
                                             <div className="p-4 w-full h-full gap-8 text-gray-400 flex flex-col justify-center items-center overflow-hidden">
                                                 <div className="w-full h-96 rounded-3xl bg-[#0f0f0f] animate-pulse flex flex-col items-center justify-center">
@@ -634,7 +863,7 @@ export default function SongGeneratorPage(): JSX.Element {
                                                 Your Song will be shown here
                                             </div>
                                         )
-                                    }
+                                    } */}
                                 </ScrollArea>
                             </CardContent>
                         </Card>
