@@ -602,7 +602,7 @@ export default function SongGeneratorPage(): JSX.Element {
                                                                             <div
                                                                                 style={{
                                                                                     backgroundImage: `url('${dataItem.imageUrl}')`,
-                                                                                    animation: currentSong?.id !== dataItem._id ? 'slowRotate 15s linear infinite' : '',
+                                                                                    animation: currentSong?.id === dataItem._id ? 'slowRotate 15s linear infinite' : '',
                                                                                 }}
                                                                                 className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-36 flex flex-col bg-cover justify-center items-center rounded-full'>
                                                                                 <style>
@@ -618,7 +618,7 @@ export default function SongGeneratorPage(): JSX.Element {
                                                                         `}
                                                                                 </style>
                                                                                 <div className='size-12 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
-                                                                                    {currentSong?.id !== dataItem._id && <AudioLines />}
+                                                                                    {currentSong?.id === dataItem._id && <AudioLines />}
                                                                                 </div>
                                                                             </div>
                                                                         </div>
