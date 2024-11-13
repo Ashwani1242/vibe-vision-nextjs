@@ -1,24 +1,26 @@
+import { TriangleAlert } from 'lucide-react';
 import React, { useEffect } from 'react';
 
 interface ToastProps {
-    message: string;
-    visible: boolean;
-    onClose: () => void;
+  message: string;
+  visible: boolean;
+  onClose: () => void;
+  isError?: boolean;
 }
 
-const MessageToast: React.FC<ToastProps> = ({ message, visible, onClose }) => {
-    useEffect(() => {
-        if (visible) {
-            const timer = setTimeout(onClose, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [visible, onClose]);
+const MessageToast: React.FC<ToastProps> = ({ message, visible, onClose, isError = false }) => {
+  useEffect(() => {
+    if (visible) {
+      const timer = setTimeout(onClose, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [visible, onClose]);
 
-    return (
-        <div
-            className={`fixed z-[3000] flex gap-4 items-center bottom-4 right-4 transform transition-transform duration-700 ${visible ? '-translate-x-0' : 'translate-x-[150%]'} px-6 py-4 text-lg bg-neutral-950 border border-gray-800 text-white rounded shadow-lg`} >
-            <style>
-                {`
+  return (
+    <div
+      className={`fixed z-[3000] flex gap-4 items-center bottom-4 right-4 transform transition-transform duration-700 ${visible ? '-translate-x-0' : 'translate-x-[150%]'} px-6 py-4 text-lg bg-neutral-950 border border-gray-800 text-white rounded shadow-lg`} >
+      <style>
+        {`
 .spinner {
   animation: spinner-y0fdc1 2s infinite ease;
   transform-style: preserve-3d;
@@ -76,18 +78,23 @@ const MessageToast: React.FC<ToastProps> = ({ message, visible, onClose }) => {
     
 
                 `}
-            </style>
-            <div className="spinner size-6 border/ border-purple-500">
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
-            <div className='max-w-60 md:max-w-96 text-sm md:text-base'> {message} </div>
-        </div>
-    );
+      </style>
+      {
+        !isError ?
+          <div className="spinner size-6 border/ border-purple-500">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          :
+          < TriangleAlert className='text-red-400' />
+      }
+      <div className='max-w-60 md:max-w-96 text-sm md:text-base'> {message} </div>
+    </div>
+  );
 };
 
 export default MessageToast;

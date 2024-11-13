@@ -19,6 +19,7 @@ import { Icons } from "../ui/icons";
 import Link from "next/link";
 import axios from "axios";
 import { BASE_URL } from "@/config";
+import MessageToast from "../ui/MessageToast";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -27,7 +28,13 @@ const loginSchema = z.object({
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [localStorageInstance,  setLocalStorageInstance] = useState<Storage | null>(null)
+  const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string>('No Message');
+
+  const showToast = () => {
+    setToastVisible(true);
+  };
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -50,12 +57,15 @@ export function LoginForm() {
       localStorageInstance?.setItem('loggedInUser', name);
       localStorageInstance?.setItem('loggedInUserEmail', email);
 
-      toast.success("Logged in successfully!");
+      setToastMessage("Logged in successfully!");
+      showToast()
       // Redirect to the gallery page (adjust URL if needed)
       window.location.href = "/entertainment-hub";
     } catch (error) {
       console.error(error);
-      toast.error("Invalid email or password");
+      setToastMessage("Invalid email or password!");
+      showToast()
+      // toast.error("Invalid email or password");
     } finally {
       setIsLoading(false);
     }
@@ -139,6 +149,12 @@ export function LoginForm() {
           </Link>
         </p>
       </CardFooter>
+      <MessageToast
+        message={toastMessage}
+        visible={toastVisible}
+        onClose={() => setToastVisible(false)}
+        isError
+      />
     </Card>
   );
 }

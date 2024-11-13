@@ -156,7 +156,6 @@ export default function SongGeneratorPage(): JSX.Element {
 
     const showToast = () => {
         setToastVisible(true);
-        // The toast will auto-close after 2 seconds because of the useEffect in the Toast component
     };
 
     useEffect(() => {
