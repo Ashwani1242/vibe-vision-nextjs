@@ -64,8 +64,8 @@ const advancedPricingPlans = [
     limitations: [
       "Limited content complexity",
       "Standard generation speed",
-      "No commercial use"
       "No API access",
+      "No commercial use"
     ],
     recommended: false,
     icon: <Rocket className="h-6 w-6 text-blue-500" />
