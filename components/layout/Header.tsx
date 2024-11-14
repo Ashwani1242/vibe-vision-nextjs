@@ -127,7 +127,6 @@ export function Header({
     setUnreadCount(0);
   };
 
-
   const markNotificationAsRead = (id: number) => {
     setNotifications(prev =>
       prev.map(notification =>

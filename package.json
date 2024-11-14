@@ -54,6 +54,7 @@
     "icons-react": "^3.7.1",
     "input-otp": "^1.2.5",
     "jspdf": "^2.5.2",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.453.0",
     "mini-svg-data-uri": "^1.4.4",
     "next": "14.2.16",
