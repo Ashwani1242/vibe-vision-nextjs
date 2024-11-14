@@ -9,21 +9,19 @@ interface DecodedToken {
 const useAuth = () => {
   const router = useRouter();
 
-  // Function to check if the token is expired
   const isTokenExpired = (token: string | null): boolean => {
     if (!token) return true;
 
     try {
       const decodedToken: DecodedToken = jwtDecode(token);
-      const currentTime = Date.now() / 1000; // Current time in seconds
+      const currentTime = Date.now() / 1000; 
       return decodedToken.exp < currentTime;
     } catch (error) {
-      return true; // If decoding fails, consider the token expired
+      return true;
     }
   };
 
   useEffect(() => {
-    // Check if we're running in the browser
     if (typeof window === 'undefined') return;
 
     const token = localStorage.getItem('token');
@@ -33,9 +31,9 @@ const useAuth = () => {
       localStorage.removeItem('loggedInUser');
       localStorage.removeItem('loggedInUserEmail');
       alert('Session expired. Please log in again.');
-      router.push('/login'); // Redirect to the login page
+      router.push('/login');
     }
-  }, [router]); // Run this effect when the router changes
+  }, [router]);
 };
 
 export default useAuth;

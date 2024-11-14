@@ -1,9 +1,12 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { ScrollArea, ScrollBar } from "../../../components/ui/scroll-area";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent } from "../../../components/ui/card";
-import { Layout } from "../../../components/layout/layout"
+import { Badge } from "../../../components/ui/badge";
+import { Layout } from "../../../components/layout/layout";
 import {
   AudioLines,
   AudioLinesIcon,
@@ -13,9 +16,11 @@ import {
   Heart,
   Image,
   Info,
+  Joystick,
   Maximize2,
   Minimize2,
   MoreVertical,
+  Music,
   Pause,
   PauseCircleIcon,
   Play,
@@ -24,6 +29,7 @@ import {
   Shuffle,
   SkipBack,
   SkipForward,
+  Sparkles,
   UserCircleIcon,
   Video,
   Volume2,
@@ -36,9 +42,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import EnhancedMusicPlayer from '@/components/media/music-player';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
 import ScrollingText from '@/components/ui/scroll-text';
 
+// Types definition
 type ContentItem = {
   _id: string;
   userName: string;
@@ -67,23 +73,32 @@ interface Song {
   lyrics: string
 }
 
-const VideoPlatform = () => {
-  const [activeCategory, setActiveCategory] = useState('');
-  const [videoModal, setVideoModal] = useState<boolean>(false)
-  const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null)
-  const [currentVideoContent, setCurrentVideoContent] = useState<ContentItem | null>(null)
-  const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
-  const videoModalRef = useRef<HTMLDivElement>(null)
+interface Feature {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  gradient: string;
+  path: string;
+  bgPattern: string;
+}
 
+const EntertainmentHub = () => {
+  const router = useRouter();
+  const [activeCategory, setActiveCategory] = useState('');
+  const [videoModal, setVideoModal] = useState<boolean>(false);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null);
+  const [currentVideoContent, setCurrentVideoContent] = useState<ContentItem | null>(null);
+  const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
+  const videoModalRef = useRef<HTMLDivElement>(null);
 
   const [currentSongIndex, setCurrentSongIndex] = useState<number | null>(null);
   const [generatedSongs, setGeneratedSongs] = useState<Song[]>([]);
   const currentSong: Song | null = currentSongIndex !== null ? generatedSongs[currentSongIndex] : null;
-  const playerScreenRef = useRef<HTMLDivElement>(null)
-  const [isMusicPlayerFullScreen, setIsMusicPlayerFullScreen] = useState<boolean>(false)
+  const playerScreenRef = useRef<HTMLDivElement>(null);
+  const [isMusicPlayerFullScreen, setIsMusicPlayerFullScreen] = useState<boolean>(false);
 
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [musicUrl, setMusicUrl] = useState<string | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [musicUrl, setMusicUrl] = useState<string | null>(null);
 
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
@@ -91,14 +106,45 @@ const VideoPlatform = () => {
   const [isShuffle, setIsShuffle] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-
   const [volume, setVolume] = useState<number>(0.7);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isRepeat, setIsRepeat] = useState<boolean>(false);
 
-  // const categories = [
-  //   'All', 'Roast My Pic', 'Jukebox', 'Kids Music', 'Story Time' 
-  // ];
+  // Features array
+  const features: Feature[] = [
+    {
+      title: 'Jukebox',
+      description: 'AI Jukebox for custom AI generated music to your liking.',
+      icon: <Music className="w-8 h-8" />,
+      gradient: 'from-purple-500 to-pink-500',
+      path: '/custom-song-generator',
+      bgPattern: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E\")"
+    },
+    {
+      title: "Kid's Music",
+      description: 'Generate some great music for your kids',
+      icon: <Joystick className="w-8 h-8" />,
+      gradient: 'from-blue-500 to-teal-500',
+      path: '/kids-music',
+      bgPattern: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0V0zm10 17l-7-7h14l-7 7z' fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E\")"
+    },
+    {
+      title: 'Roast My Pic!',
+      description: 'Tell VibeVision AI to roast an Image you submit!',
+      icon: <Play className="w-8 h-8" />,
+      gradient: 'from-purple-500 to-pink-500',
+      path: '/15-reel',
+      bgPattern: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E\")"
+    },
+    {
+      title: 'Story Forge AI',
+      description: 'Generate unique comedy storylines with AI',
+      icon: <Sparkles className="w-8 h-8" />,
+      gradient: 'from-orange-500 to-red-500',
+      path: '/story-generation',
+      bgPattern: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 0h16a2 2 0 012 2v16a2 2 0 01-2 2H2a2 2 0 01-2-2V2a2 2 0 012-2zm0 2v16h16V2H2z' fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E\")"
+    }
+  ];
 
   const categories = [
     { id: 1, contentType: '', content: 'All' },
@@ -116,13 +162,9 @@ const VideoPlatform = () => {
     )
     : data.filter((dataItem) => dataItem.status === 'success');
 
-
-  // const sortedData: number = filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  // const filteredData = data.filter((dataItem) => dataItem.contentType === currentCategory);
-
+  // Functions for handling player controls
   const handleTimeChange = (value: number[]): void => {
     if (audioRef.current) {
-      // audioRef.current.currentTime = value[0];
       setCurrentTime(audioRef.current.currentTime);
     }
   };
@@ -401,6 +443,11 @@ const VideoPlatform = () => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const chunkData = (data: ContentItem[], itemsPerRow: number) => {
+    const initialChunks = data.slice(0, itemsPerRow * 2); // First two rows
+    const remainingItems = data.slice(itemsPerRow * 2); // Rest of the items
+    return { initialChunks, remainingItems };
+  };
 
   return (
     <Layout>
@@ -422,10 +469,190 @@ const VideoPlatform = () => {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
-        {/* Videos Grid */}
+        {/* First Two Rows of Content */}
         <div className={`grid grid-cols-1 ${filteredData.length !== 0 && 'sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'} gap-4 p-4`}>
           {filteredData.length !== 0 ?
-            filteredData.map((dataItem) => (
+            filteredData.slice(0, 8).map((dataItem) => (
+              <Card key={dataItem._id} className="border-0 shadow-none h-80 ">
+                {!(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
+                  <CardContent
+                    onClick={() => { openVideoModal(`${BASE_URL}/${dataItem.videoUrl}`, dataItem) }}
+                    className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
+                    <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
+                    {/* Thumbnail Container */}
+                    <div className="relative">
+                      <img
+                        src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                        alt={dataItem.displayName || dataItem.musicTitle || ''}
+                        className={`w-full h-60 rounded-xl /aspect-video ${dataItem.contentType === 'roast-my-pic' ? 'object-contain bg-black' : 'object-cover'}`}
+                      />
+                      <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 text-sm rounded">
+                        {/* {video.duration} */}
+                      </div>
+                    </div>
+
+                    {/* Video Info */}
+                    <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                      <div className='size-8'>
+                        <UserCircleIcon className=" size-full" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold line-clamp-2 text-nowrap">
+                          {dataItem.contentType === 'story-time' ? dataItem.userPrompt || dataItem.displayName : dataItem.displayName || 'AI Generated Video'}
+                        </h3>
+                        <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                          {dataItem.userName || 'AI Generated Video'}
+                        </h3>
+                      </div>
+                    </div>
+                  </CardContent>
+                  :
+                    <CardContent
+                      className="bg-[#0f0f0f] w-fit/ h-fit min-h-80 w-full p-0 flex flex-col justify-between pb-4 rounded-xl relative">
+                      {/* <div className='h-full w-full p-0'> */}
+                      <Badge className='absolute top-2 left-2 z-10'> {dataItem.contentType} </Badge>
+                      <div className='w-full bg-neutral-900 max-h-60 relative flex flex-row justify-around items-center px-8 py-12 rounded-xl'>
+                        <div className={`relative h-full/ size-36 /w-full flex justify-center items-center group cursor-pointer`}>
+                          <div
+                            style={{
+                              backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                              filter: "blur(14px)",
+                              opacity: 0.5,
+                            }}
+                            className='top-2 left-1 z-10 group-hover:scale-105 duration-300 absolute size-36 bg-cover rounded-full' >
+                          </div>
+                          <div
+                            style={{
+                              backgroundImage: (dataItem.imageUrl || dataItem.thumbnail_alt) ? `url('${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}')` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg',
+                              animation: currentSong?.id === dataItem._id ? 'slowRotate 15s linear infinite' : '',
+                            }}
+                            className='group-hover:scale-105 relative z-20 opacity-90 duration-300 group-hover:opacity-100 size-36 flex flex-col bg-cover justify-center items-center rounded-full'>
+                            <style>
+                              {`
+                    @keyframes slowRotate {
+                        from {
+                            transform: rotate(0deg);
+                        }
+                        to {
+                            transform: rotate(360deg);
+                        }
+                    }
+                `}
+                            </style>
+                            <div className='size-8 bg-neutral-900/60 flex justify-center items-center rounded-full backdrop-blur' >
+                              {currentSong?.id === dataItem._id && <AudioLines />}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-full items-center justify-center text-center text-nowrap bg-neutral-/800 rounded-xl p-4 max-w-48 overflow-hidden whitespace-nowrap flex flex-col gap-2">
+                          {/* <h3 className="text-white animate-marquee inline-block text-md">{`${dataItem.musicTitle}`}</h3> */}
+                          <ScrollingText text={dataItem.musicTitle || "Jukebox Music"} />
+                          <p className="text-gray-200 text-xs">Vibe Vision Music.</p>
+                          <div onClick={() => playGeneratedSong(dataItem)} className='p-2 cursor-pointer hover:scale-105 duration-300'>
+                            {currentSong?.id !== dataItem._id ?
+                              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" className="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z" />
+                              </svg>
+                              :
+                              // <PauseCircleIcon className='size-10' />
+                              <div className='flex flex-col justify-center items-center'>
+                                {/* /* From Uiverse.io by ClawHack1  */}
+                                <div className="now-playing">
+                                  <div className="now-playing-inner">
+                                    <div className="now-playing-block"></div>
+                                    <div className="now-playing-block"></div>
+                                    <div className="now-playing-block"></div>
+                                    <div className="now-playing-block"></div>
+                                    <div className="now-playing-block"></div>
+                                    <div className="now-playing-block"></div>
+                                    <div className="now-playing-block"></div>
+                                    <div className="now-playing-block"></div>
+                                  </div>
+                                </div>
+
+                                Now Playing
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex items-center gap-3 mx-4 overflow-y-visible overflow-x-hidden">
+                        <div className='size-8'>
+                          <UserCircleIcon className=" size-full" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold line-clamp-2 text-nowrap">
+                            {dataItem.displayName || dataItem.musicTitle || ((dataItem.contentType === 'kids-music' || dataItem.contentType === 'jukebox') ? 'AI Generated Music' : 'AI Generated Video')}
+                          </h3>
+                          <h3 className="font-semibold text-sm text-neutral-400 line-clamp-2 text-nowrap">
+                            {dataItem.userName || 'AI Generated Video'}
+                          </h3>
+                        </div>
+                      </div>
+                    </CardContent>
+                }
+                  </Card>
+                ))
+                :
+                (
+                <div className='flex flex-col w-full items-center justify-end gap-4 text-gray-300 h-96'>
+                  <img className='size-20 opacity-60' src="https://img.icons8.com/external-vitaliy-gorbachev-blue-vitaly-gorbachev/60/external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev.png" alt="external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev" />
+                  Nothing to see here
+                </div>
+                )
+          }
+              </div>
+
+{/* Features Section */}
+<section className='py-12 px-6 lg:px-16'>
+          <h2 className="text-3xl font-bold mb-6">Create with AI</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{
+                  scale: 1.05,
+                  transition: { duration: 0.2 }
+                }}
+                className="cursor-pointer"
+                onClick={() => router.push(feature.path)}
+              >
+                <Card
+                  className={`relative overflow-hidden h-[300px] bg-gradient-to-br ${feature.gradient}`}
+                >
+                  <div
+                    className="absolute inset-0 opacity-10"
+                    style={{ backgroundImage: feature.bgPattern }}
+                  />
+                  <CardContent className="p-6 flex flex-col items-center justify-center h-full text-white relative z-10">
+                    <motion.div
+                      whileHover={{ rotate: 360, scale: 1.2 }}
+                      transition={{ duration: 0.5 }}
+                      className="mb-6 p-4 bg-white/10 rounded-full"
+                    >
+                      {feature.icon}
+                    </motion.div>
+                    <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
+                    <p className="text-sm text-center text-white/90 mb-4">{feature.description}</p>
+                    <div className="absolute bottom-4 left-4">
+                      <Badge variant="secondary" className="bg-white/20">
+                        AI-Powered
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Remaining Content */}
+        <div className={`grid grid-cols-1 ${filteredData.length !== 0 && 'sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'} gap-4 p-4`}>
+          {filteredData.length !== 0 ?
+            filteredData.slice(8).map((dataItem) => (
               <Card key={dataItem._id} className="border-0 shadow-none h-80 ">
                 {!(dataItem.contentType === 'jukebox' || dataItem.contentType === 'kids-music') ?
                   <CardContent
@@ -556,7 +783,7 @@ const VideoPlatform = () => {
           }
         </div>
 
-        
+
 
         {videoModal &&
           (
@@ -658,4 +885,4 @@ const VideoPlatform = () => {
   );
 };
 
-export default VideoPlatform;
+export default EntertainmentHub;
