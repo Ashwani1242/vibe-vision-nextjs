@@ -18,6 +18,7 @@ import {
   AudioLines,
   RefreshCw,
   LibraryBig,
+  SparklesIcon,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -240,6 +241,20 @@ export function Header({
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
+
+            {isAuthenticated &&
+
+
+              <Link href="/comedy-lab" className="flex h-full gap-6 items-center">
+              <div
+                className={`cursor-pointer text-center text-xs flex items-center gap-2 relative px-4 py-1 border border-transparent hover:border-white bg-gradient-to-r from-violet-500 from-10% via-sky-500 via-30% to-pink-500 to-90% rounded-sm z-10 hover:bg-[length:100%] before:absolute before:-top-[3px] before:-bottom-[3px] before:-left-[5px] before:-right-[5px] before:bg-gradient-to-r before:from-violet-500 before:from-10% before:via-sky-500 before:via-30% before:to-pink-500 durat before:bg-[length:400%] before:-z-10 before:rounded-sm before:hover:blur-xl before:transition-all before:ease-in-out before:duration-1000 before:hover:bg-[length:10%] active:bg-violet-700 focus:ring-violet-700`}>
+                <SparklesIcon className="size-4" fill="white" />
+                Generate
+              </div>
+              <div className="w-[1px] h-6"> <div className="w-full h-full bg-neutral-500"></div></div>
+              </Link>
+
+            }
 
             {/* User Menu */}
             <UserMenu
