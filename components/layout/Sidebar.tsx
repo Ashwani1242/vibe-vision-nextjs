@@ -43,8 +43,7 @@ interface NavItem {
 const authenticatedNavItems: NavItem[] = [
   { icon: Home, label: "Home", href: "/" },
   { icon: Tv, label: "Entertainment Hub", href: "/entertainment-hub", badge: "Hot", badgeVariant: "destructive" },
-  { icon: Video, label: "Video Studio", href: "/comedy-lab" },
-  { icon: Music2, label: "Music Studio", href: "/music-studio" },
+  { icon: Video, label: "Studio", href: "/Studio" },
   { icon: User, label: "Profile", href: "/profile-page" },
 ]
 
