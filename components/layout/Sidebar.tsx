@@ -54,11 +54,11 @@ const nonAuthenticatedNavItems: NavItem[] = [
 ]
 
 const libraryItems: NavItem[] = [
-  { icon: ListVideo, label: "Your Playlists", href: "/playlists" },
-  { icon: Clock, label: "Watch Later", href: "/watch-later", badge: "3", badgeVariant: "secondary" },
-  { icon: Star, label: "Favorites", href: "/favorites" },
-  { icon: Heart, label: "Liked Content", href: "/liked", badge: "2", badgeVariant: "outline" },
   { icon: History, label: "History", href: "/history" },
+  { icon: Clock, label: "Watch Later", href: "/watch-later", badge: "3", badgeVariant: "secondary" },
+  { icon: ListVideo, label: "Your Playlists", href: "/playlists" },
+  { icon: Heart, label: "Liked Content", href: "/liked", badge: "2", badgeVariant: "outline" },
+
 ]
 
 interface NavItemProps extends NavItem {
@@ -248,14 +248,14 @@ export function Sidebar({ isOpen, isCollapsed, onClose }: SidebarProps) {
             }
             <Separator className="my-2" />
             {/* Library Section */}
-            {/* <NavSection
+            <NavSection
               title="Library"
               items={libraryItems}
               currentPath={pathname}
               isCollapsed={isCollapsed}
               onClose={onClose}
-            /> */}
-            {/* <Separator className="my-2" /> */}
+            />
+            <Separator className="my-2" />
           </nav>
 
         </ScrollArea>
