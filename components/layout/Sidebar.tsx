@@ -224,7 +224,7 @@ const NavItem = React.forwardRef<HTMLAnchorElement, NavItemProps>(({
             <SecondaryIcon 
               fill='#6366f1' 
               color='#6366f1' 
-              className='ml-auto bg-indigo-500' 
+              className='ml-auto text-indigo-500' 
             />
           )}
           
@@ -338,13 +338,8 @@ function NavSection({ title, items, currentPath, isCollapsed, isMobile, onClose 
 
 export function Sidebar({ isOpen, isCollapsed, onClose, isAuthenticated }: SidebarProps) {
   const pathname = usePathname()
-  const [localStorageInstance, setLocalStorageInstance] = React.useState<Storage | null>(null)
   const isMobile = useMediaQuery("(max-width: 768px)")
   
-  React.useEffect(() => {
-    setLocalStorageInstance(window?.localStorage)
-  }, [])
-
   // const isAuthenticated = localStorageInstance?.getItem('token')
   const mainNavItems = isAuthenticated ? authenticatedNavItems : nonAuthenticatedNavItems
 
@@ -405,9 +400,8 @@ export function Sidebar({ isOpen, isCollapsed, onClose, isAuthenticated }: Sideb
 
         <ScrollArea className="flex-1">
           <nav className="flex flex-col gap-2 p-2">
-            {/* Main Navigation */}
-            {isAuthenticated ? <NavSection
-            <NavSection
+          {isAuthenticated ? 
+          <NavSection
               title="Main"
               items={authenticatedNavItems}
               currentPath={pathname}

@@ -36,6 +36,7 @@ export function Layout({ children }: LayoutProps) {
     setAutoSidebarCollapsed(val => !val)
   }
 
+  
   const handleSidebarHoverEnter = () => {
     setIsSidebarCollapsed(false); // Expand sidebar on hover
   };
