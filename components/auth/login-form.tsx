@@ -22,6 +22,7 @@ import Link from "next/link";
 import axios from "axios";
 import { BASE_URL } from "@/config";
 import MessageToast from "../ui/MessageToast";
+import { googleLogin, login } from "@/lib/auth-service";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -47,54 +48,68 @@ export function LoginForm() {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof loginSchema>) {
-    setIsLoading(true);
+  // async function onSubmit(data: z.infer<typeof loginSchema>) {
+  //   setIsLoading(true);
 
-    const url = `${BASE_URL}/api/auth/login`;
-    try {
-      const response = await axios.post(url, data);
-      const { jwtToken, name, email } = response.data;
+  //   const url = `${BASE_URL}/api/auth/login`;
+  //   try {
+  //     const response = await axios.post(url, data);
+  //     const { jwtToken, name, email } = response.data;
 
-      localStorageInstance?.setItem('token', jwtToken);
-      localStorageInstance?.setItem('loggedInUser', name);
-      localStorageInstance?.setItem('loggedInUserEmail', email);
+  //     localStorageInstance?.setItem('token', jwtToken);
+  //     localStorageInstance?.setItem('loggedInUser', name);
+  //     localStorageInstance?.setItem('loggedInUserEmail', email);
 
-      setToastMessage("Logged in successfully!");
-      showToast()
-      window.location.href = "/entertainment-hub";
-    } catch (error) {
-      console.error(error);
-      setToastMessage("Invalid email or password!");
-      showToast()
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  //     setToastMessage("Logged in successfully!");
+  //     showToast()
+  //     window.location.href = "/entertainment-hub";
+  //   } catch (error) {
+  //     console.error(error);
+  //     setToastMessage("Invalid email or password!");
+  //     showToast()
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
 
-  const handleGoogleLogin = async (response: any) => {
-    if (response.credential) {
-      const googleAccessToken = response.credential;
-
-      // Send the Google Access Token to your backend for verification and login
-      try {
-        const res = await axios.post('http://localhost:8000/api/auth/google', {
-          googleAccessToken,
-        });
-
-        // Handle successful login response from the backend
-        if (res.data.success) {
-          localStorage.setItem('token', res.data.jwtToken);
-          localStorage.setItem('loggedInUser', res.data.name);
-          localStorage.setItem('loggedInUserEmail', res.data.email);
-          console.log('Logged in successfully!', res.data);
-        } else {
-          console.error('Google login failed:', res.data.message);
-        }
-      } catch (err) {
-        console.error('Error logging in with Google:', err);
-      }
-    }
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+    await login(data, setToastMessage, showToast);
   };
+
+  /* 
+  ----------------------------------------------------------------------------------------------------------
+  ------------------------------------- DON'T DELETE THIS CODE ----------------------------------------    |
+  -----------------------------------------------------------------------------------------------------    V
+  */
+
+  // const handleGoogleLogin = async (response: any) => {
+  //   if (response.credential) {
+  //     const googleAccessToken = response.credential;
+
+  //     // Send the Google Access Token to your backend for verification and login
+  //     try {
+  //       const res = await axios.post('https://accounts.google.com/o/oauth2/auth', {
+  //         googleAccessToken,
+  //       });
+
+  //       // Handle successful login response from the backend
+  //       if (res.data.success) {
+  //         localStorage.setItem('token', res.data.jwtToken);
+  //         localStorage.setItem('loggedInUser', res.data.name);
+  //         localStorage.setItem('loggedInUserEmail', res.data.email);
+  //         console.log('Logged in successfully!', res.data);
+  //       } else {
+  //         console.error('Google login failed:', res.data.message);
+  //       }
+  //     } catch (err) {
+  //       console.error('Error logging in with Google:', err);
+  //     }
+  //   }
+  // };
+
+  // const handleGoogleLogin = () => {
+  //   window.location.href = `http://localhost:8000/api/auth/${'google'}`;
+  // };
 
   useEffect(() => {
     setLocalStorageInstance(localStorage)
@@ -152,23 +167,23 @@ export function LoginForm() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              Or continue with
+              Or Continue With
             </span>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 w-full">
-          {/* <Button variant="outline" className="w-full" disabled={isLoading} onClick={() => signIn('google')}>
+          <Button variant="outline" className="w-full" disabled={isLoading} onClick={googleLogin}>
             <Icons.google className="mr-2 h-4 w-4" />
             Google
-          </Button> */}
-          <GoogleLogin
+          </Button>
+          {/* <GoogleLogin
             logo_alignment="center"
             text="continue_with"
             theme="outline"
             onSuccess={cr => handleGoogleLogin(cr)}
             onError={() => console.log('Login Failed')}
             useOneTap
-          />
+          /> */}
         </div>
         <p className="text-center text-sm text-muted-foreground">
           Don't have an account?{" "}

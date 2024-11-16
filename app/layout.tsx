@@ -28,7 +28,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider> {/* Wrap with SessionProvider */}
+        {/* <AuthProvider> Wrap with SessionProvider */}
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
@@ -40,7 +40,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               <Toaster />
             </div>
           </ThemeProvider>
-        </AuthProvider>
+        {/* </AuthProvider> */}
       </body>
     </html>
   );

@@ -28,6 +28,7 @@ interface SidebarProps {
   isOpen: boolean
   isCollapsed: boolean
   onClose: () => void
+  isAuthenticated: boolean
 }
 
 interface NavItem {
@@ -182,15 +183,8 @@ function NavSection({ title, items, currentPath, isCollapsed, onClose }: NavSect
   )
 }
 
-export function Sidebar({ isOpen, isCollapsed, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, isCollapsed, onClose, isAuthenticated }: SidebarProps) {
   const pathname = usePathname()
-  const [localStorageInstance,  setLocalStorageInstance] = React.useState<Storage | null>(null)
-  
-  React.useEffect(() => {
-    setLocalStorageInstance(localStorage);
-  }, [])
-  
-
   return (
     <>
       {/* Overlay - only show on mobile when sidebar is open */}
@@ -230,7 +224,7 @@ export function Sidebar({ isOpen, isCollapsed, onClose }: SidebarProps) {
         <ScrollArea className="flex-1">
           <nav className="flex flex-col gap-2 p-2">
             {/* Main Navigation */}
-            {localStorageInstance?.getItem('token') ? <NavSection
+            {isAuthenticated ? <NavSection
               title="Main"
               items={authenticatedNavItems}
               currentPath={pathname}

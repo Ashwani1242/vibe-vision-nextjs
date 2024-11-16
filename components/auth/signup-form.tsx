@@ -20,6 +20,7 @@ import Link from "next/link";
 import axios from "axios";
 import { BASE_URL } from "@/config";
 import MessageToast from "../ui/MessageToast";
+import { googleLogin, signup } from "@/lib/auth-service";
 
 const signupSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -50,30 +51,34 @@ export function SignUpForm() {
   });
 
 
-  async function onSubmit(data: z.infer<typeof signupSchema>) {
-    setIsLoading(true);
-    const url = `${BASE_URL}/auth/signup`;
-    try {
-      await axios.post(url, {
-        name: `${data.firstName} ${data.lastName}`,
-        email: data.email,
-        password: data.password,
-        // channelName: data.channelName,
-      });
+  // async function onSubmit(data: z.infer<typeof signupSchema>) {
+  //   setIsLoading(true);
+  //   const url = `${BASE_URL}/auth/signup`;
+  //   try {
+  //     await axios.post(url, {
+  //       name: `${data.firstName} ${data.lastName}`,
+  //       email: data.email,
+  //       password: data.password,
+  //       // channelName: data.channelName,
+  //     });
 
-      // toast.success("Account created successfully! Please check your email to verify your account.");
-      // Redirect to login page
-      window.location.href = "/login";
-    } catch (error) {
-      console.error(error);
-      // toast.error("Something went wrong. Please try again.");
+  //     // toast.success("Account created successfully! Please check your email to verify your account.");
+  //     // Redirect to login page
+  //     window.location.href = "/login";
+  //   } catch (error) {
+  //     console.error(error);
+  //     // toast.error("Something went wrong. Please try again.");
 
-      setToastMessage(`Something went wrong. Please try again. \n DEV: {-- ${error} --}`);
-      showToast()
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  //     setToastMessage(`Something went wrong. Please try again. \n DEV: {-- ${error} --}`);
+  //     showToast()
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  const onSubmit = async (data: z.infer<typeof signupSchema>) => {
+    await signup(data, setToastMessage, showToast);
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -149,12 +154,12 @@ export function SignUpForm() {
             </span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline" disabled={isLoading}>
+        <div className="grid grid-cols-1 gap-4 w-full">
+          {/* <Button variant="outline" disabled={isLoading}>
             <Icons.gitHub className="mr-2 h-4 w-4" />
             GitHub
-          </Button>
-          <Button variant="outline" disabled={isLoading}>
+          </Button> */}
+          <Button variant="outline" className="w-full" disabled={isLoading} onClick={googleLogin}>
             <Icons.google className="mr-2 h-4 w-4" />
             Google
           </Button>

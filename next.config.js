@@ -17,16 +17,16 @@ const nextConfig = {
         destination: `${BASE_URL}/:path*`,
       },
       {
-        source: '/auth/:path*',
-        destination: `${BASE_URL}/auth/:path*`,
+        source: '/api/auth/:path*',
+        destination: `${BASE_URL}/api/auth/:path*`,
       },
       {
-        source: '/auth/login',
-        destination: `${BASE_URL}/auth/login`,
+        source: '/api/auth/login',
+        destination: `${BASE_URL}/api/auth/login`,
       },
       {
-        source: '/auth/signup',
-        destination: `${BASE_URL}/auth/signup`,
+        source: '/api/auth/signup',
+        destination: `${BASE_URL}/api/auth/signup`,
       },
       {
         source: '/api/:path*',

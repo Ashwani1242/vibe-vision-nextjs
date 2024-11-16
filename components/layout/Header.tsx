@@ -6,6 +6,7 @@ import {
   Search,
   Menu,
   Settings,
+  ChevronLeft,
   LogOut,
   User,
   Upload,
@@ -42,6 +43,8 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useTheme } from "next-themes";
 import axios from "axios";
 import { BASE_URL } from "@/config";
+import { logout } from "@/lib/auth-service";
+import { getToken } from "@/lib/token-manager";
 
 interface Notification {
   id: number;
@@ -109,7 +112,7 @@ export function Header({
   ]);
 
   const [data, setData] = useState<ContentItem[]>([]);
-  const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
+  // const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
 
   // Initialize localStorage safely
   const storage = useMemo(() => {
@@ -151,22 +154,11 @@ export function Header({
     }, [{ label: "Home", path: "/" }]);
   }, [pathname]);
 
-  const handleLogout = () => {
-    if (storage) {
-      storage.removeItem('token');
-      storage.removeItem('loggedInUser');
-      storage.removeItem('loggedInUserEmail');
-    }
-    router.push('/');
-  };
-
-  const username = storage?.getItem('loggedInUser') || '';
-
   const fetchData = async () => {
     setData([])
     if (typeof window !== 'undefined') {
-      setLocalStorageInstance(window.localStorage);
-      const token = window.localStorage.getItem('token');
+      // setLocalStorageInstance(window.localStorage);
+      const token = getToken()
 
       try {
         const response = await axios.get(
@@ -205,7 +197,11 @@ export function Header({
               className="lg:hidden"
               aria-label="Toggle mobile sidebar"
             >
-              <Menu className="h-5 w-5" />
+              {isSidebarCollapsed ?
+                <Menu className="h-5 w-5" />
+                :
+                <ChevronLeft className="h-5 w-5" />
+              }
             </Button>
             <Button
               variant="ghost"
@@ -214,7 +210,11 @@ export function Header({
               className="hidden lg:flex"
               aria-label="Toggle desktop sidebar"
             >
-              <Menu className="h-5 w-5" />
+              {isSidebarCollapsed ?
+                <Menu className="h-5 w-5" />
+                :
+                <ChevronLeft className="h-5 w-5" />
+              }
             </Button>
           </div>
 
@@ -242,16 +242,16 @@ export function Header({
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
-            {isAuthenticated && false&&
+            {isAuthenticated && false &&
 
 
               <Link href="/comedy-lab" className="flex h-full gap-6 items-center">
-              <div
-                className={`cursor-pointer text-center text-xs flex items-center gap-2 relative px-4 py-1 border border-transparent hover:border-white bg-gradient-to-r from-violet-500 from-10% via-sky-500 via-30% to-pink-500 to-90% rounded-sm z-10 hover:bg-[length:100%] before:absolute before:-top-[3px] before:-bottom-[3px] before:-left-[5px] before:-right-[5px] before:bg-gradient-to-r before:from-violet-500 before:from-10% before:via-sky-500 before:via-30% before:to-pink-500 durat before:bg-[length:400%] before:-z-10 before:rounded-sm before:hover:blur-xl before:transition-all before:ease-in-out before:duration-1000 before:hover:bg-[length:10%] active:bg-violet-700 focus:ring-violet-700`}>
-                <SparklesIcon className="size-4" fill="white" />
-                Generate
-              </div>
-              <div className="w-[1px] h-6"> <div className="w-full h-full bg-neutral-500"></div></div>
+                <div
+                  className={`cursor-pointer text-center text-xs flex items-center gap-2 relative px-4 py-1 border border-transparent hover:border-white bg-gradient-to-r from-violet-500 from-10% via-sky-500 via-30% to-pink-500 to-90% rounded-sm z-10 hover:bg-[length:100%] before:absolute before:-top-[3px] before:-bottom-[3px] before:-left-[5px] before:-right-[5px] before:bg-gradient-to-r before:from-violet-500 before:from-10% before:via-sky-500 before:via-30% before:to-pink-500 durat before:bg-[length:400%] before:-z-10 before:rounded-sm before:hover:blur-xl before:transition-all before:ease-in-out before:duration-1000 before:hover:bg-[length:10%] active:bg-violet-700 focus:ring-violet-700`}>
+                  <SparklesIcon className="size-4" fill="white" />
+                  Generate
+                </div>
+                <div className="w-[1px] h-6"> <div className="w-full h-full bg-neutral-500"></div></div>
               </Link>
 
             }
@@ -259,8 +259,8 @@ export function Header({
             {/* User Menu */}
             <UserMenu
               isAuthenticated={isAuthenticated}
-              username={username}
-              onLogout={handleLogout}
+              username={'username'}
+              onLogout={logout}
               showUserMenu={showUserMenu}
               setShowUserMenu={setShowUserMenu}
             />
