@@ -3,24 +3,35 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input2";
-import { Label } from "@/components/ui/label2";
 import { Layout } from "@/components/layout/layout"
 import {
     AudioLines,
     Edit,
     AudioLinesIcon,
+    CheckCircle2,
     ChevronDown,
+    Download,
+    Heart,
     Image,
+    Info,
+    Maximize2,
+    Minimize2,
+    MoreVertical,
+    Pause,
+    PauseCircleIcon,
+    Play,
+    Repeat,
     Share,
+    Shuffle,
+    SkipBack,
+    SkipForward,
     TriangleAlert,
     User2Icon,
     UserCircleIcon,
     Video,
-    X,
-    PlusIcon,
-    Camera,
-    User2
+    Volume2,
+    VolumeX,
+    X
 } from 'lucide-react';
 import axios from 'axios';
 import { BASE_URL } from '@/config';
@@ -48,14 +59,6 @@ type ContentItem = {
     songLyrics: string;
 };
 
-interface ProfileData {
-    profileImage: string;
-    bannerImage: string;
-    channelName: string;
-    channelHandle: string;
-    channelDescription: string;
-}
-
 interface Song {
     id: string;
     title: string;
@@ -67,30 +70,6 @@ interface Song {
     lyrics: string;
 }
 
-// Type-safe storage helper functions
-const getFromStorage = (key: string): string => {
-    try {
-        const item = localStorage.getItem(key);
-        return item || '';
-    } catch {
-        return '';
-    }
-};
-
-const setInStorage = (key: string, value: string): void => {
-    try {
-        localStorage.setItem(key, value);
-    } catch (error) {
-        console.error('Error saving to localStorage:', error);
-    }
-};
-
-interface Category {
-    id: number;
-    content: string;
-    contentType: string;
-}
-
 const ProfilePage = () => {
     const [activeCategory, setActiveCategory] = useState('');
     const [videoModal, setVideoModal] = useState<boolean>(false)
@@ -99,11 +78,11 @@ const ProfilePage = () => {
     const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
     const [showMessageDialog, setShowMessageDialog] = useState<boolean>(false);
     const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
-    const [profileImage, setProfileImage] = useState<string>(getFromStorage('profileImage'));
-    const [bannerImage, setBannerImage] = useState<string>(getFromStorage('bannerImage'));
-    const [channelName, setChannelName] = useState<string>(getFromStorage('channelName'));
-    const [channelHandle, setChannelHandle] = useState<string>(getFromStorage('channelHandle'));
-    const [channelDescription, setChannelDescription] = useState<string>(getFromStorage('channelDescription'));
+    const [profileImage, setProfileImage] = useState<string | null>(null);
+    const [bannerImage, setBannerImage] = useState<string | null>(null);
+    const [channelName, setChannelName] = useState<string | null>(null);
+    const [channelHandle, setChannelHandle] = useState<string | null>(null);
+    const [channelDescription, setChannelDescription] = useState<string | null>(null);
     const [channelLinks, setChannelLinks] = useState<{ [key: string]: string }>({});
     const [channelContactInfo, setChannelContactInfo] = useState<string | null>(null);
     const [videoWatermark, setVideoWatermark] = useState<string | null>(null);
@@ -128,6 +107,7 @@ const ProfilePage = () => {
     const [volume, setVolume] = useState<number>(0.7);
     const [isMuted, setIsMuted] = useState<boolean>(false);
     const [isRepeat, setIsRepeat] = useState<boolean>(false);
+
 
     const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
 
@@ -335,242 +315,124 @@ const ProfilePage = () => {
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    // Update the handlers with type-safe storage
     const handleProfileImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
             const file = event.target.files[0];
-            const imageUrl = URL.createObjectURL(file);
-            setProfileImage(imageUrl);
-            setInStorage('profileImage', imageUrl);
+            setProfileImage(URL.createObjectURL(file));
         }
     };
 
     const handleBannerImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
             const file = event.target.files[0];
-            const imageUrl = URL.createObjectURL(file);
-            setBannerImage(imageUrl);
-            setInStorage('bannerImage', imageUrl);
+            setBannerImage(URL.createObjectURL(file));
         }
     };
 
     const handleChannelNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setChannelName(value);
-        setInStorage('channelName', value);
+        setChannelName(event.target.value);
     };
 
     const handleChannelHandleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setChannelHandle(value);
-        setInStorage('channelHandle', value);
+        setChannelHandle(event.target.value);
     };
 
     const handleChannelDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const value = event.target.value;
-        setChannelDescription(value);
-        setInStorage('channelDescription', value);
+        setChannelDescription(event.target.value);
+    };
+
+    const handleChannelLinkAdd = () => {
+        const newLink = { label: '', url: '' };
+        setChannelLinks(prev => ({ ...prev, [Object.keys(prev).length + 1]: newLink }));
+    };
+
+    const handleChannelLinkLabelChange = (index: string, event: React.ChangeEvent<HTMLInputElement>) => {
+        setChannelLinks(prev => ({
+            ...prev,
+            [index]: {
+                ...prev[index],
+                label: event.target.value
+            }
+        }));
+    };
+
+    const handleChannelLinkUrlChange = (index: string, event: React.ChangeEvent<HTMLInputElement>) => {
+        setChannelLinks(prev => ({
+            ...prev,
+            [index]: {
+                ...prev[index],
+                url: event.target.value
+            }
+        }));
+    };
+
+    const handleChannelLinkRemove = (index: string) => {
+        const newLinks = { ...channelLinks };
+        delete newLinks[index];
+        setChannelLinks(newLinks);
+    };
+
+    const handleChannelContactInfoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setChannelContactInfo(event.target.value);
+    };
+
+    const handleVideoWatermarkChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setVideoWatermark(event.target.value);
     };
 
     const handleSaveProfile = () => {
-        setInStorage('profileImage', profileImage);
-        setInStorage('bannerImage', bannerImage);
-        setInStorage('channelName', channelName);
-        setInStorage('channelHandle', channelHandle);
-        setInStorage('channelDescription', channelDescription);
-        setShowProfileOptions(false);
+        // Save the profile changes to the server
+        console.log({
+            profileImage,
+            bannerImage,
+            channelName,
+            channelHandle,
+            channelDescription,
+            channelLinks,
+            channelContactInfo,
+            videoWatermark
+        });
     };
-
-    // For displaying subscriber count with type safety:
-    const subscriberCount = getFromStorage('subscribers') || '136';
-
 
     return (
         <Layout>
-            <div className="w-full bg-neutral-900 min-h-screen">
-                {/* Banner Section */}
-                <div className="relative w-full">
-                    <div className="w-full h-[200px] relative">
-                        {(() => {
-                            const bannerSrc = localStorageInstance?.getItem('bannerImage');
-                            return bannerSrc ? (
-                                <img
-                                    src={bannerSrc}
-                                    alt="Channel Banner"
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full bg-neutral-800" />
-                            );
-                        })()}
+            <div className="w-full bg-background pt-24/ /pl-20 pb-36">
+                <div className='h-80 flex items-center text-white p-20 gap-8'>
+                    <div className='size-24 md:size-40 border-4 border-white rounded-full p-6 relative'>
+                        <User2Icon className='size-full' />
+                        <button
+                            className='absolute bottom-0 right-0 size-8 bg-neutral-900 rounded-full p-2 hover:scale-105 duration-300 cursor-pointer'
+                            onClick={() => setShowProfileOptions(true)}
+                        >
+                            <Edit className="size-full" />
+                        </button>
                     </div>
-
-                    {/* Profile Section */}
-                    <div className="mx-auto px-6">
-                        <div className="relative -mt-16 pb-4 flex items-end gap-6">
-                            {/* Profile Image */}
-                            <div className="relative">
-                                <div className="size-32 md:size-40 rounded-full border-4 border-neutral-900 bg-neutral-800 overflow-hidden">
-                                    {(() => {
-                                        const profileSrc = localStorageInstance?.getItem('profileImage');
-                                        return profileSrc ? (
-                                            <img
-                                                src={profileSrc}
-                                                alt="Profile"
-                                                className="size-full object-cover rounded-full"
-                                            />
-                                        ) : (
-                                            <User2Icon className="size-full p-6 text-white" />
-                                        );
-                                    })()}
-                                </div>
-                                <button
-                                    className="absolute bottom-0 right-0 size-8 bg-neutral-900 rounded-full p-2 hover:scale-105 duration-300 cursor-pointer border border-white"
-                                    onClick={() => setShowProfileOptions(true)}
-                                >
-                                    <Edit className="size-full text-white" />
-                                </button>
-                            </div>
-
-                            {/* Channel Info */}
-                            <div className="flex flex-col gap-1">
-                                <h1 className="text-2xl md:text-3xl font-semibold text-white">
-                                    {localStorageInstance?.getItem('loggedInUser') || 'Channel Name'}
-                                </h1>
-                                <div className="flex flex-col md:flex-row gap-2 text-gray-400">
-                                    <span className="text-sm">
-                                        @{localStorageInstance?.getItem('loggedInUserEmail')}
-                                    </span>
-                                    <span className="text-sm">
-                                        {localStorageInstance?.getItem('subscribers') || '136'} subscribers
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Navigation */}
-                        <ScrollArea className="w-full border-b border-neutral-700 mt-4">
-                            <div className="flex gap-2 py-2">
-                                {categories.map((category) => (
-                                    <button
-                                        key={category.id}
-                                        onClick={() => setActiveCategory(category.contentType)}
-                                        className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${activeCategory === category.contentType
-                                            ? 'bg-white text-neutral-900'
-                                            : 'text-white hover:bg-neutral-800'
-                                            }`}
-                                    >
-                                        {category.content}
-                                    </button>
-                                ))}
-                            </div>
-                        </ScrollArea>
+                    <div className='flex flex-col gap-2 md:gap-4'>
+                        <span className='text-2xl md:text-3xl font-semibold'> {localStorageInstance?.getItem('loggedInUser')} </span>
+                        <span className='text-xl text-gray-300/60'> {localStorageInstance?.getItem('loggedInUserEmail')} </span>
                     </div>
                 </div>
 
-                {/* Profile Settings Modal */}
-                {showProfileOptions && (
-                    <div className="fixed inset-0 bg-neutral-900/80 flex justify-center items-center z-50">
-                        <Card className="p-6 w-full max-w-2xl">
-                            <div className="flex justify-end mb-4">
-                                <button className="p-2 rounded-full hover:bg-neutral-800" onClick={() => setShowProfileOptions(false)}>
-                                    <X className="size-6 text-white" />
+                <ScrollArea className="w-full p-4 border-y">
+                    <span className='text-xl'>Generated Content</span>
+                    <div className="flex gap-4 py-4 overflow-x-auto">
+                            {categories.map((category) => (
+                                <button
+                                    key={category.id}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                                        activeCategory === category.contentType
+                                            ? 'bg-primary-500 text-primary-50'
+                                            : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                                    }`}
+                                    onClick={() => setActiveCategory(category.contentType)}
+                                >
+                                    {category.content}
                                 </button>
-                            </div>
-                            <h2 className="text-2xl font-bold mb-4 text-white">Profile Settings</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="relative">
-                                        <div className="md:size-36 border-2 border-white rounded-full overflow-hidden">
-                                            {profileImage ? (
-                                                <img src={profileImage} alt="Profile" className="size-full object-cover" />
-                                            ) : (
-                                                <User2 className="size-full p-6 text-white" />
-                                            )}
-                                        </div>
-                                        <Label
-                                            htmlFor="profile-image"
-                                            className="absolute bottom-2 right-2 bg-neutral-800 hover:bg-neutral-700 size-8 rounded-full flex items-center justify-center cursor-pointer transition-colors"
-                                        >
-                                            <Camera className="size-4 text-white" />
-                                            <input type="file" id="profile-image" className="hidden" onChange={handleProfileImageUpload} />
-                                        </Label>
-                                    </div>
-                                </div>
-                                <div className="relative">
-                                    {bannerImage ? (
-                                        <div className="relative">
-                                            <img src={bannerImage} alt="Banner" className="w-full h-36 object-cover rounded-md" />
-                                            <Label
-                                                htmlFor="banner-image"
-                                                className="absolute bottom-2 right-2 bg-neutral-800 hover:bg-neutral-700 p-2 rounded-full flex items-center justify-center cursor-pointer transition-colors"
-                                            >
-                                                <Camera className="size-4 text-white" />
-                                                <input type="file" id="banner-image" className="hidden" onChange={handleBannerImageUpload} />
-                                            </Label>
-                                        </div>
-                                    ) : (
-                                        <div className="w-full h-36 rounded-md border-2 border-white flex flex-col items-center justify-center text-white relative">
-                                            <Label
-                                                htmlFor="banner-image"
-                                                className="flex flex-col items-center cursor-pointer"
-                                            >
-                                                <Camera className="size-6 mb-2" />
-                                                Add banner image
-                                                <input type="file" id="banner-image" className="hidden" onChange={handleBannerImageUpload} />
-                                            </Label>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                <div>
-                                    <Label htmlFor="channel-name" className="text-lg font-bold text-white">
-                                        Channel Name
-                                    </Label>
-                                    <Input
-                                        type="text"
-                                        id="channel-name"
-                                        className="bg-transparent border-2 border-white text-white px-4 py-2 rounded-md w-full"
-                                        value={channelName || ''}
-                                        onChange={handleChannelNameChange}
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="channel-handle" className="text-lg font-bold text-white">
-                                        Channel Handle
-                                    </Label>
-                                    <Input
-                                        type="text"
-                                        id="channel-handle"
-                                        className="bg-transparent border-2 border-white text-white px-4 py-2 rounded-md w-full"
-                                        value={channelHandle || ''}
-                                        onChange={handleChannelHandleChange}
-                                    />
-                                </div>
-                            </div>
-                            <div className="mt-4">
-                                <Label htmlFor="channel-description" className="text-lg font-bold text-white">
-                                    Channel Description
-                                </Label>
-                                <textarea
-                                    id="channel-description"
-                                    className="bg-transparent border-2 border-white text-white px-4 py-2 rounded-md w-full resize-none"
-                                    rows={3}
-                                    value={channelDescription || ''}
-                                    onChange={handleChannelDescriptionChange}
-                                ></textarea>
-                            </div>
-                            <div className="flex justify-end mt-4">
-                                <Button className="bg-white text-neutral-900 hover:bg-neutral-200 px-4 py-2 rounded-md" onClick={handleSaveProfile}>
-                                    Save Profile
-                                </Button>
-                            </div>
-                        </Card>
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    </ScrollArea>
 
-                {/* Videos Grid */}
+                    {/* Videos Grid */}
                 <div className={`grid grid-cols-1 ${filteredData.length !== 0 && 'sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'} gap-4 p-4`}>
                     {filteredData.length !== 0 ?
                         filteredData.map((dataItem) => (
@@ -825,132 +687,319 @@ const ProfilePage = () => {
                         </div>
                     )
                 }
-                {showShareDialog && (
-                    <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-                        <DialogTrigger>
-                            <div className="fixed inset-0 bg-neutral-900/80 flex justify-center items-center z-50">
-                                <Card className="bg-neutral-800 p-6 w-full max-w-md">
-                                    <div className="flex justify-end mb-4">
-                                        <button
-                                            className="bg-neutral-700 p-2 rounded-full hover:bg-neutral-600 transition-colors"
-                                            onClick={() => setShowShareDialog(false)}
-                                        >
-                                            <X className="size-6" />
-                                        </button>
-                                    </div>
-                                    <DialogHeader>
-                                        <DialogTitle>Share Content</DialogTitle>
-                                        <DialogDescription>
-                                            Copy the link to share this content.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <DialogContent>
-                                        <div className="flex items-center bg-neutral-700 rounded-md p-2">
-                                            <input
-                                                type="text"
-                                                className="bg-transparent flex-1 outline-none text-neutral-300"
-                                                value={window.location.href}
-                                                readOnly
-                                            />
+                    {showShareDialog && (
+                        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+                            <DialogTrigger>
+                                <div className="fixed inset-0 bg-neutral-900/80 flex justify-center items-center z-50">
+                                    <Card className="bg-neutral-800 p-6 w-full max-w-md">
+                                        <div className="flex justify-end mb-4">
                                             <button
-                                                className="bg-neutral-600 text-neutral-300 px-4 py-2 rounded-md hover:bg-neutral-500 transition-colors"
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(window.location.href);
-                                                    setShowShareDialog(false);
-                                                }}
+                                                className="bg-neutral-700 p-2 rounded-full hover:bg-neutral-600 transition-colors"
+                                                onClick={() => setShowShareDialog(false)}
                                             >
-                                                Copy
+                                                <X className="size-6" />
                                             </button>
                                         </div>
-                                    </DialogContent>
-                                </Card>
-                            </div>
-                        </DialogTrigger>
-                    </Dialog>
-                )}
+                                        <DialogHeader>
+                                            <DialogTitle>Share Content</DialogTitle>
+                                            <DialogDescription>
+                                                Copy the link to share this content.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogContent>
+                                            <div className="flex items-center bg-neutral-700 rounded-md p-2">
+                                                <input
+                                                    type="text"
+                                                    className="bg-transparent flex-1 outline-none text-neutral-300"
+                                                    value={window.location.href}
+                                                    readOnly
+                                                />
+                                                <button
+                                                    className="bg-neutral-600 text-neutral-300 px-4 py-2 rounded-md hover:bg-neutral-500 transition-colors"
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(window.location.href);
+                                                        setShowShareDialog(false);
+                                                    }}
+                                                >
+                                                    Copy
+                                                </button>
+                                            </div>
+                                        </DialogContent>
+                                    </Card>
+                                </div>
+                            </DialogTrigger>
+                        </Dialog>
+                    )}
 
-                {showMessageDialog && (
-                    <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
-                        <DialogTrigger>
-                            <div className="fixed inset-0 bg-neutral-900/80 flex justify-center items-center z-50">
-                                <Card className="bg-neutral-800 p-6 w-full max-w-md">
-                                    <div className="flex justify-end mb-4">
-                                        <button
-                                            className="bg-neutral-700 p-2 rounded-full hover:bg-neutral-600 transition-colors"
-                                            onClick={() => setShowMessageDialog(false)}
-                                        >
-                                            <X className="size-6" />
-                                        </button>
+                    {showMessageDialog && (
+                        <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+                            <DialogTrigger>
+                                <div className="fixed inset-0 bg-neutral-900/80 flex justify-center items-center z-50">
+                                    <Card className="bg-neutral-800 p-6 w-full max-w-md">
+                                        <div className="flex justify-end mb-4">
+                                            <button
+                                                className="bg-neutral-700 p-2 rounded-full hover:bg-neutral-600 transition-colors"
+                                                onClick={() => setShowMessageDialog(false)}
+                                            >
+                                                <X className="size-6" />
+                                            </button>
+                                        </div>
+                                        <DialogHeader>
+                                            <DialogTitle>Welcome to the Profile Page!</DialogTitle>
+                                            <DialogDescription>
+                                                This is where you can manage your channel settings and view your generated content.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogContent>
+                                            <Button
+                                                className="w-full"
+                                                onClick={() => {
+                                                    setShowMessageDialog(false);
+                                                    setShowProfileOptions(true);
+                                                }}
+                                            >
+                                                Customize Profile
+                                            </Button>
+                                        </DialogContent>
+                                    </Card>
+                                </div>
+                            </DialogTrigger>
+                        </Dialog>
+                    )}
+
+                    {showProfileOptions && (
+                        <div className="fixed inset-0 bg-neutral-900/80 flex justify-center items-center z-50">
+                            <Card className="bg-neutral-800 p-6 w-full max-w-md">
+                                <div className="flex justify-end mb-4">
+                                    <button
+                                        className="bg-neutral-700 p-2 rounded-full hover:bg-neutral-600 transition-colors"
+                                        onClick={() => setShowProfileOptions(false)}
+                                    >
+                                        <X className="size-6" />
+                                    </button>
+                                </div>
+                                <h2 className="text-xl font-medium mb-4">Profile Settings</h2>
+                                <div className="flex flex-col gap-4">
+                                    <div>
+                                        <label htmlFor="profile-image" className="text-sm font-medium">
+                                            Profile Image
+                                        </label>
+                                        <div className="flex items-center gap-4">
+                                            <div className="size-24 md:size-32 border-4 border-white rounded-full p-6 relative">
+                                                {profileImage ? (
+                                                    <img
+                                                        src={profileImage}
+                                                        alt="Profile"
+                                                        className="size-full rounded-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <User2Icon className="size-full" />
+                                                )}
+                                            </div>
+                                            <input
+                                                type="file"
+                                                id="profile-image"
+                                                className="hidden"
+                                                onChange={handleProfileImageUpload}
+                                            />
+                                            <label
+                                                htmlFor="profile-image"
+                                                className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md hover:bg-neutral-600 transition-colors cursor-pointer"
+                                            >
+                                                Upload
+                                            </label>
+                                        </div>
                                     </div>
-                                    <DialogHeader>
-                                        <DialogTitle>Welcome to the Profile Page!</DialogTitle>
-                                        <DialogDescription>
-                                            This is where you can manage your channel settings and view your generated content.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <DialogContent>
+                                    <div>
+                                        <label htmlFor="banner-image" className="text-sm font-medium">
+                                            Banner Image
+                                        </label>
+                                        <div className="flex items-center gap-4">
+                                            {bannerImage ? (
+                                                <img
+                                                    src={bannerImage}
+                                                    alt="Banner"
+                                                    className="w-full h-32 object-cover rounded-md"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-32 bg-neutral-700 rounded-md flex items-center justify-center text-neutral-400">
+                                                    No banner image
+                                                </div>
+                                            )}
+                                            <input
+                                                type="file"
+                                                id="banner-image"
+                                                className="hidden"
+                                                onChange={handleBannerImageUpload}
+                                            />
+                                            <label
+                                                htmlFor="banner-image"
+                                                className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md hover:bg-neutral-600 transition-colors cursor-pointer"
+                                            >
+                                                Upload
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="channel-name" className="text-sm font-medium">
+                                            Channel Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="channel-name"
+                                            className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md w-full"
+                                            value={channelName || ''}
+                                            onChange={handleChannelNameChange}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="channel-handle" className="text-sm font-medium">
+                                            Channel Handle
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="channel-handle"
+                                            className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md w-full"
+                                            value={channelHandle || ''}
+                                            onChange={handleChannelHandleChange}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="channel-description" className="text-sm font-medium">
+                                            Channel Description
+                                        </label>
+                                        <textarea
+                                            id="channel-description"
+                                            className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md w-full resize-none"
+                                            rows={3}
+                                            value={channelDescription || ''}
+                                            onChange={handleChannelDescriptionChange}
+                                        ></textarea>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium">
+                                            Channel Links
+                                        </label>
+                                        <div className="flex flex-col gap-2">
+                                            {Object.keys(channelLinks).map((key) => (
+                                                <div key={key} className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md flex-1"
+                                                        placeholder="Link Label"
+                                                        value={channelLinks[key].label}
+                                                        onChange={(event) =>
+                                                            handleChannelLinkLabelChange(key, event)
+                                                        }
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md flex-1"
+                                                        placeholder="Link URL"
+                                                        value={channelLinks[key].url}
+                                                        onChange={(event) =>
+                                                            handleChannelLinkUrlChange(key, event)
+                                                        }
+                                                    />
+                                                    <button
+                                                        className="bg-neutral-700 p-2 rounded-full hover:bg-neutral-600 transition-colors"
+                                                        onClick={() => handleChannelLinkRemove(key)}
+                                                    >
+                                                        <X className="size-6" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <button
+                                                className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md hover:bg-neutral-600 transition-colors"
+                                                onClick={handleChannelLinkAdd}
+                                            >
+                                                Add Link
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="channel-contact-info" className="text-sm font-medium">
+                                            Contact Info
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="channel-contact-info"
+                                            className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md w-full"
+                                            value={channelContactInfo || ''}
+                                            onChange={handleChannelContactInfoChange}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="video-watermark" className="text-sm font-medium">
+                                            Video Watermark
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="video-watermark"
+                                            className="bg-neutral-700 text-neutral-300 px-4 py-2 rounded-md w-full"
+                                            value={videoWatermark || ''}
+                                            onChange={handleVideoWatermarkChange}
+                                        />
+                                    </div>
+                                    <div className="flex justify-end">
                                         <Button
-                                            className="w-full"
-                                            onClick={() => {
-                                                setShowMessageDialog(false);
-                                                setShowProfileOptions(true);
-                                            }}
+                                            className="bg-primary-500 hover:bg-primary-600 text-primary-50"
+                                            onClick={handleSaveProfile}
                                         >
-                                            Customize Profile
+                                            Save Profile
                                         </Button>
-                                    </DialogContent>
-                                </Card>
-                            </div>
-                        </DialogTrigger>
-                    </Dialog>
-                )}
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+                    )}
 
                 {/* Music Player */}
                 <EnhancedMusicPlayer currentSong={currentSong || null} />
 
 
-                <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-                    <DialogContent className="bg-black/90 border-purple-500/20">
-                        <DialogHeader>
-                            <DialogTitle className="text-white">Share Your Story</DialogTitle>
-                            <DialogDescription className="text-purple-200">
-                                Share your creation across platforms
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid grid-cols-2 gap-4">
-                            {[
-                                { name: 'Twitter', icon: '🐦' },
-                                { name: 'Facebook', icon: '👤' },
-                                { name: 'Reddit', icon: '🤖' },
-                                { name: 'Email', icon: '📧' }
-                            ].map(platform => (
-                                <Button
-                                    key={platform.name}
-                                    variant="outline"
-                                    className="w-full bg-black/30"
-                                    onClick={() => setShowShareDialog(false)}
-                                >
-                                    <span className="mr-2">{platform.icon}</span>
-                                    {platform.name}
-                                </Button>
-                            ))}
-                        </div>
-                    </DialogContent>
-                </Dialog>
+<Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+    <DialogContent className="bg-black/90 border-purple-500/20">
+        <DialogHeader>
+            <DialogTitle className="text-white">Share Your Story</DialogTitle>
+            <DialogDescription className="text-purple-200">
+                Share your creation across platforms
+            </DialogDescription>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-4">
+            {[
+                { name: 'Twitter', icon: '🐦' },
+                { name: 'Facebook', icon: '👤' },
+                { name: 'Reddit', icon: '🤖' },
+                { name: 'Email', icon: '📧' }
+            ].map(platform => (
+                <Button
+                    key={platform.name}
+                    variant="outline"
+                    className="w-full bg-black/30"
+                    onClick={() => setShowShareDialog(false)}
+                >
+                    <span className="mr-2">{platform.icon}</span>
+                    {platform.name}
+                </Button>
+            ))}
+        </div>
+    </DialogContent>
+</Dialog>
 
-                <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
-                    <DialogContent className="bg-black/90 border-purple-500/20">
-                        <DialogHeader>
-                            <DialogTitle className="text-white text-xl">Attention!</DialogTitle>
-                            <DialogDescription className="text-purple-200 text-base">
-                                Since the website is in development as of now, your generated content will be deleted from the server when the server gets updated next time.
-                            </DialogDescription>
-                        </DialogHeader>
-                    </DialogContent>
-                </Dialog>
-            </div>
-        </Layout>
-    );
+<Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+    <DialogContent className="bg-black/90 border-purple-500/20">
+        <DialogHeader>
+            <DialogTitle className="text-white text-xl">Attention!</DialogTitle>
+            <DialogDescription className="text-purple-200 text-base">
+                Since the website is in development as of now, your generated content will be deleted from the server when the server gets updated next time.
+            </DialogDescription>
+        </DialogHeader>
+    </DialogContent>
+</Dialog>
+</div>
+</Layout>
+);
 };
 
 export default ProfilePage;
