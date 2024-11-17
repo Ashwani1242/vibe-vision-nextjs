@@ -70,6 +70,13 @@ interface Song {
     lyrics: string;
 }
 
+interface ChannelLink {
+    label: string;
+    url: string;
+  }
+  
+  type ChannelLinks = { [key: string]: ChannelLink };
+
 const ProfilePage = () => {
     const [activeCategory, setActiveCategory] = useState('');
     const [videoModal, setVideoModal] = useState<boolean>(false)
@@ -83,7 +90,7 @@ const ProfilePage = () => {
     const [channelName, setChannelName] = useState<string | null>(null);
     const [channelHandle, setChannelHandle] = useState<string | null>(null);
     const [channelDescription, setChannelDescription] = useState<string | null>(null);
-    const [channelLinks, setChannelLinks] = useState<{ [key: string]: string }>({});
+    const [channelLinks, setChannelLinks] = useState<ChannelLinks>({});
     const [channelContactInfo, setChannelContactInfo] = useState<string | null>(null);
     const [videoWatermark, setVideoWatermark] = useState<string | null>(null);
     const videoModalRef = useRef<HTMLDivElement>(null)
