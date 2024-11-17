@@ -62,9 +62,9 @@ interface SectionProps {
     isLoading: boolean;
 }
 
-interface EnhancedFeatureGridProps {
-    onNavigate: (path: string) => void;
-}
+// interface EnhancedFeatureGridProps {
+//     onNavigate: (path: string) => void;
+// }
 
 const tutorials = [
     {
@@ -897,7 +897,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, icon, features
 );
 
 // Main Component (continued)
-const EnhancedFeatureGrid: React.FC<EnhancedFeatureGridProps> = ({ onNavigate }) => {
+const EnhancedFeatureGrid = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const router = useRouter();
 
