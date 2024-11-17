@@ -1,9 +1,9 @@
 // src/services/authService.ts
 import axios from 'axios';
 import { setToken, removeToken } from './token-manager';
-import { BASE_URL } from '@/config';
+// import { BASE_URL } from '@/config';
 
-// const BASE_URL = 'http://localhost:8000'; // Your backend URL
+const BASE_URL = 'http://localhost:8000'; // Your backend URL
 
 export const login = async (
     data: { email: string; password: string },

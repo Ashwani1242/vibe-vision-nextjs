@@ -112,9 +112,7 @@ export function Header({
   ]);
 
   const [data, setData] = useState<ContentItem[]>([]);
-  // const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
 
-  // Initialize localStorage safely
   const storage = useMemo(() => {
     if (typeof window !== 'undefined') {
       return window.localStorage;

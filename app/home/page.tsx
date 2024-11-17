@@ -1,14 +1,15 @@
 // app/page.tsx
 "use client"
 
-import React from "react"
+import React, { useRef } from "react"
 import { cn } from "../../lib/utils";
 import Marquee from "../../components/animata/container/marquee";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
+// import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import {
   Users,
   CheckCircle2,
-  ArrowRight,
+  // ArrowRight,
   Calendar,
   Music2,
   Star,
@@ -21,16 +22,9 @@ import {
   Clock,
   Gift,
   Sparkles,
-  Music,
-  Mic,
   Video,
-  Headphones,
-  Radio,
   MessageSquare,
-  Palette,
-  Speaker,
-  Library,
-  PartyPopper,
+  TrendingUp,
 } from "lucide-react"
 
 import { Button } from "../../components/ui/button"
@@ -44,9 +38,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../../components/ui/accordion"
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+// import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
 import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect"
+import Link from "next/link";
 
 const words = `Transform your creative vision into reality with AI-powered music and comedy production.`;
 const advancedPricingPlans = [
@@ -150,112 +145,120 @@ const testimonials = [
     rating: 4,
   },
 ]// Animated particle component for the background
-const Particle = ({ className }: any) => {
-  const randomDelay = Math.random() * 5;
-  return (
-    <motion.div
-      className={`absolute w-1 h-1 rounded-full bg-primary/20 ${className}`}
-      animate={{
-        y: [-20, 20],
-        opacity: [0.2, 0.5, 0.2],
-        scale: [1, 1.5, 1],
-      }}
-      transition={{
-        duration: 3,
-        repeat: Infinity,
-        delay: randomDelay,
-      }}
-    />
-  );
-};
+// const Particle = ({ className }: any) => {
+//   const randomDelay = Math.random() * 5;
+//   return (
+//     <motion.div
+//       className={`absolute w-1 h-1 rounded-full bg-primary/20 ${className}`}
+//       animate={{
+//         y: [-20, 20],
+//         opacity: [0.2, 0.5, 0.2],
+//         scale: [1, 1.5, 1],
+//       }}
+//       transition={{
+//         duration: 3,
+//         repeat: Infinity,
+//         delay: randomDelay,
+//       }}
+//     />
+//   );
+// };
 
 // Floating element component for hero section
-const FloatingElement = ({ children, delay = 0 }: any) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{
-      duration: 0.8,
-      delay,
-      type: "spring",
-      stiffness: 100,
-    }}
-  >
-    {children}
-  </motion.div>
-);
+// const FloatingElement = ({ children, delay = 0 }: any) => (
+//   <motion.div
+//     initial={{ opacity: 0, y: 20 }}
+//     animate={{ opacity: 1, y: 0 }}
+//     transition={{
+//       duration: 0.8,
+//       delay,
+//       type: "spring",
+//       stiffness: 100,
+//     }}
+//   >
+//     {children}
+//   </motion.div>
+// );
 
 // Enhanced Hero Section
-const HeroSection = () => {
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 300], [0, 50]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+// const HeroSection = () => {
+//   const { scrollY } = useScroll();
+//   const y = useTransform(scrollY, [0, 300], [0, 50]);
+//   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
-  // Generate particles
-  const particles = Array.from({ length: 50 }).map((_, i) => (
-    <Particle
-      key={i}
-      className={`left-[${Math.random() * 100}%] top-[${Math.random() * 100}%]`}
-    />
-  ));
+//   // Generate particles
+//   const particles = Array.from({ length: 50 }).map((_, i) => (
+//     <Particle
+//       key={i}
+//       className={`left-[${Math.random() * 100}%] top-[${Math.random() * 100}%]`}
+//     />
+//   ));
 
-  return (
-    <BackgroundBeamsWithCollision>
-      <section className="min-h-screen relative overflow-hidden flex items-center justify-center py-20 px-8">
-        {/* Animated background */}
-        <div className="absolute inset-0 overflow-hidden">
-          {particles}
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background" />
-        </div>
+//   return (
+//     <BackgroundBeamsWithCollision>
+//       <section className="min-h-screen relative overflow-hidden flex items-center justify-center py-20 px-8">
+//         {/* Animated background */}
+//         <div className="absolute inset-0 overflow-hidden">
+//           {particles}
+//           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background" />
+//         </div>
 
-        {/* Main content */}
-        <motion.div
-          style={{ y, opacity }}
-          className="relative max-w-screen-xl mx-auto text-center z-10"
-        >
-          <FloatingElement delay={0.2}>
-            <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
-              <span className="inline-block bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent animate-gradient">
-                Driving growth
-              </span>
-              <br />
-              <span className="inline-block bg-gradient-to-r from-blue-500 via-purple-500 to-primary bg-clip-text text-transparent animate-gradient">
-                with AI
-              </span>
-            </h1>
-          </FloatingElement>
+//         {/* Main content */}
+//         <motion.div
+//           style={{ y, opacity }}
+//           className="relative max-w-screen-xl mx-auto text-center z-10"
+//         >
+//           <FloatingElement delay={0.2}>
+//             <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
+//               <span className="inline-block bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent animate-gradient">
+//                 Driving growth
+//               </span>
+//               <br />
+//               <span className="inline-block bg-gradient-to-r from-blue-500 via-purple-500 to-primary bg-clip-text text-transparent animate-gradient">
+//                 with AI
+//               </span>
+//             </h1>
+//           </FloatingElement>
 
-          <FloatingElement delay={0.4}>
-            <p className="mt-8 text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-              We turn businesses into industry leaders with AI-driven solutions
-            </p>
-          </FloatingElement>
+//           <FloatingElement delay={0.4}>
+//             <p className="mt-8 text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
+//               We turn businesses into industry leaders with AI-driven solutions
+//             </p>
+//           </FloatingElement>
 
-          <FloatingElement delay={0.6}>
-            <div className="mt-10 flex gap-4 justify-center">
-              <Button
-                size="lg"
-                className="text-lg px-8 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 transition-all duration-300"
-              >
-                Get Started
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-lg px-8 border-2 hover:bg-primary/5 transition-all duration-300"
-              >
-                Learn More
-              </Button>
-            </div>
-          </FloatingElement>
-        </motion.div>
-      </section>
-    </BackgroundBeamsWithCollision>
-  );
-};
+//           <FloatingElement delay={0.6}>
+//             <div className="mt-10 flex gap-4 justify-center">
+//               <Button
+//                 size="lg"
+//                 className="text-lg px-8 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 transition-all duration-300"
+//               >
+//                 Get Started
+//                 <ArrowRight className="ml-2 h-5 w-5" />
+//               </Button>
+//               <Button
+//                 size="lg"
+//                 variant="outline"
+//                 className="text-lg px-8 border-2 hover:bg-primary/5 transition-all duration-300"
+//               >
+//                 Learn More
+//               </Button>
+//             </div>
+//           </FloatingElement>
+//         </motion.div>
+//       </section>
+//     </BackgroundBeamsWithCollision>
+//   );
+// };
 
 export default function HomePage() {
+  const pricingSectionRef = useRef<HTMLDivElement | null>(null);
+
+  const handleFocus = () => {
+    if (pricingSectionRef.current) {
+      pricingSectionRef.current.focus();
+      pricingSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   return (
     <Layout>
@@ -336,9 +339,9 @@ export default function HomePage() {
                 description: "Generate unique content with advanced AI algorithms",
               },
               {
-                icon: Users,
-                title: "Collaboration Tools",
-                description: "Work together with creators worldwide",
+                icon: TrendingUp,
+                title: "Engaging Content",
+                description: "Generate and view engaging content",
               },
               {
                 icon: Award,
@@ -382,7 +385,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 bg-muted/20 relative">
+      {/* Pricing Section */}
+      <section ref={pricingSectionRef} className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 bg-muted/20 relative">
         <div className="max-w-[320px] sm:max-w-2xl lg:max-w-6xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">
             Flexible Pricing for Every Creator
@@ -587,11 +591,13 @@ export default function HomePage() {
               No credit card required.
             </p>
             <div className="flex gap-4 justify-center mt-8">
-              <Button size="lg" className="gap-2">
-                <Sparkles className="h-4 w-4" />
-                Get Started Free
-              </Button>
-              <Button size="lg" variant="outline" className="gap-2">
+              <Link href="/login">
+                <Button size="lg" className="gap-2" onClick={() => { }}>
+                  <Sparkles className="h-4 w-4" />
+                  Get Started Free
+                </Button>
+              </Link>
+              <Button size="lg" variant="outline" className="gap-2" onClick={handleFocus}>
                 <Gift className="h-4 w-4" />
                 View Plans
               </Button>
@@ -628,6 +634,6 @@ export default function HomePage() {
           </Card>
         </div>
       </section>
-    </Layout>
+    </ Layout>
   )
 }

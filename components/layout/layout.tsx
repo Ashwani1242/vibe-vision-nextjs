@@ -12,16 +12,13 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  // State for both mobile sidebar visibility and desktop sidebar collapse
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const [autoSidebarCollapsed, setAutoSidebarCollapsed] = useState(true)
-  // const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false)
 
   useAuth()
 
-  // Handler for mobile sidebar toggle
   const handleSidebarOpen = () => {
     setIsSidebarOpen(true)
   }
@@ -30,19 +27,17 @@ export function Layout({ children }: LayoutProps) {
     setIsSidebarOpen(false)
   }
 
-  // Handler for desktop sidebar collapse toggle
   const handleSidebarCollapse = () => {
     setIsSidebarCollapsed(val => !val)
     setAutoSidebarCollapsed(val => !val)
   }
-
   
   const handleSidebarHoverEnter = () => {
-    setIsSidebarCollapsed(false); // Expand sidebar on hover
+    setIsSidebarCollapsed(false); 
   };
 
   const handleSidebarHoverLeave = () => {
-    setIsSidebarCollapsed(true); // Collapse sidebar when hover ends
+    setIsSidebarCollapsed(true); 
   };
 
   useEffect(() => {
