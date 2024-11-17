@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+// import { useSearchParams } from 'next/navigation';
 import { Layout } from "@/components/layout/layout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input2";
@@ -19,7 +19,7 @@ interface PlanDetails {
 }
 
 export default function CheckoutPage() {
-    const searchParams = useSearchParams();
+    // const searchParams = useSearchParams();
     const [planDetails, setPlanDetails] = useState<PlanDetails | null>(null);
     const [formData, setFormData] = useState({
         email: '',
@@ -33,21 +33,21 @@ export default function CheckoutPage() {
         postalCode: ''
     });
 
-    useEffect(() => {
-        const plan = searchParams.get('plan');
-        const price = searchParams.get('price');
-        const billing = searchParams.get('billing');
-        const features = searchParams.get('features')?.split('|') || [];
+    // useEffect(() => {
+    //     const plan = searchParams.get('plan');
+    //     const price = searchParams.get('price');
+    //     const billing = searchParams.get('billing');
+    //     const features = searchParams.get('features')?.split('|') || [];
 
-        if (plan && price && billing) {
-            setPlanDetails({
-                name: plan,
-                price: price,
-                billingType: billing,
-                features: features
-            });
-        }
-    }, [searchParams]);
+    //     if (plan && price && billing) {
+    //         setPlanDetails({
+    //             name: plan,
+    //             price: price,
+    //             billingType: billing,
+    //             features: features
+    //         });
+    //     }
+    // }, [searchParams]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
