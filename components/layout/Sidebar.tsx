@@ -167,7 +167,15 @@ const NavItem = React.forwardRef<HTMLAnchorElement, NavItemProps>(({
   onClose
 }, ref) => {
   const content = (
-    <Link href={href} passHref legacyBehavior>
+    <Link 
+      href={href}
+      ref={ref}
+      onClick={(e) => {
+        if (onClose) {
+          onClose()
+        }
+      }}
+    >
       <Button
         variant={isActive ? "secondary" : "ghost"}
         className={cn(
@@ -180,15 +188,9 @@ const NavItem = React.forwardRef<HTMLAnchorElement, NavItemProps>(({
                 isCollapsed && "justify-center p-2"
               )
         )}
-        onClick={() => {
-          if (onClose) {
-            onClose()
-          }
-        }}
         asChild
       >
-        <motion.a
-          ref={ref}
+        <motion.div
           whileTap={{ scale: 0.95 }}
           className={cn(
             "flex items-center",
@@ -236,7 +238,7 @@ const NavItem = React.forwardRef<HTMLAnchorElement, NavItemProps>(({
               {badge}
             </Badge>
           )}
-        </motion.a>
+        </motion.div>
       </Button>
     </Link>
   )
