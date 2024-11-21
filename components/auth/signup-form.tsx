@@ -140,7 +140,7 @@ export const SignUpForm = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 100 }}
-            src="logo.svg"
+            src="logo.webp"
             width={100}
             className="rounded-full"
           />
@@ -238,7 +238,7 @@ export const SignUpForm = () => {
               initial={{ opacity: 0, rotate: -10 }}
               animate={{ opacity: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 100 }}
-              src="logo.png"
+              src="logo.webp"
               width={100}
               className="lg:hidden rounded-full"
             />

@@ -118,7 +118,7 @@ export const ForgotPasswordForm = () => {
               <motion.div className="max-w-sm w-full text-gray-600 space-y-8">
                 <motion.div className="text-left">
                   <img
-                    src="logo.png"
+                    src="logo.webp"
                     width={100}
                     className="m-auto rounded-full"
                   />

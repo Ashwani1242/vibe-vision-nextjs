@@ -126,7 +126,7 @@ export function LoginForm() {
         >
           <motion.img
             variants={itemVariants}
-            src="logo.svg"
+            src="logo.webp"
             width={100}
             className="rounded-full"
           />
@@ -205,7 +205,7 @@ export function LoginForm() {
         >
           <motion.div variants={itemVariants} className="relative">
             <img
-              src="logo.svg"
+              src="logo.webp"
               width={100}
               className="lg:hidden rounded-full"
             />
