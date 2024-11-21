@@ -118,7 +118,7 @@ export const ForgotPasswordForm = () => {
               <motion.div className="max-w-sm w-full text-gray-600 space-y-8">
                 <motion.div className="text-left">
                   <img
-                    src="https://farmui.com/logo.svg"
+                    src="logo.png"
                     width={100}
                     className="m-auto rounded-full"
                   />
@@ -149,7 +149,7 @@ export const ForgotPasswordForm = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="john@example.com"
+                  placeholder="neil@example.com"
                   {...form.register("email")}
                   disabled={emailVerificationStage !== 'initial'}
                   className={`

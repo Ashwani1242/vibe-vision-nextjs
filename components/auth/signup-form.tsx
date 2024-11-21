@@ -163,8 +163,6 @@ export const SignUpForm = () => {
             >
               Sign up now to generate AI-powered music, comedy shows, and videos. Share your creations on your favorite platform like Instagram, TikTok, and YouTube.
             </motion.p>
-
-
             <motion.div
               variants={itemVariants}
               className="flex items-center -space-x-2 overflow-hidden"
@@ -240,7 +238,7 @@ export const SignUpForm = () => {
               initial={{ opacity: 0, rotate: -10 }}
               animate={{ opacity: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 100 }}
-              src="https://farmui.com/logo.svg"
+              src="logo.png"
               width={100}
               className="lg:hidden rounded-full"
             />
@@ -498,7 +496,7 @@ export const SignUpForm = () => {
               <button
                 type="button"
                 onClick={() => togglePasswordVisibility('password')}
-                className="absolute right-3 top-2/3 pb-1 -translate-y-1/2"
+                className="absolute right-3 top-1/3 pb-3 -translate-y-1/2"
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -507,6 +505,15 @@ export const SignUpForm = () => {
                   {form.formState.errors.password.message}
                 </p>
               )}
+              <div className="text-xs text-white/60 space-y-1">
+                  Password requirements:
+                  <ul className="list-disc list-inside">
+                    <li>At least 8 characters</li>
+                    <li>Uppercase and lowercase letters</li>
+                    <li>Include a number</li>
+                    <li>Special character required</li>
+                  </ul>
+                </div>
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-2 relative">

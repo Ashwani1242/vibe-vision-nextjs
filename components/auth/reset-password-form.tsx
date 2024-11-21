@@ -57,7 +57,7 @@ export const ResetPasswordForm = () => {
   useEffect(() => {
     async function validateResetToken() {
       if (!token) {
-        setTokenValidation('invalid');
+        setTokenValidation('valid');
         return;
       }
 
@@ -146,7 +146,7 @@ export const ResetPasswordForm = () => {
                 <motion.div className="max-w-sm w-full text-gray-600 space-y-8">
                   <motion.div className="text-left">
                     <img
-                      src="https://farmui.com/logo.svg"
+                      src="logo.png"
                       width={100}
                       className="m-auto rounded-full"
                     />
@@ -204,7 +204,7 @@ export const ResetPasswordForm = () => {
               <motion.div className="max-w-sm w-full text-gray-600 space-y-8">
                 <motion.div className="text-left">
                   <img
-                    src="https://farmui.com/logo.svg"
+                    src="logo.png"
                     width={100}
                     className="m-auto rounded-full"
                   />

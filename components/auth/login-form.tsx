@@ -384,7 +384,7 @@ export function LoginForm() {
                     type="email"
                     {...form.register("email")}
                     className="w-full bg-transparent border-white/10 text-white focus:border-indigo-600"
-                    placeholder="Enter your email"
+                    placeholder="neil@example.com"
                   />
                 </motion.div>
                 <AnimatePresence>
