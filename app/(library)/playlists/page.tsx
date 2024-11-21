@@ -7,10 +7,7 @@ import {
   Eye,
   Search,
   Bookmark,
-  ChevronRight,
-  List,
-  Folder,
-  Tags
+  List
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Layout } from '@/components/layout/layout';

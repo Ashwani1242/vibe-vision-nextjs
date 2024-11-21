@@ -10,8 +10,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 import { Navigation, Keyboard, Pagination, Autoplay } from 'swiper/modules';
 import {
-    Play, Sparkles, Music, Video, Type, Mic, MessageCircle, Camera,
-    Wand2, BookOpen, PenTool, VideoIcon, TrendingUp, Award, Users,
+    Play, Sparkles, Music, Video, Type, Mic, MessageCircle, Camera, BookOpen, PenTool, VideoIcon, TrendingUp, Award, Users,
     PlaySquare, Lightbulb, User, Star,
     ChevronRight,
     Heart,
@@ -19,7 +18,7 @@ import {
     Pause
 } from 'lucide-react';
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";

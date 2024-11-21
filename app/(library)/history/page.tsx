@@ -9,14 +9,11 @@ import {
     Filter,
     MoreVertical,
     Clock,
-    TrendingUp,
     Tag,
-    ThumbsUp,
     Zap,
     Activity,
     Eye,
     ArrowUpRight,
-    ChevronRight,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

@@ -10,38 +10,21 @@ import { Layout } from "../../../components/layout/layout";
 import {
   AudioLines,
   AudioLinesIcon,
-  CheckCircle2,
   ChevronDown,
-  Download,
-  Heart,
   Image,
-  Info,
   Joystick,
-  Maximize2,
-  Minimize2,
-  MoreVertical,
   Music,
-  Pause,
-  PauseCircleIcon,
   Play,
-  Repeat,
   Share,
-  Shuffle,
-  SkipBack,
-  SkipForward,
   Sparkles,
   UserCircleIcon,
   Video,
-  Volume2,
-  VolumeX,
   X
 } from 'lucide-react';
 import axios from 'axios';
 import { BASE_URL } from '@/config';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import EnhancedMusicPlayer from '@/components/media/music-player';
-import { Progress } from '@/components/ui/progress';
-import { Slider } from '@/components/ui/slider';
 import ScrollingText from '@/components/ui/scroll-text';
 
 // Types definition

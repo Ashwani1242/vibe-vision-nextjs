@@ -1,15 +1,13 @@
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
-import { motion, AnimatePresence, useAnimation, PanInfo } from "framer-motion"
+import { motion, useAnimation, PanInfo } from "framer-motion"
 import {
   Home,
-  Music2,
   Video,
   Tv,
   Clock,
   ListVideo,
-  Star,
   History,
   Heart,
   X,

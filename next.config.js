@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 
-const BASE_URL = 'http://54.165.196.203:8000'
-// const BASE_URL = 'http://localhost:8000'
+// const BASE_URL = 'http://54.165.196.203:8000'
+const BASE_URL = 'http://localhost:8000'
 
 const nextConfig = {
   reactStrictMode: true,
@@ -77,3 +77,4 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+
