@@ -1,13 +1,20 @@
-// app/layout.tsx
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import {  Roboto_Condensed, Rubik_Glitch } from 'next/font/google';
 import { ThemeProvider } from '../components/providers/theme-provider';
 import { Toaster } from '../components/ui/toaster';
 import './globals.css';
 
-const inter = Inter({
+const rubikGlitch = Rubik_Glitch({
   subsets: ['latin'],
   display: 'swap',
+  weight: '400',
+  variable: '--font-rubik-glitch',
+});
+
+const roboto = Roboto_Condensed({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-roboto',
 });
 
 export const metadata: Metadata = {
@@ -25,7 +32,7 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${roboto.className} ${rubikGlitch.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

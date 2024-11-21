@@ -14,6 +14,7 @@ import {
   RefreshCw,
   LibraryBig,
   SparklesIcon,
+  Settings,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -181,7 +182,7 @@ export function Header({
               alt="Vibe Vision Logo"
               className="h-8 w-8 rounded-full"
             />
-            <span className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-[#4BC0C8] via-[#C779D0] to-[#FEAC5E]">
+            <span className="font-rubik-glitch text-lg text-transparent bg-clip-text bg-gradient-to-r from-[#4BC0C8] via-[#C779D0] to-[#FEAC5E]">
               VibeVision
             </span>
 
@@ -291,9 +292,9 @@ const UserMenu = ({
           {/* <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" /> Settings
           </DropdownMenuItem> */}
-          <Link href="/comedy-lab">
+          <Link href="/setting">
             <DropdownMenuItem>
-              <Upload className="mr-2 h-4 w-4" /> Studio
+              <Settings className="mr-2 h-4 w-4" /> Setting
             </DropdownMenuItem>
           </Link>
           <DropdownMenuSeparator />

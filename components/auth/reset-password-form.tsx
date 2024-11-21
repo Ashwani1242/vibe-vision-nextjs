@@ -57,7 +57,7 @@ export const ResetPasswordForm = () => {
   useEffect(() => {
     async function validateResetToken() {
       if (!token) {
-        setTokenValidation('valid');
+        setTokenValidation('invalid');
         return;
       }
 

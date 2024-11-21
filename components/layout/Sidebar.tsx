@@ -95,7 +95,7 @@ const useNavigationGestures = (items: NavItem[], currentIndex: number) => {
 const authenticatedNavItems: NavItem[] = [
   { icon: Home, label: "Home", href: "/", index: 0 },
   { icon: Tv, label: "Entertainment Hub", href: "/entertainment-hub", badge: "Hot", badgeVariant: "destructive", index: 1 },
-  { icon: Video, label: "Studio", href: "/Studio", index: 2 },
+  { icon: Video, label: "AI Studio", href: "/Studio", index: 2 },
   { icon: User, label: "Profile", href: "/profile-page", index: 3 },
 ]
 
@@ -342,7 +342,6 @@ export function Sidebar({ isOpen, isCollapsed, onClose, isAuthenticated }: Sideb
   const pathname = usePathname()
   const isMobile = useMediaQuery("(max-width: 768px)")
   
-  // const isAuthenticated = localStorageInstance?.getItem('token')
   const mainNavItems = isAuthenticated ? authenticatedNavItems : nonAuthenticatedNavItems
 
   if (isMobile) {
@@ -402,32 +401,27 @@ export function Sidebar({ isOpen, isCollapsed, onClose, isAuthenticated }: Sideb
 
         <ScrollArea className="flex-1">
           <nav className="flex flex-col gap-2 p-2">
-          {isAuthenticated ? 
-          <NavSection
-              title="Main"
-              items={authenticatedNavItems}
-              currentPath={pathname}
-              isCollapsed={isCollapsed}
-              onClose={onClose}
-            /> :
-              <NavSection
-                title="Main"
-                items={nonAuthenticatedNavItems}
-                currentPath={pathname}
-                isCollapsed={isCollapsed}
-                onClose={onClose}
-              />
-
-            }
-            <Separator className="my-2" />
             <NavSection
-              title="Library"
-              items={libraryItems}
+              title="Main"
+              items={mainNavItems}
               currentPath={pathname}
               isCollapsed={isCollapsed}
               onClose={onClose}
             />
-            <Separator className="my-2" />
+            
+            {isAuthenticated && (
+              <>
+                <Separator className="my-2" />
+                <NavSection
+                  title="Library"
+                  items={libraryItems}
+                  currentPath={pathname}
+                  isCollapsed={isCollapsed}
+                  onClose={onClose}
+                />
+                <Separator className="my-2" />
+              </>
+            )}
           </nav>
         </ScrollArea>
       </aside>
@@ -435,4 +429,4 @@ export function Sidebar({ isOpen, isCollapsed, onClose, isAuthenticated }: Sideb
   )
 }
 
-export default Sidebar;
+export default Sidebar
