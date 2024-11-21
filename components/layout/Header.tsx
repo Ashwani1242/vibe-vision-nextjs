@@ -3,16 +3,10 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Bell,
-  Search,
-  Menu,
-  Settings,
-  ChevronLeft,
   LogOut,
   User,
   Upload,
   ChevronRight,
-  Sun,
-  Moon,
   CircleCheckBig,
   Loader,
   TriangleAlert,
@@ -40,7 +34,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
-import { useTheme } from "next-themes";
 import axios from "axios";
 import { BASE_URL } from "@/config";
 import { logout } from "@/lib/auth-service";
@@ -86,15 +79,10 @@ interface Breadcrumb {
 }
 
 export function Header({
-  onSidebarOpen,
   isAuthenticated = false,
-  isSidebarCollapsed,
-  onSidebarCollapse,
 }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
-
   const [mounted, setMounted] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -186,59 +174,20 @@ export function Header({
     <div className="fixed top-0 z-50 w-full">
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center gap-4 px-4">
-          {/* Sidebar Toggle */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onSidebarOpen}
-              className="lg:hidden"
-              aria-label="Toggle mobile sidebar"
-            >
-              {isSidebarCollapsed ?
-                <Menu className="h-5 w-5" />
-                :
-                <ChevronLeft className="h-5 w-5" />
-              }
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onSidebarCollapse}
-              className="hidden lg:flex"
-              aria-label="Toggle desktop sidebar"
-            >
-              {isSidebarCollapsed ?
-                <Menu className="h-5 w-5" />
-                :
-                <ChevronLeft className="h-5 w-5" />
-              }
-            </Button>
-          </div>
-
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="Vibe Vision Logo"
               className="h-8 w-8 rounded-full"
             />
-            <span className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-purple-500/30 to-pink-400">
-              Vibe Vision
+            <span className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-[#4BC0C8] via-[#C779D0] to-[#FEAC5E]">
+              VibeVision
             </span>
+
           </Link>
 
           <div className="ml-auto flex items-center gap-4">
-            {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              aria-label="Toggle theme"
-              className="hidden"
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
 
             {isAuthenticated && false &&
 
@@ -331,7 +280,7 @@ const UserMenu = ({
     <DropdownMenuContent align="end" className="w-56">
       {isAuthenticated ? (
         <>
-          <DropdownMenuLabel>My Account | {username}</DropdownMenuLabel>
+          <DropdownMenuLabel>{username}</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
           <Link href="/profile-page">
