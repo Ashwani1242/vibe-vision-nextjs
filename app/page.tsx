@@ -2,7 +2,7 @@
 // import useAuth from '@/hooks/use-auth'
 import dynamic from 'next/dynamic'
 
-const HomePage = dynamic(() => import('./home/page'), { ssr: false })
+const HomePage = dynamic(() => import('./home/page'), { ssr: true })
 
 export default function Page() {
   return <HomePage />

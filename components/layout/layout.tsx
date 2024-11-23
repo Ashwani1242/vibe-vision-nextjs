@@ -61,7 +61,7 @@ export function Layout({ children }: LayoutProps) {
           isAuthenticated={isUserLoggedIn} />
       </div>
       <main className={`${isSidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-72'} pt-[100px] transition-all duration-300`}>
-        <div className="h-[calc(100vh-4rem)]">
+        <div>
           {children}
         </div>
       </main>

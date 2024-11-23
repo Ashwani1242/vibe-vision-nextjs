@@ -58,6 +58,7 @@ const advancedPricingPlans = [
     limitations: [
       "Limited content complexity",
       "Standard generation speed",
+      "No API access",
       "No commercial use"
     ],
     recommended: false,

@@ -28,3 +28,32 @@ type Genre = {
     summary: string;
     characters: string[];
   }
+
+  // types.ts
+export interface PlanDetails {
+  name: string;
+  price: string;
+  billingType: string;
+  features: string[];
+  basePrice: string;
+  addons?: Addon[];
+}
+
+export interface Addon {
+  name: string;
+  price: number;
+  description: string;
+}
+
+export interface FormData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+}
+
+export interface SuccessModalProps {
+  isVisible: boolean;
+  onClose: () => void;
+  formData: FormData;
+}

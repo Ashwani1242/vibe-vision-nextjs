@@ -251,3 +251,20 @@
     box-shadow: 0 0 50px rgba(255, 255, 255, 0.7);
   }
 }
+
+
+/* Disable autofill styles globally */
+input:-webkit-autofill {
+  box-shadow: 0 0 0 30px transparent inset !important; /* Transparent background */
+  -webkit-text-fill-color: inherit !important;        /* Inherit text color */
+}
+
+input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 30px transparent inset !important;
+}
+
+/* Target Stripe Elements inputs */
+.StripeElement input {
+  -webkit-autofill: off !important; /* Disable autofill explicitly */
+  caret-color: auto !important;     /* Ensure caret visibility */
+}
