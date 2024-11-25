@@ -1,4 +1,3 @@
-// app/(checkout)/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -13,7 +12,7 @@ import { StripeElementsOptions } from '@stripe/stripe-js';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Loader2, Lock, Shield, RefreshCw, ArrowLeft, CheckCircle2
+    Loader2, Lock, Shield, RefreshCw, ArrowLeft, CheckCircle2, TagIcon
 } from "lucide-react";
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -24,15 +23,39 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
 import { SparklesCore } from '@/components/ui/sparkles';
 import { SuccessModal } from '@/components/checkout/SuccessModal';
 import { OrderSummary } from '@/components/checkout/OrderSummary';
+import PromoCodeSection from '@/components/checkout/PromoCode';
 
 // Utils and Config
 import { stripePromise, stripeAppearance } from '@/config/stripeConfig';
 import { generateEmailTemplate } from '@/utils/emailTemplate';
-import type { PlanDetails, FormData } from '@/types/types';
+import type { PlanDetails, FormData, PaymentStatus } from '@/types/types';
+import { Input } from '@/components/ui/input';
+
+const formatBillingType = (billing: string | null): string => {
+    if (!billing) return 'Monthly';
+    return billing.charAt(0).toUpperCase() + billing.slice(1).toLowerCase();
+};
+
+const getAddons = (billingType: string) => {
+    const isYearly = billingType.toLowerCase() === 'yearly';
+    return [
+        {
+            name: "Family Access",
+            price: isYearly ? 99.99 : 9.99,
+            description: "Add up to 4 family members",
+            saving: isYearly ? "Save $19.89" : null
+        },
+        {
+            name: "Premium Support",
+            price: isYearly ? 49.99 : 4.99,
+            description: "24/7 priority support",
+            saving: isYearly ? "Save $9.89" : null
+        }
+    ];
+};
 
 const CheckoutForm: React.FC = () => {
     const stripe = useStripe();
@@ -52,29 +75,23 @@ const CheckoutForm: React.FC = () => {
             "Multiple Device Access"
         ],
         basePrice: "49.99",
-        addons: [
-            {
-                name: "Family Access",
-                price: 9.99,
-                description: "Add up to 4 family members"
-            },
-            {
-                name: "Premium Support",
-                price: 4.99,
-                description: "24/7 priority support"
-            }
-        ]
+        addons: getAddons("Monthly")
     });
 
     const [loading, setLoading] = useState(false);
     const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
-    const [promoCode, setPromoCode] = useState('');
     const [promoDiscount, setPromoDiscount] = useState(0);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [isPaymentComplete, setIsPaymentComplete] = useState(false);
     const [isAddressComplete, setIsAddressComplete] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState<{
+        success: boolean;
+        formData: FormData | null;
+    }>({
+        success: false,
+        formData: null
+    });
     const [formData, setFormData] = useState<FormData>({
         firstName: '',
         lastName: '',
@@ -122,27 +139,6 @@ const CheckoutForm: React.FC = () => {
         }
     };
 
-    // Handle promo code
-    const handlePromoCode = async () => {
-        try {
-            const response = await fetch('/api/validate-promo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: promoCode }),
-            });
-
-            const data = await response.json();
-            if (data.valid) {
-                setPromoDiscount(data.discount);
-                toast.success(`Promo code applied! ${data.discount * 100}% off`);
-            } else {
-                toast.error('Invalid promo code');
-            }
-        } catch (error) {
-            toast.error('Error validating promo code');
-        }
-    };
-
     // Load Plan Details
     useEffect(() => {
         const fetchPaymentIntent = async () => {
@@ -173,17 +169,18 @@ const CheckoutForm: React.FC = () => {
         const plan = searchParams.get('plan');
         const price = searchParams.get('price');
         const billing = searchParams.get('billing');
-        const features = searchParams.get('features')?.split('|') || [];
+        const formattedBillingType = formatBillingType(billing);
 
-        if (plan && price && billing) {
-            setPlanDetails({
+        if (plan && price) {
+            setPlanDetails(prevDetails => ({
+                ...prevDetails,
                 name: plan,
                 price: price,
                 basePrice: price,
-                billingType: billing,
-                features: features,
-                addons: planDetails.addons // Keep default addons
-            });
+                billingType: formattedBillingType,
+                features: prevDetails.features,
+                addons: getAddons(formattedBillingType)
+            }));
             fetchPaymentIntent();
         }
     }, [searchParams, elements]);
@@ -200,14 +197,15 @@ const CheckoutForm: React.FC = () => {
         try {
             const { error: submitError } = await elements.submit();
             if (submitError) {
-                toast.error(submitError.message);
+                setError(submitError.message ?? 'Submission error occurred');
+                toast.error(submitError.message ?? 'Submission error occurred');
                 return;
             }
 
-            const { error: confirmError } = await stripe.confirmPayment({
+            const result = await stripe.confirmPayment({
                 elements,
+                redirect: "if_required",
                 confirmParams: {
-                    return_url: `${window.location.origin}/studio`,
                     payment_method_data: {
                         billing_details: {
                             name: `${formData.firstName} ${formData.lastName}`,
@@ -218,18 +216,24 @@ const CheckoutForm: React.FC = () => {
                 },
             });
 
-            if (confirmError) {
-                toast.error(confirmError.message);
-            } else {
+            if (result.error) {
+                // Handle the error case
+                setError(result.error.message ?? 'Payment confirmation failed');
+                toast.error(result.error.message ?? 'Payment confirmation failed');
+            } else if (result.paymentIntent) {
+                // Handle successful payment
                 await sendConfirmationEmail();
-                setShowPopup(true);
-                setTimeout(() => {
-                    router.push('/studio');
-                }, 2000);
+                setPaymentStatus({
+                    success: true,
+                    formData: formData
+                });
+                setError(null); // Clear any existing errors
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Payment processing failed');
-            toast.error('Payment processing failed');
+            // Handle unexpected errors
+            const errorMessage = err instanceof Error ? err.message : 'Payment processing failed';
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -243,6 +247,31 @@ const CheckoutForm: React.FC = () => {
             </div>
         );
     }
+
+    const handlePromoApplied = (discount: number) => {
+        setPromoDiscount(discount);
+    };
+
+    const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // Handle address element changes
+    const handleAddressChange = (event: any) => {
+        setIsAddressComplete(event.complete);
+        const { firstName, lastName, phone } = event.value;
+
+        setFormData(prev => ({
+            ...prev,
+            firstName: firstName || prev.firstName,
+            lastName: lastName || prev.lastName,
+            phoneNumber: phone || prev.phoneNumber,
+        }));
+    };
 
     return (
         <Layout>
@@ -260,7 +289,7 @@ const CheckoutForm: React.FC = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="max-w-4xl mx-auto"
+                    className="max-w-7xl mx-auto"
                 >
                     <Link href="/" className="inline-flex items-center text-sm mb-8 hover:text-primary transition-colors z-10 absolute m-10">
                         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -268,7 +297,21 @@ const CheckoutForm: React.FC = () => {
                     </Link>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-24">
-                        {/* Left Side: Checkout Form */}
+                        {/* Left Side: Order Summary */}
+                        <div className="space-y-6">
+                            <OrderSummary
+                                planDetails={planDetails}
+                                selectedAddons={selectedAddons}
+                                promoDiscount={promoDiscount}
+                                calculateTotal={calculateTotal}
+                                onAddonChange={handleAddonChange}
+                            />
+
+                            {/* Promo Code Section */}
+                            <PromoCodeSection onPromoApplied={handlePromoApplied} />
+                        </div>
+
+                        {/* Right Side: Checkout Form */}
                         <div className="space-y-6">
                             <Card className="backdrop-blur-sm bg-card/40">
                                 <CardHeader>
@@ -277,13 +320,21 @@ const CheckoutForm: React.FC = () => {
                                 </CardHeader>
                                 <CardContent>
                                     <form onSubmit={handleSubmit} className="space-y-6">
-                                        <AnimatePresence>
-                                            {error && (
-                                                <Alert variant="destructive">
-                                                    <AlertDescription>{error}</AlertDescription>
-                                                </Alert>
-                                            )}
-                                        </AnimatePresence>
+                                        {/* Email Input */}
+                                        <div className="space-y-4">
+                                            <Label htmlFor="email">Email</Label>
+                                            <Input
+                                                id="email"
+                                                name="email"
+                                                type="email"
+                                                value={formData.email}
+                                                onChange={handleFormChange}
+                                                placeholder="Enter your email"
+                                                required
+                                                className="w-full"
+                                            />
+                                        </div>
+
 
                                         {/* Address Element */}
                                         <div className="space-y-4">
@@ -291,10 +342,14 @@ const CheckoutForm: React.FC = () => {
                                             <AddressElement
                                                 options={{
                                                     mode: 'billing',
-                                                    fields: { phone: 'always' },
-                                                    validation: { phone: { required: 'always' } },
+                                                    fields: {
+                                                        phone: 'always',
+                                                    },
+                                                    validation: {
+                                                        phone: { required: 'always' }
+                                                    },
                                                 }}
-                                                onChange={(event) => setIsAddressComplete(event.complete)}
+                                                onChange={handleAddressChange}
                                             />
                                         </div>
 
@@ -311,7 +366,7 @@ const CheckoutForm: React.FC = () => {
                                         <Button
                                             type="submit"
                                             className="w-full transition-all"
-                                            disabled={!stripe || loading}
+                                            disabled={!stripe || loading || !isAddressComplete || !isPaymentComplete}
                                         >
                                             <AnimatePresence mode="wait">
                                                 {loading ? (
@@ -323,6 +378,9 @@ const CheckoutForm: React.FC = () => {
                                                     <motion.div className="flex items-center">
                                                         <Lock className="mr-2 h-4 w-4" />
                                                         Pay ${calculateTotal()}
+                                                        <span className="ml-1">
+                                                            {planDetails.billingType.toLowerCase() === 'yearly' ? '/year' : '/month'}
+                                                        </span>
                                                     </motion.div>
                                                 )}
                                             </AnimatePresence>
@@ -341,23 +399,14 @@ const CheckoutForm: React.FC = () => {
                                 </CardFooter>
                             </Card>
                         </div>
-
-                        {/* Right Side: Order Summary */}
-                        <OrderSummary
-                            planDetails={planDetails}
-                            selectedAddons={selectedAddons}
-                            promoDiscount={promoDiscount}
-                            calculateTotal={calculateTotal}
-                            onAddonChange={handleAddonChange}
-                        />
                     </div>
                 </motion.div>
 
                 {/* Success Modal */}
                 <SuccessModal
-                    isVisible={showPopup}
-                    onClose={() => setShowPopup(false)}
-                    formData={formData}
+                    isVisible={paymentStatus.success}
+                    onClose={() => setPaymentStatus({ success: false, formData: null })}
+                    formData={paymentStatus.formData}
                 />
             </div>
         </Layout>
@@ -366,7 +415,7 @@ const CheckoutForm: React.FC = () => {
 
 export default function CheckoutPage() {
     const options: StripeElementsOptions = {
-        mode: 'payment' as const,  // Using 'as const' ensures literal type
+        mode: 'payment' as const,
         amount: 1999,
         currency: 'usd'
     };

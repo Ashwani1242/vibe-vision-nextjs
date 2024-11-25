@@ -57,3 +57,8 @@ export interface SuccessModalProps {
   onClose: () => void;
   formData: FormData;
 }
+
+export interface PaymentStatus {
+  success: boolean;
+  formData: FormData | null;
+}

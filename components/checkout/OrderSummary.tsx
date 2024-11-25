@@ -1,4 +1,4 @@
-// components/checkout/OrderSummary.tsx
+// OrderSummary.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2 } from "lucide-react";
@@ -20,6 +20,16 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
     calculateTotal,
     onAddonChange,
 }) => {
+    // Helper function to format the billing period
+    const formatBillingPeriod = (billingType: string) => {
+        return billingType.toLowerCase() === 'yearly' ? '/year' : '/month';
+    };
+
+    // Helper function to format addon prices
+    const formatAddonPrice = (price: number) => {
+        return `+$${price}${formatBillingPeriod(planDetails.billingType)}`;
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -42,7 +52,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                         {/* Base Price */}
                         <div className="text-3xl font-bold text-primary">
                             ${planDetails.basePrice}
-                            <span className="text-sm font-normal text-muted-foreground">/month</span>
+                            <span className="text-sm font-normal text-muted-foreground">
+                                {formatBillingPeriod(planDetails.billingType)}
+                            </span>
                         </div>
 
                         {/* Add-ons Section */}
@@ -67,7 +79,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                                                 <div className="text-sm text-muted-foreground">{addon.description}</div>
                                             </div>
                                         </div>
-                                        <div className="font-medium">+${addon.price}/mo</div>
+                                        <div className="font-medium">{formatAddonPrice(addon.price)}</div>
                                     </div>
                                 ))}
                             </div>
@@ -115,7 +127,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                             )}
                             <div className="flex justify-between font-bold pt-2 border-t">
                                 <span>Total</span>
-                                <span>${calculateTotal()}/month</span>
+                                <span>${calculateTotal()}{formatBillingPeriod(planDetails.billingType)}</span>
                             </div>
                         </div>
                     </div>
