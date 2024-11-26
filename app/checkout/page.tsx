@@ -12,7 +12,7 @@ import { StripeElementsOptions } from '@stripe/stripe-js';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Loader2, Lock, Shield, RefreshCw, ArrowLeft, CheckCircle2, TagIcon
+    Loader2, Lock, Shield, RefreshCw, ArrowLeft
 } from "lucide-react";
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -22,7 +22,6 @@ import { Layout } from "@/components/layout/layout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SparklesCore } from '@/components/ui/sparkles';
 import { SuccessModal } from '@/components/checkout/SuccessModal';
 import { OrderSummary } from '@/components/checkout/OrderSummary';
@@ -30,8 +29,7 @@ import PromoCodeSection from '@/components/checkout/PromoCode';
 
 // Utils and Config
 import { stripePromise, stripeAppearance } from '@/config/stripeConfig';
-import { generateEmailTemplate } from '@/utils/emailTemplate';
-import type { PlanDetails, FormData, PaymentStatus } from '@/types/types';
+import type { PlanDetails, FormData } from '@/types/types';
 import { Input } from '@/components/ui/input';
 
 const formatBillingType = (billing: string | null): string => {
@@ -84,7 +82,6 @@ const CheckoutForm: React.FC = () => {
     const [isPaymentComplete, setIsPaymentComplete] = useState(false);
     const [isAddressComplete, setIsAddressComplete] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [showPopup, setShowPopup] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState<{
         success: boolean;
         formData: FormData | null;
@@ -122,20 +119,44 @@ const CheckoutForm: React.FC = () => {
     // Send confirmation email
     const sendConfirmationEmail = async () => {
         try {
+            // Log the data being sent (be careful not to log sensitive info in production)
+            console.log('Sending email with data:', {
+                to: formData.email,
+                firstName: formData.firstName,
+                planName: planDetails.name,
+                billingType: planDetails.billingType,
+                totalAmount: calculateTotal(),
+                features: planDetails.features
+            });
+    
             const response = await fetch('/api/send-email', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     to: formData.email,
                     subject: 'Your Entertainment Hub Subscription Confirmation',
-                    html: generateEmailTemplate(formData, planDetails, calculateTotal()),
+                    firstName: formData.firstName,
+                    planName: planDetails.name,
+                    billingType: planDetails.billingType,
+                    totalAmount: calculateTotal(),
+                    features: planDetails.features
                 }),
             });
-
-            if (!response.ok) throw new Error('Failed to send confirmation email');
+    
+            const responseBody = await response.json();
+    
+            if (!response.ok) {
+                console.error('Email send error response:', responseBody);
+                throw new Error(responseBody.error || 'Failed to send confirmation email');
+            }
+    
+            // Optional: Add success toast
+            toast.success('Confirmation email sent successfully');
         } catch (error) {
             console.error('Error sending confirmation email:', error);
-            toast.error('Could not send confirmation email');
+            toast.error(error instanceof Error ? error.message : 'Could not send confirmation email');
         }
     };
 

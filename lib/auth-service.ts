@@ -1,62 +1,63 @@
-// src/services/authService.ts
-import axios from 'axios';
-import { setToken, removeToken } from './token-manager';
-// import { BASE_URL } from '@/config';
+import axios from 'axios'
+import { signIn, signOut } from "next-auth/react"
 
-const BASE_URL = 'http://localhost:8000'; // Your backend URL
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://www.vibevision.ai'
 
-export const login = async (
-    data: { email: string; password: string },
-    setToastMessage: Function,
-    showToast: Function
-) => {
-    try {
-        const url = `${BASE_URL}/api/auth/login`;
-        const response = await axios.post(url, data);
-        const { jwtToken, name, email } = response.data;
+export const authService = {
+    async login(email: string, password: string) {
+        try {
+            const result = await signIn('credentials', {
+                redirect: false,
+                email,
+                password
+            })
 
-        setToken(jwtToken);
+            if (result?.error) {
+                throw new Error(result.error)
+            }
 
-        setToastMessage('Logged in successfully!');
-        showToast();
-        window.location.href = "/entertainment-hub";
-    } catch (error) {
-        console.error(error);
-        setToastMessage('Invalid email or password!');
-        showToast();
+            return result
+        } catch (error) {
+            console.error('Login failed:', error)
+            throw error
+        }
+    },
+
+    async signup(userData: {
+        firstName: string, 
+        lastName: string, 
+        email: string, 
+        password: string
+    }) {
+        try {
+            const response = await axios.post(`${BASE_URL}/api/auth/signup`, {
+                name: `${userData.firstName} ${userData.lastName}`,
+                email: userData.email,
+                password: userData.password
+            })
+
+            return response.data
+        } catch (error) {
+            console.error('Signup failed:', error)
+            throw error
+        }
+    },
+
+    async googleLogin() {
+        await signIn('google')
+    },
+
+    async logout() {
+        await signOut({ redirect: true, callbackUrl: '/' })
+    },
+
+    async resetPassword(email: string) {
+        try {
+            const response = await axios.post(`${BASE_URL}/api/auth/reset-password`, { email })
+            return response.data
+        } catch (error) {
+            console.error('Password reset failed:', error)
+            throw error
+        }
     }
-};
-
-export const signup = async (
-    data: { firstName: string; lastName: string; email: string; password: string },
-    setToastMessage: Function,
-    showToast: Function
-) => {
-    try {
-        const url = `${BASE_URL}/api/auth/signup`;
-        await axios.post(url, {
-            name: `${data.firstName} ${data.lastName}`,
-            email: data.email,
-            password: data.password,
-        });
-
-        setToastMessage('Account created successfully! Please check your email to verify your account.');
-        showToast();
-        window.location.href = "/login";
-    } catch (error) {
-        console.error(error);
-        setToastMessage('Something went wrong. Please try again.');
-        showToast();
-    }
-};
-
-// Function to handle Google OAuth login
-export const googleLogin = () => {
-    window.location.href = `${BASE_URL}/api/auth/google`;
-};
-
-// Function to handle logout
-export const logout = () => {
-    removeToken();
-    window.location.href = '/'; // Redirect to login page
-};
+}
