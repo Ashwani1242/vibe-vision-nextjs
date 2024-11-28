@@ -72,6 +72,8 @@ export function UploadSection() {
     }
   };
 
+  const peaks = [1];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -193,9 +195,7 @@ export function UploadSection() {
             >
               <WaveformDisplay
                 audioUrl={audioUrl}
-                title="My Audio"
-                waveColor="rgba(255, 0, 0, 0.5)"
-                progressColor="rgba(0, 255, 0, 0.8)"
+                peakData={peaks}
               />
             </motion.div>
           )}

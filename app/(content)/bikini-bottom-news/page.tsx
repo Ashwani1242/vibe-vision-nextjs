@@ -57,12 +57,12 @@ import MyGenerations from '@/components/ui/bikini-bottom-news/my-generations';
 
 // Enhanced Bubble Animation Component
 const BubbleBackground = () => {
-    const bubbleCount = 75;
+    const bubbleCount = 25;
 
     return (
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-10">
             {[...Array(bubbleCount)].map((_, index) => {
-                const size = Math.random() * 60 + 10;
+                const size = Math.random() * 40 + 10;
                 const delay = Math.random() * 15;
                 const duration = Math.random() * 15 + 15;
                 const left = Math.random() * 100;
