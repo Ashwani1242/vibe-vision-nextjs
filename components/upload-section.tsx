@@ -72,7 +72,7 @@ export function UploadSection() {
     }
   };
 
-  const peaks = [1];
+  const peaks = [0.1, 0.3, 0.5, 0.7, 0.9,10];
 
   return (
     <motion.div

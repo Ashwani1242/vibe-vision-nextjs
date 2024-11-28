@@ -1,57 +1,54 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  PlayIcon, 
-  PauseIcon, 
-  RefreshCcwIcon, 
-  RepeatIcon, 
-  VolumeXIcon, 
-  Volume2Icon 
-} from "lucide-react";
+  FaPlay, 
+  FaPause, 
+  FaRedo, 
+  FaSync, 
+  FaDownload, 
+  FaVolumeUp, 
+  FaVolumeMute 
+} from "react-icons/fa";
+import { MdLoop } from "react-icons/md";
+
+interface WaveformDisplayProps {
+  audioUrl?: string;
+  peakData?: number[]; 
+}
 
 export function WaveformDisplay({ 
   audioUrl, 
   peakData 
-}: { 
-  audioUrl?: string, 
-  peakData?: number[] 
-}) {
+}: WaveformDisplayProps) {
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurfer = useRef<WaveSurfer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [peakValues, setPeakValues] = useState<number[]>(peakData || []);
 
   useEffect(() => {
     if (!waveformRef.current || !audioUrl) return;
 
     const initWaveSurfer = async () => {
-      // Destroy existing wavesurfer instance if any
       if (wavesurfer.current) {
         wavesurfer.current.destroy();
       }
 
-      // Create wavesurfer instance with enhanced styling
       const ws = WaveSurfer.create({
         container: waveformRef.current!,
-        waveColor: 'rgba(102, 126, 234, 0.5)', // Softer, more vibrant blue
-        progressColor: 'rgba(102, 126, 234, 0.8)', // Deeper blue for progress
-        cursorColor: 'rgba(255, 99, 132, 1)', // Accent color for cursor
-        barWidth: 3,
-        barRadius: 4,
-        cursorWidth: 2,
-        height: 150, // Slightly taller
-        barGap: 2,
-        responsive: true,
-        normalize: true, // Normalize wave height
-        backend: 'WebAudio', // More precise audio processing
+        waveColor: '#4a90e2', // Cool blue color
+        progressColor: '#2c3e50', // Dark blue-gray
+        cursorColor: '#e74c3c', // Vibrant red
+        barWidth: 2,
+        barRadius: 3,
+        cursorWidth: 1,
+        height: 128,
+        barGap: 3,
       });
 
-      // Handle audio playback events
       ws.on('finish', () => {
         if (isLooping) {
           ws.play();
@@ -63,18 +60,12 @@ export function WaveformDisplay({
       ws.on('play', () => setIsPlaying(true));
       ws.on('pause', () => setIsPlaying(false));
 
-      // Load peaks if provided for faster rendering
-      if (peakData && peakData.length) {
-        ws.load(audioUrl, peakData);
-      } else {
-        try {
-          await ws.load(audioUrl);
-        } catch (error) {
-          console.error('Error loading audio:', error);
-        }
+      try {
+        await ws.load(audioUrl);
+        wavesurfer.current = ws;
+      } catch (error) {
+        console.error('Error loading audio:', error);
       }
-
-      wavesurfer.current = ws;
     };
 
     initWaveSurfer();
@@ -85,7 +76,7 @@ export function WaveformDisplay({
         wavesurfer.current = null;
       }
     };
-  }, [audioUrl, isLooping, peakData]);
+  }, [audioUrl, isLooping]);
 
   const togglePlayPause = () => {
     if (wavesurfer.current) {
@@ -104,70 +95,79 @@ export function WaveformDisplay({
     setIsLooping(!isLooping);
   };
 
-  const toggleMute = () => {
+  const toggleVolume = () => {
     if (wavesurfer.current) {
-      const isMutedNow = !isMuted;
-      wavesurfer.current.setMute(isMutedNow);
-      setIsMuted(isMutedNow);
+      const newVolume = volume === 0 ? 1 : 0;
+      setVolume(newVolume);
+      wavesurfer.current.setVolume(newVolume);
+    }
+  };
+
+  const handleDownload = () => {
+    if (wavesurfer.current && audioUrl) {
+      const link = document.createElement('a');
+      link.href = audioUrl;
+      link.download = 'audio.mp3';
+      link.click();
     }
   };
 
   if (!audioUrl) return null;
 
   return (
-    <Card className="max-w-md mx-auto shadow-lg">
+    <Card className="max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-800">
-          Audio Waveform
-        </CardTitle>
+        <CardTitle>Audio Waveform Player</CardTitle>
       </CardHeader>
       <CardContent>
-        <div 
-          ref={waveformRef} 
-          className="mb-6 bg-gray-50 rounded-lg p-2 shadow-inner"
-        />
-        <div className="flex justify-center items-center space-x-4">
+        <div ref={waveformRef} className="mb-4" />
+        <div className="flex justify-center space-x-4">
           <Button 
             variant="outline" 
             size="icon" 
             onClick={handleRestart}
-            className="hover:bg-blue-50"
             title="Restart"
           >
-            <RefreshCcwIcon className="h-5 w-5 text-blue-600" />
+            <FaRedo className="h-5 w-5" />
           </Button>
           <Button 
             size="icon" 
             onClick={togglePlayPause}
-            className="hover:bg-blue-100"
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
-              <PauseIcon className="h-6 w-6 text-blue-700" />
+              <FaPause className="h-5 w-5" />
             ) : (
-              <PlayIcon className="h-6 w-6 text-blue-700" />
+              <FaPlay className="h-5 w-5" />
             )}
           </Button>
           <Button 
             variant={isLooping ? "default" : "outline"} 
             size="icon" 
             onClick={toggleLoop}
-            title="Toggle Loop"
+            title="Loop"
           >
-            <RepeatIcon className="h-5 w-5" />
+            <MdLoop className="h-5 w-5" />
           </Button>
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={toggleMute}
-            className="hover:bg-red-50"
-            title={isMuted ? "Unmute" : "Mute"}
+            onClick={toggleVolume}
+            title={volume === 0 ? "Unmute" : "Mute"}
           >
-            {isMuted ? (
-              <VolumeXIcon className="h-5 w-5 text-red-600" />
+            {volume === 0 ? (
+              <FaVolumeMute className="h-5 w-5" />
             ) : (
-              <Volume2Icon className="h-5 w-5 text-blue-600" />
+              <FaVolumeUp className="h-5 w-5" />
             )}
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handleDownload}
+            title="Download"
+          >
+            <FaDownload className="h-5 w-5" />
           </Button>
         </div>
       </CardContent>
