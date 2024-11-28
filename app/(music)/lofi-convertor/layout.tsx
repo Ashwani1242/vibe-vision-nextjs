@@ -1,5 +1,5 @@
 import { Playfair_Display, Roboto } from 'next/font/google';
-import { AudioProvider } from '@/lib/audio-context';
+import { AudioContextProvider } from '@/hooks/use-audio-context';
 
 // Hero section font: Stylish and elegant
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-hero' });
@@ -16,10 +16,10 @@ export default function Layout({
   children: React.ReactNode;
 }) {
   return (
-        <AudioProvider>
-          <main className="min-h-screen">
+        <AudioContextProvider>
+          <main className="min-h-screen r">
             {children}
           </main>
-        </AudioProvider>
+        </AudioContextProvider>
   );
 }

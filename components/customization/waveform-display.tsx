@@ -1,176 +1,215 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
-import WaveSurfer from "wavesurfer.js";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
+import { gsap } from "gsap";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  FaPlay, 
-  FaPause, 
-  FaRedo, 
-  FaSync, 
-  FaDownload, 
-  FaVolumeUp, 
-  FaVolumeMute 
-} from "react-icons/fa";
-import { MdLoop } from "react-icons/md";
+import { Play, Pause, RotateCcw, RepeatIcon } from "lucide-react";
+import { useAudioContext } from "@/hooks/use-audio-context";
 
-interface WaveformDisplayProps {
-  audioUrl?: string;
-  peakData?: number[]; 
-}
-
-export function WaveformDisplay({ 
-  audioUrl, 
-  peakData 
-}: WaveformDisplayProps) {
-  const waveformRef = useRef<HTMLDivElement>(null);
-  const wavesurfer = useRef<WaveSurfer | null>(null);
+export function WaveVisualizer({ audioUrl }: { audioUrl?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [peakValues, setPeakValues] = useState<number[]>(peakData || []);
+  const { audioContext } = useAudioContext();
 
   useEffect(() => {
-    if (!waveformRef.current || !audioUrl) return;
+    if (!audioUrl || !canvasRef.current || !audioContext || !containerRef.current) return;
 
-    const initWaveSurfer = async () => {
-      if (wavesurfer.current) {
-        wavesurfer.current.destroy();
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    audio.crossOrigin = "anonymous";
+
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const source = audioContext.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+    analyserRef.current = analyser;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d")!;
+
+    const draw = () => {
+      const width = canvas.width;
+      const height = canvas.height;
+      analyser.getByteFrequencyData(dataArray);
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+      ctx.fillRect(0, 0, width, height);
+
+      const barWidth = (width / bufferLength) * 2.5;
+      let barHeight;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        barHeight = (dataArray[i] / 255) * height;
+
+        const hue = 260 + (i / bufferLength) * 60;
+        ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.8)`;
+
+        ctx.beginPath();
+        ctx.roundRect(
+          x,
+          height - barHeight,
+          barWidth - 2,
+          barHeight,
+          5
+        );
+        ctx.fill();
+
+        x += barWidth;
       }
 
-      const ws = WaveSurfer.create({
-        container: waveformRef.current!,
-        waveColor: '#4a90e2', // Cool blue color
-        progressColor: '#2c3e50', // Dark blue-gray
-        cursorColor: '#e74c3c', // Vibrant red
-        barWidth: 2,
-        barRadius: 3,
-        cursorWidth: 1,
-        height: 128,
-        barGap: 3,
-      });
-
-      ws.on('finish', () => {
-        if (isLooping) {
-          ws.play();
-        } else {
-          setIsPlaying(false);
-        }
-      });
-
-      ws.on('play', () => setIsPlaying(true));
-      ws.on('pause', () => setIsPlaying(false));
-
-      try {
-        await ws.load(audioUrl);
-        wavesurfer.current = ws;
-      } catch (error) {
-        console.error('Error loading audio:', error);
-      }
+      animationFrameRef.current = requestAnimationFrame(draw);
     };
 
-    initWaveSurfer();
+    // Set canvas size
+    const resizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+    };
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // Start animation
+    draw();
+
+    // GSAP animation for container glow
+    gsap.to(containerRef.current, {
+      duration: 2,
+      boxShadow: "0 0 30px hsla(260, 100%, 60%, 0.3)",
+      repeat: -1,
+      yoyo: true,
+      ease: "power1.inOut",
+    });
+
+    audio.addEventListener("ended", () => {
+      setIsPlaying(false);
+    });
 
     return () => {
-      if (wavesurfer.current) {
-        wavesurfer.current.destroy();
-        wavesurfer.current = null;
+      window.removeEventListener("resize", resizeCanvas);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      source.disconnect();
+      analyser.disconnect();
     };
-  }, [audioUrl, isLooping]);
+  }, [audioUrl, audioContext]);
 
   const togglePlayPause = () => {
-    if (wavesurfer.current) {
-      wavesurfer.current.playPause();
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
     }
   };
 
   const handleRestart = () => {
-    if (wavesurfer.current) {
-      wavesurfer.current.stop();
-      wavesurfer.current.play();
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+      setIsPlaying(true);
     }
   };
 
   const toggleLoop = () => {
-    setIsLooping(!isLooping);
-  };
-
-  const toggleVolume = () => {
-    if (wavesurfer.current) {
-      const newVolume = volume === 0 ? 1 : 0;
-      setVolume(newVolume);
-      wavesurfer.current.setVolume(newVolume);
-    }
-  };
-
-  const handleDownload = () => {
-    if (wavesurfer.current && audioUrl) {
-      const link = document.createElement('a');
-      link.href = audioUrl;
-      link.download = 'audio.mp3';
-      link.click();
+    if (audioRef.current) {
+      audioRef.current.loop = !isLooping;
+      setIsLooping(!isLooping);
     }
   };
 
   if (!audioUrl) return null;
 
   return (
-    <Card className="max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Audio Waveform Player</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div ref={waveformRef} className="mb-4" />
-        <div className="flex justify-center space-x-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={handleRestart}
-            title="Restart"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <Card className="backdrop-blur-lg bg-opacity-50 border-primary/20">
+        <CardContent className="p-6">
+          <div 
+            ref={containerRef}
+            className="relative rounded-lg overflow-hidden bg-gradient-to-br from-purple-900/20 to-indigo-900/20 p-1"
           >
-            <FaRedo className="h-5 w-5" />
-          </Button>
-          <Button 
-            size="icon" 
-            onClick={togglePlayPause}
-            title={isPlaying ? "Pause" : "Play"}
+            <canvas 
+              ref={canvasRef} 
+              className="w-full h-48 rounded-md"
+              style={{ background: "transparent" }}
+            />
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+            </div>
+          </div>
+
+          <motion.div 
+            className="flex justify-center space-x-4 mt-6"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
           >
-            {isPlaying ? (
-              <FaPause className="h-5 w-5" />
-            ) : (
-              <FaPlay className="h-5 w-5" />
-            )}
-          </Button>
-          <Button 
-            variant={isLooping ? "default" : "outline"} 
-            size="icon" 
-            onClick={toggleLoop}
-            title="Loop"
-          >
-            <MdLoop className="h-5 w-5" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={toggleVolume}
-            title={volume === 0 ? "Unmute" : "Mute"}
-          >
-            {volume === 0 ? (
-              <FaVolumeMute className="h-5 w-5" />
-            ) : (
-              <FaVolumeUp className="h-5 w-5" />
-            )}
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={handleDownload}
-            title="Download"
-          >
-            <FaDownload className="h-5 w-5" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key="controls"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex space-x-2"
+              >
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={handleRestart}
+                  className="hover:bg-primary/20 transition-colors"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+                <Button 
+                  size="icon" 
+                  onClick={togglePlayPause}
+                  className="bg-primary hover:bg-primary/80 transition-colors"
+                >
+                  {isPlaying ? (
+                    <Pause className="h-4 w-4" />
+                  ) : (
+                    <Play className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button 
+                  variant={isLooping ? "default" : "outline"} 
+                  size="icon" 
+                  onClick={toggleLoop}
+                  className={isLooping ? "bg-primary hover:bg-primary/80" : "hover:bg-primary/20"}
+                >
+                  <RepeatIcon className="h-4 w-4" />
+                </Button>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

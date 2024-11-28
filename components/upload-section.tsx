@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, Music, Loader2, Link as LinkIcon, X } from "lucide-react";
+import { Upload, Music, Loader2, LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -11,15 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { motion, AnimatePresence } from "framer-motion";
-import { WaveformDisplay } from "./customization/waveform-display";
-import { useAudio } from "@/lib/audio-context";
+import { processAudioWithFFmpeg } from "@/lib/ffmpeg";
+import { motion } from "framer-motion";
+import { WaveVisualizer } from "./customization/waveform-display";
+import { Input } from "./ui/input";
 
 export function UploadSection() {
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string>();
   const [error, setError] = useState<string>();
-  const [songUrl, setSongUrl] = useState<string>('');
-  const { isProcessing, audioUrl, processAudioWithOptions } = useAudio();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -39,6 +39,21 @@ export function UploadSection() {
     }
   };
 
+
+  const processAudio = async (file: File) => {
+    setIsUploading(true);
+    setError(undefined);
+    try {
+      const processedAudioUrl = await processAudioWithFFmpeg(file);
+      setAudioUrl(processedAudioUrl);
+    } catch (error) {
+      setError('Error processing audio. Please try again.');
+      console.error('Error processing audio:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('audio/')) {
@@ -48,10 +63,10 @@ export function UploadSection() {
 
   const handleUrlSubmit = async () => {
     setError(undefined);
-    if (!songUrl) return;
+    if (!audioUrl) return;
 
     try {
-      const response = await fetch(songUrl);
+      const response = await fetch(audioUrl);
       const blob = await response.blob();
       const file = new File([blob], 'song.mp3', { type: 'audio/mpeg' });
       await processAudio(file);
@@ -61,61 +76,40 @@ export function UploadSection() {
     }
   };
 
-  const processAudio = async (file: File) => {
-    setError(undefined);
-    try {
-      await processAudioWithOptions(file);
-      setSongUrl('');
-    } catch (error) {
-      setError('Error processing audio. Please try again.');
-      console.error('Error processing audio:', error);
-    }
-  };
-
-  const peaks = [0.1, 0.3, 0.5, 0.7, 0.9,10];
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
       className="container mx-auto px-4 py-12"
     >
       <Card>
         <CardHeader>
           <CardTitle>Upload Your Track</CardTitle>
           <CardDescription>
-            Drag and drop your audio file, click to browse, or paste a direct audio URL.
+            Drag and drop your audio file or click to browse. We support MP3, WAV,
+            and FLAC formats.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <AnimatePresence>
-            <motion.div
-              key="upload-area"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${isDragging
+          <div
+            className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+              isDragging
                 ? "border-primary bg-primary/5"
                 : "border-muted-foreground/25"
-                }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              {isProcessing ? (
-                <motion.div
-                  initial={{ scale: 0.9 }}
-                  animate={{ scale: 1 }}
-                  className="space-y-4"
-                >
-                  <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-                  <p className="text-sm text-muted-foreground">
-                    Processing your track...
-                  </p>
-                </motion.div>
-              ) : (
-                <div className="space-y-4">
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            {isUploading ? (
+              <div className="space-y-4">
+                <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Processing your track...
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
@@ -147,11 +141,11 @@ export function UploadSection() {
                     <div className="flex items-center gap-2">
                       <Input
                         placeholder="Paste audio URL"
-                        value={songUrl}
-                        onChange={(e) => setSongUrl(e.target.value)}
+                        value={audioUrl}
+                        onChange={(e) => setAudioUrl(e.target.value)}
                         className="w-full sm:w-64"
                       />
-                      {songUrl && (
+                      {audioUrl && (
                         <Button
                           variant="outline"
                           size="icon"
@@ -163,42 +157,12 @@ export function UploadSection() {
                     </div>
                   </div>
                 </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="text-sm text-destructive text-center"
-              >
-                {error}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setError(undefined)}
-                  className="ml-2"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </motion.p>
             )}
-          </AnimatePresence>
-
-          {audioUrl && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <WaveformDisplay
-                audioUrl={audioUrl}
-                peakData={peaks}
-              />
-            </motion.div>
+          </div>
+          {error && (
+            <p className="text-sm text-destructive text-center">{error}</p>
           )}
+          {audioUrl && <WaveVisualizer audioUrl={audioUrl} />}
         </CardContent>
       </Card>
     </motion.div>

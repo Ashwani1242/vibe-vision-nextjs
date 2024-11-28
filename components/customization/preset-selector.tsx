@@ -1,6 +1,6 @@
 "use client";
 
-import { useAudio, presets } from "@/lib/audio-context";
+import { useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -9,31 +9,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { PRESETS } from "@/lib/constants/presets";
+import { useAudioProcessor } from "@/hooks/use-audio-processor";
+import { motion } from "framer-motion";
 
 export function PresetSelector() {
-  const { currentPreset, applyPreset } = useAudio();
+  const { currentPreset, applyPreset } = useAudioProcessor();
+
+  useEffect(() => {
+    // Apply default preset if none selected
+    if (!currentPreset && PRESETS.length > 0) {
+      applyPreset(PRESETS[0].id);
+    }
+  }, [currentPreset, applyPreset]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Presets</CardTitle>
-      </CardHeader>
-      <CardContent className="h-auto">
-        <Select value={currentPreset} onValueChange={applyPreset}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a preset">
-              {currentPreset ? presets[currentPreset].name : "Select a preset"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(presets).map(([id, preset]) => (
-              <SelectItem key={id} value={id}>
-                {preset.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </CardContent>
-    </Card>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <Card className="backdrop-blur-lg bg-opacity-50 border-primary/20">
+        <CardHeader>
+          <CardTitle>Presets</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={currentPreset} onValueChange={applyPreset}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a preset" />
+            </SelectTrigger>
+            <SelectContent>
+              {PRESETS.map((preset) => (
+                <SelectItem key={preset.id} value={preset.id}>
+                  {preset.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

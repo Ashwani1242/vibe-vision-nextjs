@@ -3,7 +3,7 @@
 import { PresetSelector } from "./customization/preset-selector";
 import { EffectControls } from "./customization/effect-controls";
 import { AudioControls } from "./customization/audio-controls";
-import { WaveformDisplay } from "./customization/waveform-display";
+import { WaveVisualizer } from "./customization/waveform-display";
 import { motion } from "framer-motion";
 
 const panelVariants = {
@@ -51,7 +51,7 @@ export function CustomizationPanel() {
           <EffectControls />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <WaveformDisplay />
+          <WaveVisualizer />
         </motion.div>
       </motion.div>
     </motion.div>
