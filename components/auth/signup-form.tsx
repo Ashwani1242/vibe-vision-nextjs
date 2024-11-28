@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 import { BASE_URL } from "@/config";
-import { Eye, EyeOff } from "lucide-react";
+import {Icon} from "@iconify/react";
 import { Label } from "../ui/label2";
 
 const signupSchema = z.object({
@@ -249,9 +249,11 @@ export const SignUpForm = () => {
             >
               <motion.h3
                 variants={itemVariants}
-                className="text-gray-200 text-3xl font-semibold tracking-tighter sm:text-4xl text-lg text-transparent bg-clip-text bg-gradient-to-r from-[#4BC0C8] via-[#C779D0] to-[#FEAC5E]"
+                className="flex items-center text-3xl font-semibold tracking-tighter sm:text-4xl"
               >
-                Sign up - Start journey with Vibe Vision
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4BC0C8] to-[#C779D0] mr-2">Sign up</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C779D0] to-[#FEAC5E]"> - Start journey with Vibe Vision
+                </span>
               </motion.h3>
               <motion.p
                 variants={itemVariants}
@@ -498,7 +500,15 @@ export const SignUpForm = () => {
                 onClick={() => togglePasswordVisibility('password')}
                 className="absolute right-3 top-1/3 pb-3 -translate-y-1/2"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ?  (<Icon
+                    className="pointer-events-none text-2xl text-default-400"
+                    icon="solar:eye-closed-linear"
+                  />
+                ) : (
+                  <Icon
+                    className="pointer-events-none text-2xl text-default-400"
+                    icon="solar:eye-bold"
+                  />)}
               </button>
               {form.formState.errors.password && (
                 <p className="text-red-500 text-sm">
@@ -531,7 +541,15 @@ export const SignUpForm = () => {
                 onClick={() => togglePasswordVisibility('confirmPassword')}
                 className="absolute right-3 top-2/3 pb-1 -translate-y-1/2"
               >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showConfirmPassword ? (<Icon
+                    className="pointer-events-none text-2xl text-default-400"
+                    icon="solar:eye-closed-linear"
+                  />
+                ) : (
+                  <Icon
+                    className="pointer-events-none text-2xl text-default-400"
+                    icon="solar:eye-bold"
+                  />)}
               </button>
               {form.formState.errors.confirmPassword && (
                 <p className="text-red-500 text-sm">

@@ -106,6 +106,45 @@ const Plans = [
   }
 ];
 
+  const features = [
+    {
+      icon: Zap,
+      title: "AI-Powered Creation",
+      description: "Generate unique content with advanced AI algorithms",
+      size: "one"
+    },
+    {
+      icon: TrendingUp,
+      title: "Engaging Content",
+      description: "Generate and view engaging content with seamless integration and advanced visualization tools",
+      size: "two"
+    },
+    {
+      icon: Award,
+      title: "Professional Quality",
+      description: "Industry-standard output that meets the highest standards of professional content creation",
+      size: "two"
+    },
+    {
+      icon: Clock,
+      title: "Real-time Generation",
+      description: "Get instant results as you create",
+      size: "one"
+    },
+    {
+      icon: Download,
+      title: "Easy Export",
+      description: "Download your content in multiple formats with just a single click",
+      size: "one"
+    },
+    {
+      icon: MessageSquare,
+      title: "Community Feedback",
+      description: "Get insights and collaborative input from a vibrant community of creators worldwide",
+      size: "two"
+    },
+  ];
+
 const faqs = [
   {
     question: "How does the AI content generation work?",
@@ -299,52 +338,45 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-8">
-        <div className="max-w-screen-xl mx-auto relative">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold">Powerful Features</h2>
-            <p className="mt-4 text-xl text-muted-foreground">
-              Everything you need to create amazing content
-            </p>
+      <section className="py-16 px-8 bg-background">
+      <div className="max-w-screen-xl mx-auto relative">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-foreground">Powerful Features</h2>
+          <p className="mt-4 text-xl text-muted-foreground">
+            Everything you need to create amazing content
+          </p>
+        </div>
+        <div className="space-y-8">
+          {/* One in line */}
+          <div className="flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="w-full max-w-xl"
+            >
+              <Card>
+                <CardHeader>
+                  <div className="p-3 bg-primary/10 rounded-full w-fit">
+                    <Zap className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="mt-4">{features[0].title}</CardTitle>
+                  <CardDescription>{features[0].description}</CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Zap,
-                title: "AI-Powered Creation",
-                description: "Generate unique content with advanced AI algorithms",
-              },
-              {
-                icon: TrendingUp,
-                title: "Engaging Content",
-                description: "Generate and view engaging content",
-              },
-              {
-                icon: Award,
-                title: "Professional Quality",
-                description: "Industry-standard output for all your content",
-              },
-              {
-                icon: Clock,
-                title: "Real-time Generation",
-                description: "Get instant results as you create",
-              },
-              {
-                icon: Download,
-                title: "Easy Export",
-                description: "Download your content in multiple formats",
-              },
-              {
-                icon: MessageSquare,
-                title: "Community Feedback",
-                description: "Get insights from other creators",
-              },
-            ].map((feature, index) => (
+
+          {/* Two in line */}
+          <div className="grid grid-cols-2 gap-8">
+            {features.slice(1, 3).map((feature, index) => (
               <motion.div
                 key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: true }}
               >
                 <Card>
                   <CardHeader>
@@ -358,8 +390,53 @@ export default function HomePage() {
               </motion.div>
             ))}
           </div>
+
+          {/* Two in line */}
+          <div className="grid grid-cols-2 gap-8">
+            {features.slice(3, 5).map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: true }}
+              >
+                <Card>
+                  <CardHeader>
+                    <div className="p-3 bg-primary/10 rounded-full w-fit">
+                      <feature.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="mt-4">{feature.title}</CardTitle>
+                    <CardDescription>{feature.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* One in line */}
+          <div className="flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="w-full max-w-xl"
+            >
+              <Card>
+                <CardHeader>
+                  <div className="p-3 bg-primary/10 rounded-full w-fit">
+                    <MessageSquare className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="mt-4">{features[5].title}</CardTitle>
+                  <CardDescription>{features[5].description}</CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
+          </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* Pricing section */}
       <section className="py-16 px-4 sm:px-6 relative overflow-hidden">
@@ -411,7 +488,7 @@ export default function HomePage() {
             {Plans.map((plan) => (
               <Card
                 key={plan.name}
-                className={`relative transform transition-all duration-300 hover:scale-105 ${plan.recommended ? 'border-primary shadow-lg' : ''
+                className={`relative transform transition-all duration-300 ${plan.recommended ? 'border-primary shadow-lg' : ''
                   }`}
               >
                 {plan.recommended && (
