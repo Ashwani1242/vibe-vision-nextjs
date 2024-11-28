@@ -39,25 +39,25 @@ module.exports = {
       },
       keyframes: {
         gradientOcean: {
-          '0%': { 
-            backgroundPosition: '0% 50%' 
+          '0%': {
+            backgroundPosition: '0% 50%'
           },
-          '50%': { 
-            backgroundPosition: '100% 50%' 
+          '50%': {
+            backgroundPosition: '100% 50%'
           },
-          '100%': { 
-            backgroundPosition: '0% 50%' 
+          '100%': {
+            backgroundPosition: '0% 50%'
           }
         },
         gradientOceanOverlay: {
-          '0%': { 
-            backgroundPosition: '100% 0%' 
+          '0%': {
+            backgroundPosition: '100% 0%'
           },
-          '50%': { 
-            backgroundPosition: '0% 100%' 
+          '50%': {
+            backgroundPosition: '0% 100%'
           },
-          '100%': { 
-            backgroundPosition: '100% 0%' 
+          '100%': {
+            backgroundPosition: '100% 0%'
           }
         },
         bubbleUp: {
@@ -67,6 +67,16 @@ module.exports = {
           },
           '100%': {
             transform: 'translateY(-100vh)',
+            opacity: '0'
+          }
+        },
+        'bubble-up': {
+          '0%': {
+            transform: 'translateY(0) scale(0.8)',
+            opacity: '0.6'
+          },
+          '100%': {
+            transform: 'translateY(-100vh) scale(1.2)',
             opacity: '0'
           }
         },
@@ -124,7 +134,7 @@ module.exports = {
         animation: {
           sparkle: 'sparkle ease-in-out',
         },
-
+        'bubble-up': 'bubble-up linear infinite',
         "marquee-x": {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(calc(-100% - var(--gap)))" },
