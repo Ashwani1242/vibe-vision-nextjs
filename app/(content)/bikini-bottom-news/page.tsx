@@ -308,6 +308,7 @@ export default function BikiniBottomNewsPage() {
             <BubbleBackground />
 
             <div className="min-h-screen bg-transparent p-6 md:p-16 pb-40 relative">
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-[url('/image.png')] bg-cover bg-bottom opacity-50 z-0"></div>
                 {/* Page Header */}
                 <div className="max-w-7xl mx-auto space-y-8 relative">
                     <div className="text-center space-y-4">
