@@ -452,10 +452,10 @@ export function Sidebar({
 
       <aside
         className={cn(
-          "fixed z-50 flex flex-col bg-background border-r shadow-lg",
+          "fixed z-50 flex flex-col bg-background/60 border-r shadow-lg",
           "transition-all duration-300 ease-in-out",
-          "top-[105px]",
-          "h-[calc(100vh-105px)]",
+          "top-[100px]",
+          "h-[calc(100vh-100px)]",
           isCollapsed ? "w-[70px]" : "w-72",
           isOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0"
