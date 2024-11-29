@@ -408,7 +408,7 @@ export function LoginForm() {
               </motion.div>
 
               <motion.div variants={itemVariants}>
-                <Label className="font-medium text-gray-300">Password</Label>
+                <Label className=" font-medium text-gray-300">Password</Label>
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -423,7 +423,7 @@ export function LoginForm() {
                   />
                   <button
                 type="button"
-                onClick={() => togglePasswordVisibility}
+                onClick={togglePasswordVisibility}
                 className="absolute right-3 top-2/3 pb-3 -translate-y-1/2"
               >
                 {showPassword ?  (<Icon
