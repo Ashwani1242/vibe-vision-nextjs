@@ -24,7 +24,6 @@ export function LoginForm() {
   const [socialLoading, setSocialLoading] = useState<'github' | 'google' | 'twitter' | null>(null);
   const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [reset, setReset] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const form = useForm({
