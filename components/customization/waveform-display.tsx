@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, RepeatIcon } from "lucide-react";
+import { Icon } from '@iconify/react';
 import { useAudioContext } from "@/hooks/use-audio-context";
 
 export function WaveVisualizer({ audioUrl }: { audioUrl?: string }) {
@@ -16,6 +17,7 @@ export function WaveVisualizer({ audioUrl }: { audioUrl?: string }) {
   const animationFrameRef = useRef<number>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { audioContext } = useAudioContext();
 
   useEffect(() => {
@@ -140,6 +142,26 @@ export function WaveVisualizer({ audioUrl }: { audioUrl?: string }) {
     }
   };
 
+  const handleDownload = async () => {
+    if (!audioUrl) return;
+
+    setIsDownloading(true);
+    try {
+      const response = await fetch(audioUrl);
+      const blob = await response.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'audio_track.mp3';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Download failed', error);
+    } finally {
+      setTimeout(() => setIsDownloading(false), 1500);
+    }
+  };
+
   if (!audioUrl) return null;
 
   return (
@@ -176,7 +198,7 @@ export function WaveVisualizer({ audioUrl }: { audioUrl?: string }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex space-x-2"
+                className="flex space-x-2 items-center"
               >
                 <Button 
                   variant="outline" 
@@ -204,6 +226,29 @@ export function WaveVisualizer({ audioUrl }: { audioUrl?: string }) {
                   className={isLooping ? "bg-primary hover:bg-primary/80" : "hover:bg-primary/20"}
                 >
                   <RepeatIcon className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={handleDownload}
+                  disabled={isDownloading}
+                  className="hover:bg-primary/20 transition-colors relative"
+                >
+                  {isDownloading ? (
+                    <motion.div
+                      initial={{ rotate: 0 }}
+                      animate={{ rotate: 360 }}
+                      transition={{ 
+                        duration: 1, 
+                        repeat: Infinity, 
+                        ease: "linear" 
+                      }}
+                    >
+                      <Icon icon="line-md:loading-twotone-loop" className="h-5 w-5" />
+                    </motion.div>
+                  ) : (
+                    <Icon icon="solar:download-linear" className="h-4 w-4" />
+                  )}
                 </Button>
               </motion.div>
             </AnimatePresence>
