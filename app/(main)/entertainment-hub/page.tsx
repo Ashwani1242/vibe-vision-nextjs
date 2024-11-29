@@ -402,7 +402,7 @@ const EntertainmentHub = () => {
       <div className="w-full bg-background pb-36">
 
         {/* Search Bar */}
-        <div className="fle/x p-4 gap-2 hidden">
+        <div className="fle/x p-4 gap-2 overflow-hidden">
           <div className="flex-1 max-w-2xl mx-auto">
             <PlaceholdersAndVanishInput
               placeholders={searchPlaceholders}

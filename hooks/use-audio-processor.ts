@@ -17,6 +17,21 @@ export function useAudioProcessor() {
       rain: false,
       coffeeShop: false,
       forest: false
+    },
+    lofiEffect: {
+      roomSize: 0.75,
+      damping: 0.5,
+      wetLevel: 0.08,
+      dryLevel: 0.2,
+      delay: 2,
+      slowFactor: 0.08
+    },
+    // Add default echo effect options
+    echoEffect: {
+      delay: 0.25,     // 250ms between echoes
+      decay: 0.5,      // 50% volume reduction per echo
+      feedback: 0.3,   // 30% feedback
+      maxEchoes: 5     // Maximum 5 echo repetitions
     }
   });
 
@@ -29,10 +44,31 @@ export function useAudioProcessor() {
   };
 
   const updateSettings = (newSettings: Partial<AudioProcessingOptions>) => {
-    setSettings(prev => ({
-      ...prev,
-      ...newSettings
-    }));
+    setSettings(prev => {
+      // Handle nested objects carefully
+      const updatedSettings = {
+        ...prev,
+        ...newSettings
+      };
+
+      // Ensure ambientSounds is properly merged
+      if (newSettings.ambientSounds) {
+        updatedSettings.ambientSounds = {
+          ...prev.ambientSounds,
+          ...newSettings.ambientSounds
+        };
+      }
+
+      // Ensure lofiEffect is properly merged
+      if (newSettings.lofiEffect) {
+        updatedSettings.lofiEffect = {
+          ...prev.lofiEffect,
+          ...newSettings.lofiEffect
+        };
+      }
+
+      return updatedSettings;
+    });
   };
 
   const processTrack = async (file: File) => {

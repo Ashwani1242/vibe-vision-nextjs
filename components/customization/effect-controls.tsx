@@ -44,6 +44,91 @@ export function EffectControls() {
                 }
               />
             </div>
+            <div className="space-y-2">
+              <Label>Reverb Wet Level</Label>
+              <Slider
+                value={[
+                  (settings.lofiEffect?.wetLevel || 0.08) * 100
+                ]}
+                max={100}
+                step={1}
+                onValueChange={([value]) =>
+                  updateSettings({ 
+                    lofiEffect: { 
+                      wetLevel: value / 100 
+                    } 
+                  })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Reverb Delay</Label>
+              <Slider
+                value={[settings.lofiEffect?.delay || 2]}
+                max={5}
+                min={0}
+                step={0.1}
+                onValueChange={([value]) =>
+                  updateSettings({ 
+                    lofiEffect: { 
+                      delay: value 
+                    } 
+                  })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Echo Decay</Label>
+              <Slider
+                value={[
+                  (settings.echoEffect?.decay || 0.5) * 100
+                ]}
+                max={100}
+                min={0}
+                step={1}
+                onValueChange={([value]) =>
+                  updateSettings({ 
+                    echoEffect: { 
+                      decay: value / 100 
+                    } 
+                  })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Echo Feedback</Label>
+              <Slider
+                value={[
+                  (settings.echoEffect?.feedback || 0.3) * 100
+                ]}
+                max={100}
+                min={0}
+                step={1}
+                onValueChange={([value]) =>
+                  updateSettings({ 
+                    echoEffect: { 
+                      feedback: value / 100 
+                    } 
+                  })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Echo Repetitions</Label>
+              <Slider
+                value={[settings.echoEffect?.maxEchoes || 5]}
+                max={10}
+                min={1}
+                step={1}
+                onValueChange={([value]) =>
+                  updateSettings({ 
+                    echoEffect: { 
+                      maxEchoes: value 
+                    } 
+                  })
+                }
+              />
+            </div>
           </div>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
