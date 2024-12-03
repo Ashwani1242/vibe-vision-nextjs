@@ -23,6 +23,9 @@ module.exports = {
       },
     },
     extend: {
+      aspectRatio: {
+        '9/16': '9 / 16',
+      },
       backgroundImage: {
         'gradient-ocean': 'linear-gradient(to bottom right, #4F42B4, #4E5BAD, #4C74A6, #4B8DA0, #49A39A)',
       },

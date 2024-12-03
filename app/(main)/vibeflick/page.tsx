@@ -1,55 +1,41 @@
-import React from "react";
-import ReactPlayer from "react-player/lazy";
-import { motion } from "framer-motion";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import { Icon } from "@iconify/react";
-import searchIcon from "@iconify/icons-mdi/magnify";
-import subscribeIcon from "@iconify/icons-mdi/bell";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Layout } from "@/components/layout/layout";
+import { SparklesCore } from "@/components/ui/sparkles";
+import { ShortsPlayer } from "@/components/viveflicks-player";
 
-const VibeFlick = () => {
-    return (
-        <div className="bg-black text-white h-screen flex flex-col items-center">
-            {/* Header */}
-            <header className="w-full flex justify-between items-center px-4 py-3 bg-gray-900">
-                <h1 className="text-xl font-bold">Vibe Flick</h1>
-                <div className="flex gap-2 items-center">
-                    <button className="text-sm px-4 py-2 bg-blue-600 rounded hover:bg-blue-500">
-                        Login
-                    </button>
-                </div>
-            </header>
-
-            {/* Main Content */}
-                {/* Video Section */}
-                <div className="flex-1 bg-gray-800 p-4">
-                    <motion.div
-                        className="rounded overflow-hidden shadow-lg"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                    >
-                        <ReactPlayer
-                            url="https://www.example.com/video.mp4"
-                            width="100%"
-                            height="100%"
-                            controls={true}
-                        />
-                    </motion.div>
-                </div>
-
-                    {/* Subscribe Button */}
-                    <motion.button
-                        className="bg-red-600 text-white py-2 px-4 rounded shadow hover:bg-red-500 flex items-center gap-2"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <Icon icon={subscribeIcon} />
-                        Subscribe
-                    </motion.button>
-                </div>
-    );
+const demoShort = {
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    title: "Why did Scott Lang bring an orange slice for Clint in Endgame???",
+    channelName: "APieceOfMovie",
+    likes: "667K",
+    comments: "445",
+    views: "2.3M",
+    postedDate: "2 days ago",
+    channelAvatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=80&auto=format&fit=crop",
+    hashtags: ["#Marvel", "#Endgame", "#ScottLang"],
+    description: "In this video, we dive deep into the hilarious yet mysterious orange slice scene from Endgame. Is there a deeper meaning behind Scott Lang's gesture?",
+    duration: "01:23",
+    isVerified: true, // Indicates if the channel is verified
+    category: "Entertainment",
+    shareCount: "123K",
 };
 
-export default VibeFlick;
+
+export default function Home() {
+    return (
+        <Layout>
+            <main className="min-h-screen bg-black flex items-center justify-center p-4">
+                <div className="absolute inset-0 z-0">
+                    <SparklesCore
+                        id="forgot-password-sparkles"
+                        background="purple"
+                        minSize={0.6}
+                        maxSize={1.4}
+                        particleDensity={100}
+                        particleColor="#FFFFFF"
+                    />
+                </div>
+                <ShortsPlayer {...demoShort} />
+            </main>
+        </Layout>
+    );
+}

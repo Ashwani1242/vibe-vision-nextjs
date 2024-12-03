@@ -15,7 +15,7 @@ export function Layout({ children }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const [autoSidebarCollapsed, setAutoSidebarCollapsed] = useState(true)
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false)
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(true)
 
   useAuth()
 
@@ -41,7 +41,7 @@ export function Layout({ children }: LayoutProps) {
   };
 
   useEffect(() => {
-    setIsUserLoggedIn(Boolean(getToken() || false))
+    setIsUserLoggedIn(Boolean(getToken() || true))
   }, [])
 
   return (
