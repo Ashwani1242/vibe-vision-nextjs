@@ -72,3 +72,41 @@ declare module 'next-auth' {
       } & DefaultSession['user'];
   }
 }
+
+export type ComedyType = 'standup' | 'sketch' | 'roast' | 'musical' | 'improv' | 'sitcom';
+export type TargetAudience = 'everyone' | 'kids' | 'teens' | 'adults' | 'seniors' | 'corporate' | 'family';
+export type ToneSetting = 'funny' | 'sarcastic' | 'witty' | 'balanced';
+export type VoiceSetting = 'natural' | 'casual' | 'formal';
+export type Language = 'en' | 'es' | 'fr' | 'de';
+export type CharacterArchetype = 'protagonist' | 'sidekick' | 'antagonist' | 'mentor' | 'comic-relief';
+
+export interface ScriptFormData {
+  comedyType: ComedyType;
+  targetAudience: TargetAudience;
+  duration: string;
+  context: string;
+  image: File | null;
+}
+
+export interface ScriptSettings {
+  tone: ToneSetting;
+  voice: VoiceSetting;
+  language: Language;
+  creativityLevel: number;
+  useAICharacters: boolean;
+  enableSceneAnalysis: boolean;
+  collaborativeMode: boolean;
+}
+
+export interface GenerateScriptParams {
+  formData: ScriptFormData;
+  settings: ScriptSettings;
+}
+
+export interface ScriptAnalysis {
+  pacing: number;
+  comedyDensity: number;
+  audienceEngagement: number;
+  characterDevelopment: number;
+  suggestions: string[];
+}

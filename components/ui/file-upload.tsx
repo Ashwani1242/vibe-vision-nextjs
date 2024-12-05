@@ -26,16 +26,19 @@ const secondaryVariant = {
 };
 
 export const FileUpload = ({
-    onChange,
+    onFileUpload,
 }: {
-    onChange?: (files: File[]) => void;
+    onFileUpload: (file: File) => void;
 }) => {
     const [files, setFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (newFiles: File[]) => {
-        setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-        onChange && onChange(newFiles);
+        if (newFiles.length > 0) {
+            const file = newFiles[0]; // Take only the first file
+            setFiles([file]);
+            onFileUpload(file); // Call the prop function with the file
+        }
     };
 
     const handleClick = () => {
@@ -49,6 +52,9 @@ export const FileUpload = ({
         onDropRejected: (error) => {
             console.log(error);
         },
+        accept: {
+            'image/*': ['.jpeg', '.png', '.gif', '.jpg', '.webp']
+        }
     });
 
     return (
@@ -62,10 +68,11 @@ export const FileUpload = ({
                     ref={fileInputRef}
                     id="file-upload-handle"
                     type="file"
+                    accept="image/*"
                     onChange={(e) => handleFileChange(Array.from(e.target.files || []))}
                     className="hidden"
                 />
-                <div className="absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,white,transparent)]">
+                <div className="absolute inset-0 bg-black [mask-image:radial-gradient(ellipse_at_center,white,transparent)]">
                     <GridPattern />
                 </div>
                 <div className="flex flex-col items-center justify-center">
@@ -73,7 +80,7 @@ export const FileUpload = ({
                         Upload file
                     </p>
                     <p className="relative z-20 font-sans font-normal text-neutral-400 dark:text-neutral-400 text-base mt-2">
-                        Drag or drop your files here or click to upload
+                        Drag or drop your image here or click to upload
                     </p>
                     <div className="relative w-full mt-10 max-w-xl mx-auto">
                         {files.length > 0 &&

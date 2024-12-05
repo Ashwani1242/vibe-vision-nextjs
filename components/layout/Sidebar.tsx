@@ -14,9 +14,6 @@ import {
   SparklesIcon,
   LogInIcon,
   User,
-  Menu,
-  Settings,
-  HelpCircle
 } from "lucide-react"
 
 // Utility and UI imports

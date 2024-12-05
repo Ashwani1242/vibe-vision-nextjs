@@ -12,13 +12,17 @@ interface VideoPlayerProps {
   title: string;
   channelName: string;
   channelAvatar: string;
+  description?: string;
+  hashtags?: string[];
 }
 
 export function VideoPlayer({ 
   videoUrl, 
   title, 
   channelName, 
-  channelAvatar 
+  channelAvatar,
+  description = '',
+  hashtags = []
 }: VideoPlayerProps) {
   const {
     videoRef,
@@ -40,6 +44,18 @@ export function VideoPlayer({
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
+      
+      // Force portrait orientation in fullscreen
+      if (document.fullscreenElement) {
+        try {
+          // @ts-ignore
+          screen.orientation.lock('portrait-primary').catch(() => {
+            console.warn('Could not lock screen orientation');
+          });
+        } catch (error) {
+          console.warn('Screen orientation lock not supported');
+        }
+      }
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -62,47 +78,80 @@ export function VideoPlayer({
   return (
     <div className={`
       relative w-full h-full 
-      ${isFullscreen ? 'absolute inset-0 bg-black' : 'aspect-9/16'}
+      aspect-9/16 max-w-[414px] mx-auto
+      ${isFullscreen 
+        ? 'fixed inset-0 z-50 w-full h-full' 
+        : ''}
     `}>
       <div className={`
-        w-full h-full flex items-center justify-center
-        ${isFullscreen ? 'max-w-full max-h-full' : ''}
+        relative w-full h-full
+        ${isFullscreen 
+          ? 'h-full w-full flex flex-col' 
+          : ''}
       `}>
-        <video
-          ref={videoRef}
-          className={`
-            ${isFullscreen 
-              ? 'max-w-full max-h-full object-contain' 
-              : 'w-full h-full object-cover'}
-          `}
-          loop
-          playsInline
-          onClick={togglePlay}
-        >
-          <source src={videoUrl} type="video/mp4" />
-        </video>
+        <div className={`
+          w-full flex-grow relative
+          ${isFullscreen 
+            ? 'h-[calc(100%-200px)] min-h-[400px]' 
+            : 'aspect-9/16'}
+        `}>
+          <video
+            ref={videoRef}
+            className={`
+              absolute inset-0 w-full h-full object-cover
+              ${isFullscreen 
+                ? 'object-contain' 
+                : ''}
+            `}
+            loop
+            playsInline
+            onClick={togglePlay}
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+          
+          <VideoOverlay isPlaying={isPlaying} onTogglePlay={togglePlay} />
+          
+          <VideoControls 
+            volume={volume}
+            isMuted={isMuted}
+            onVolumeChange={handleVolumeChange}
+            onToggleMute={toggleMute}
+            onToggleFullScreen={toggleFullScreen}
+          />
+          
+          <InteractionButtons 
+            likes={likes}
+            dislikes={dislikes}
+            comments="0"
+            videoUrl={videoUrl}
+            onLike={handleLike}
+            onDislike={handleDislike}
+          />
+        </div>
+        
+        {isFullscreen && (
+          <div className="h-[200px] overflow-y-auto bg-black p-4">
+            <VideoInfo 
+              title={title}
+              channelName={channelName}
+              channelAvatar={channelAvatar}
+              description={description}
+              hashtags={hashtags}
+            />
+          </div>
+        )}
+        
+        {!isFullscreen && (
+          <VideoInfo 
+            title={title}
+            channelName={channelName}
+            channelAvatar={channelAvatar}
+            description={description}
+            hashtags={hashtags}
+          />
+        )}
       </div>
-      <VideoOverlay isPlaying={isPlaying} onTogglePlay={togglePlay} />
-      <VideoControls 
-        volume={volume}
-        isMuted={isMuted}
-        onVolumeChange={handleVolumeChange}
-        onToggleMute={toggleMute}
-        onToggleFullScreen={toggleFullScreen}
-      />
-      <InteractionButtons 
-        likes={likes}
-        dislikes={dislikes}
-        comments="0"
-        videoUrl={videoUrl}
-        onLike={handleLike}
-        onDislike={handleDislike}
-      />
-      <VideoInfo 
-        title={title}
-        channelName={channelName}
-        channelAvatar={channelAvatar}
-      />
     </div>
   );
 }
