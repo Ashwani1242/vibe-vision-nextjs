@@ -1,42 +1,29 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Textarea } from "../../../components/ui/textarea";
-import { Label } from "../../../components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../../../components/ui/dialog";
-import { Badge } from "../../../components/ui/badge";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../../../components/ui/tooltip";
-import { ScrollArea } from "../../../components/ui/scroll-area";
+} from "@/components/ui/tooltip";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   BookOpen,
-  Download,
-  Share2,
-  TriangleAlert,
-  Sparkles,
-  Wand2,
-  RefreshCw,
   Copy,
   Check,
   BrainCircuit,
-  Share,
+  Wand2,
+  RefreshCw,
 } from 'lucide-react';
-import { BASE_URL } from '@/config';
-import axios from 'axios';
 import { Layout } from '@/components/layout/layout';
-import MessageToast from '@/components/ui/MessageToast';
+import { toast } from 'sonner';
+import OpenAI from 'openai';
 
 // Genre type definition
 type Genre = {
@@ -109,195 +96,119 @@ const genres: Genre[] = [
   }
 ];
 
-
-type ContentItem = {
-  _id: string;
-  userName: string;
-  contentType: string;
-  status: string;
-  videoUrl?: string;
-  audioUrl?: string;
-  imageUrl?: string | null;
-  thumbnail_alt?: string | null;
-  musicTitle?: string | null;
-  displayName?: string | null;
+// Story type
+type Story = {
+  id: string;
+  genre: string;
+  prompt: string;
+  content: string;
   createdAt: string;
-  enhancedPrompt: string;
-  userPrompt: string;
-  songLyrics: string;
 };
-
 
 export default function EnhancedStoryGenerator() {
   // Core state
   const [genre, setGenre] = useState<string>(genres[0].value);
   const [genreDescription, setGenreDescription] = useState<string>(genres[0].description);
   const [prompt, setPrompt] = useState<string>('');
-  const [generatedStory, setGeneratedStory] = useState<GeneratedStory | null>(null);
+  const [generatedStory, setGeneratedStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [darkMode, setDarkMode] = useState<boolean>(true);
-
-  // UI state
-  const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
-  const [showHistoryDialog, setShowHistoryDialog] = useState<boolean>(false);
+  const [darkMode] = useState<boolean>(true);
   const [copied, setCopied] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>('write');
+  const [stories, setStories] = useState<Story[]>([]);
+  const [characterLimit] = useState<number>(2000);
 
-  // Enhanced features state
-  const [storyHistory, setStoryHistory] = useState<StoryHistoryItem[]>([]);
-  const [audioEnabled, setAudioEnabled] = useState<boolean>(true);
-  const [backgroundStyle, setBackgroundStyle] = useState<string>('gradient');
-  const [characterLimit, setCharacterLimit] = useState<number>(2000);
-
-  // Advanced settings
-  const [settings, setSettings] = useState<StorySettings>({
+  // Story generation settings
+  const [settings, setSettings] = useState({
     tone: 'casual',
     ageGroup: 'Kids ( less than 12 )',
-    pacing: '30 seconds',
-    duration: 30,
-    complexity: 'medium',
   });
 
-  // Refs
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  // Initialize OpenAI client
+  const openai = new OpenAI({
+    apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true
+  });
 
-  const [error, setError] = useState<string>('');
-  const [videoUrl, setVideoUrl] = useState<string>('');
-  const [generatedScript, setGeneratedScript] = useState<string>('');
-  const [videoTitle, setVideoTitle] = useState<string>('');
-
-  const [localStorageInstance, setLocalStorageInstance] = useState<Storage | null>(null)
-
-  const [toastVisible, setToastVisible] = useState(false);
-
-
-  useEffect(() => {
-    setLocalStorageInstance(localStorage);
-  }, [])
-
-
-
-  const [data, setData] = useState<ContentItem[]>([]);
-
-  const filteredData = data.filter((dataItem) => dataItem.contentType === 'story-time')
-  const mostRecentData = filteredData.slice().reverse();
-
-  const fetchData = async () => {
-    if (typeof window !== 'undefined') {
-      // Access localStorage on the client side
-      setLocalStorageInstance(window.localStorage);
-      const token = window.localStorage.getItem('token');
-
-      try {
-        const response = await axios.get(
-          `${BASE_URL}/api/content/get-user-content`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-          }
-        );
-        console.log(response.data);
-        setData(response.data);
-      } catch (error) {
-        console.error("Error fetching content data:", error);
-      }
+  // Utility functions
+  const handleCopyToClipboard = async (text: string) => {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast.success('Story copied to clipboard');
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      toast.error('Failed to copy story');
     }
   };
 
-  useEffect(() => {
-    // Fetch data immediately and set an interval to fetch every 15 seconds
-    fetchData();
-    const interval = setInterval(fetchData, 15000); // 15000 ms = 15 seconds
+  // Story generation function
+  const generateStory = async () => {
+    if (!prompt.trim()) {
+      toast.error('Please provide a story prompt');
+      return;
+    }
 
-    // Cleanup function to clear the interval when the component unmounts
-    return () => clearInterval(interval);
-  }, [BASE_URL]);
+    setLoading(true);
+    try {
+      // Construct detailed prompt for ChatGPT
+      const fullPrompt = `Write a ${settings.tone} ${genre.toLowerCase()} story for ${settings.ageGroup}. 
+      Story Prompt: ${prompt}. 
+      Guidelines:
+      - Ensure the story is appropriate for the specified age group
+      - Maintain a ${settings.tone} tone
+      - Story should be engaging and creative
+      - Length: Around 300-500 words`;
 
+      // Generate story using OpenAI
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system", 
+            content: "You are a creative storyteller who generates engaging stories based on specific prompts."
+          },
+          {
+            role: "user", 
+            content: fullPrompt
+          }
+        ],
+        max_tokens: 600,
+        temperature: 0.7,
+      });
+
+      const storyContent = completion.choices[0].message.content || 'Story generation failed.';
+
+      const newStory: Story = {
+        id: `story-${Date.now()}`,
+        genre,
+        prompt,
+        content: storyContent,
+        createdAt: new Date().toISOString()
+      };
+
+      // Update stories state
+      setStories(prevStories => [newStory, ...prevStories]);
+      setGeneratedStory(newStory);
+      toast.success('Story generated successfully!');
+    } catch (error) {
+      console.error('Story generation failed:', error);
+      toast.error('Failed to generate story. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Dynamic background classes
   const getBackgroundClass = () => {
     const baseClasses = 'transition-all duration-500 ease-in-out';
-    switch (backgroundStyle) {
-      case 'gradient':
-        return `${baseClasses} bg-gradient-to-br ${genres.find(g => g.value === genre)?.theme || 'from-purple-600 to-blue-600'}`;
-    }
-  };
-
-  const handleDownloadVideo = async (videoUrl: string | null, displayName: string) => {
-    if (videoUrl) {
-      try {
-        // Fetch the video file as a blob using Axios
-        const response = await axios.get(videoUrl, {
-          responseType: 'blob',
-        });
-
-        const blob = new Blob([response.data], { type: 'video/mp4' });
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${displayName}.mp4`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        URL.revokeObjectURL(url); // Clean up the URL object
-      } catch (error) {
-        console.error("Error downloading audio:", error);
-      }
-    }
-  };
-
-  // Utility functions
-  const handleCopyToClipboard = async (script: string) => {
-    if (!script) return;
-
-    try {
-      await navigator.clipboard.writeText(script);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-
-      if (audioEnabled) {
-        new Audio('/sounds/copy.mp3').play();
-      }
-    } catch (error) {
-      console.error('Failed to copy:', error);
-    }
+    return `${baseClasses} bg-gradient-to-br ${genres.find(g => g.value === genre)?.theme || 'from-purple-600 to-blue-600'}`;
   };
 
   return (
     <Layout>
-      <div
-        ref={containerRef}
-        className={`min-h-screen ${getBackgroundClass()} p-6 overflow-hidden relative`}
-      >
-        {/* Animated particles background */}
-        {backgroundStyle === 'particles' && (
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(50)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute animate-float"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 5}s`,
-                  animationDuration: `${5 + Math.random() * 10}s`,
-                  opacity: 0.1 + Math.random() * 0.3,
-                }}
-              >
-                <Sparkles
-                  className="text-purple-500"
-                  size={10 + Math.random() * 20}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Main content */}
+      <div className={`min-h-screen ${getBackgroundClass()} p-6 overflow-hidden relative`}>
         <div className="max-w-7xl mx-auto relative">
           {/* Header */}
           <header className="flex justify-between items-center mb-8">
@@ -338,12 +249,9 @@ export default function EnhancedStoryGenerator() {
                                 }`}
                               onClick={() => {
                                 setGenre(value);
-                                setGenreDescription(description)
-                                if (audioEnabled) {
-                                  new Audio('/sounds/select.mp3').play();
-                                }
-                              }
-                              }>
+                                setGenreDescription(description);
+                              }}
+                            >
                               <span className="text-2xl">{icon}</span>
                               <span className="text-sm">{value}</span>
                             </Button>
@@ -429,6 +337,7 @@ export default function EnhancedStoryGenerator() {
                   <Button
                     className="w-full bg-purple-600 hover:bg-purple-700"
                     disabled={loading || !prompt.trim()}
+                    onClick={generateStory}
                   >
                     {loading ? (
                       <>
@@ -444,246 +353,66 @@ export default function EnhancedStoryGenerator() {
                   </Button>
                 </CardContent>
               </Card>
-              </div>
-
-              {/* Right panel - Story Display */}
-              <div className="space-y-6">
-                <Card className={`${darkMode ? 'bg-black/50' : 'bg-white/90'} backdrop-blur border-purple-500/20`}>
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <BookOpen className="h-5 w-5" />
-                        Your Generated Stories and Videos
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[800px] rounded-md border border-purple-500/20 p-4 gap-4">
-
-                      {mostRecentData.length !== 0 ?
-                        mostRecentData.map((dataItem) =>
-                          < Card className='p-6 bg-black/30 mb-4'>
-                            {
-                              dataItem.status === 'success' ?
-                                (
-                                  <>
-                                    <div className="prose prose-invert max-w-none py-4 rounded-xl bg-black/60 p-4 mb-4">
-                                      <h2 className="text-2xl font-bold text-purple-100 mb-4 flex justify-between">
-                                        {dataItem.userPrompt || 'Story Time Video'}
-                                        <div className="flex gap-2">
-                                          <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleCopyToClipboard(dataItem.enhancedPrompt)}
-                                            className="text-white hover:bg-white/20"
-                                          >
-                                            {copied ? (
-                                              <Check className="h-4 w-4" />
-                                            ) : (
-                                              <Copy className="h-4 w-4" />
-                                            )}
-                                          </Button>
-                                        </div>
-                                      </h2>
-                                      <p className="text-purple-50 whitespace-pre-wrap leading-relaxed pr-4 max-h-40 overflow-y-auto">
-                                        {dataItem.enhancedPrompt}
-                                      </p>
-                                    </div>
-                                    <video
-                                      src={dataItem.videoUrl}
-                                      controls
-                                      className="w-full h-64 rounded-lg object-contain bg-black"
-                                      preload="auto"
-                                      onError={(e) => console.error("Video error:", e)}
-                                    />
-                                    <div className="grid grid-cols-2 gap-3 pt-4">
-                                      <Button
-                                        variant="secondary"
-
-                                        onClick={() => handleDownloadVideo(dataItem.videoUrl || '', dataItem.userPrompt || '')}
-                                      >
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Download
-                                      </Button>
-                                      <Button
-                                        variant="secondary"
-                                        onClick={() => setShowShareDialog(true)}
-                                      >
-                                        <Share className="mr-2 h-4 w-4" />
-                                        Share
-                                      </Button>
-                                    </div>
-                                  </>
-                                ) :
-                                dataItem.status === 'waiting' ?
-                                  (
-                                    <div className="w-full h-96 rounded-lg bg-black/30 flex flex-col items-center justify-center">
-                                      <div
-                                        className="p-2 animate-spin drop-shadow-2xl bg-gradient-to-bl from-pink-400 via-purple-400 to-indigo-600 md:w-20 md:h-20 h-16 w-16 aspect-square rounded-full"
-                                      >
-                                        <div
-                                          className="rounded-full h-full w-full bg-slate-100 dark:bg-zinc-900 background-blur-md"
-                                        ></div>
-                                      </div>
-
-                                      <div className="loader">
-                                        <p>Generating</p>
-                                        <div className="words">
-                                          <span className="word">Story</span>
-                                          <span className="word">Speech</span>
-                                          <span className="word">Character</span>
-                                          <span className="word">Video</span>
-                                          <span className="word">Story</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )
-                                  :
-                                  (
-                                    <CardContent
-                                      className="bg-[#0f0f0f]/ bg-red-900/30 border-2/ border-red-600 h-fit min-h-96 w-full p-0 flex flex-col justify-center pb-4 rounded-xl relative">
-                                      <div className="text-center">
-                                        <TriangleAlert className='size-16 text-red-500 mx-auto' />
-                                        <h2 className="text-zinc-900 dark:text-white mt-4">Error Generating Content!</h2>
-                                        <p className="text-zinc-600 dark:text-zinc-400">
-                                          The server wasn't able to generate your {dataItem.contentType}!
-                                        </p>
-                                        <div className='pt-1 text-sm opacity-60'>Please Try Again!</div>
-                                        <div className='pt-1 text-xs opacity-40'>{dataItem.userPrompt}</div>
-                                      </div>
-                                      {
-                                        dataItem.contentType === 'roast-my-pic' &&
-                                        (
-                                          <img
-                                            src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
-                                            alt={dataItem.displayName || dataItem.musicTitle || ''}
-                                            className={`size-24 aspect-square rounded-xl object-cover absolute bottom-4 right-4 hidden`}
-                                          />
-                                        )
-                                      }
-                                    </CardContent>
-                                  )
-                            }
-                          </ Card>
-                        )
-                        :
-                        (
-                          <div className={`text-center text-purple-300 py-20 ${loading && ' animate-pulse '}`}>
-                            <BookOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                            <p>Your stories will appear here</p>
-                            <p className="text-sm mt-2 text-purple-400">
-                              Use the controls on the left to generate your story
-                            </p>
-                          </div>
-                        )
-                      }
-                    </ScrollArea>
-
-                    {generatedScript && (
-                      <div className="mt-4 space-y-4">
-                        <div className="flex justify-between items-center">
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              className="bg-black/30"
-                              onClick={() => setShowShareDialog(true)}
-                            >
-                              <Share2 className="mr-2 h-4 w-4" />
-                              Share
-                            </Button>
-                          </div>
-                          <div className="flex gap-4 items-center">
-                            <Badge variant="outline" className="bg-black/30">
-                              {genre}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
             </div>
 
-            {/* Dialogs */}
-            <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-              <DialogContent className="bg-black/90 border-purple-500/20">
-                <DialogHeader>
-                  <DialogTitle className="text-white">Share Your Story</DialogTitle>
-                  <DialogDescription className="text-purple-200">
-                    Share your creation across platforms
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { name: 'Twitter', icon: '🐦' },
-                    { name: 'Facebook', icon: '👤' },
-                    { name: 'Reddit', icon: '🤖' },
-                    { name: 'Email', icon: '📧' }
-                  ].map(platform => (
-                    <Button
-                      key={platform.name}
-                      variant="outline"
-                      className="w-full bg-black/30"
-                      onClick={() => setShowShareDialog(false)}
-                    >
-                      <span className="mr-2">{platform.icon}</span>
-                      {platform.name}
-                    </Button>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* History Dialog */}
-            <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
-              <DialogContent className="bg-black/90 border-purple-500/20 max-w-4xl">
-                <DialogHeader>
-                  <DialogTitle className="text-white">Story History</DialogTitle>
-                </DialogHeader>
-                <ScrollArea className="h-[60vh]">
-                  <div className="space-y-4">
-                    {storyHistory.map((item) => (
-                      <Card key={item.id} className="bg-black/50">
-                        <CardHeader>
-                          <CardTitle className="text-white text-sm flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {genres.find(g => g.value === item.genre)?.icon}
-                              <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setGeneratedStory(item);
-                                setPrompt(item.prompt);
-                                setGenre(item.genre);
-                                setShowHistoryDialog(false);
-                              }}
-                            >
-                              Load
-                            </Button>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <h3 className="text-purple-100 font-semibold mb-2">{item.title}</h3>
-                          <p className="text-purple-200 line-clamp-3">{item.content}</p>
-                        </CardContent>
-                      </Card>
-                    ))}
+            {/* Right panel - Story Display */}
+            <div className="space-y-6">
+              <Card className={`${darkMode ? 'bg-black/50' : 'bg-white/90'} backdrop-blur border-purple-500/20`}>
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <BookOpen className="h-5 w-5" />
+                      Your Generated Stories
+                    </CardTitle>
                   </div>
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
-
-            <MessageToast
-              message="Your creation is in progress! You can keep track in your profile."
-              visible={toastVisible}
-              onClose={() => setToastVisible(false)}
-            />
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[800px] rounded-md border border-purple-500/20 p-4 gap-4">
+                    {stories.length > 0 ? (
+                      stories.map((story) => (
+                        <Card key={story.id} className='p-6 bg-black/30 mb-4'>
+                          <div className="prose prose-invert max-w-none py-4 rounded-xl bg-black/60 p-4 mb-4">
+                            <h2 className="text-2xl font-bold text-purple-100 mb-4 flex justify-between">
+                              Story Prompt
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleCopyToClipboard(story.content)}
+                                  className="text-white hover:bg-white/20"
+                                >
+                                  {copied ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                  </Button>
+                              </div>
+                            </h2>
+                            <p className="text-purple-50 mb-4">{story.prompt}</p>
+                            <h3 className="text-xl font-semibold text-purple-100 mb-2">Generated Story</h3>
+                            <p className="text-purple-50 whitespace-pre-wrap leading-relaxed pr-4 max-h-96 overflow-y-auto">
+                              {story.content}
+                            </p>
+                          </div>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center text-purple-300 py-20">
+                        <BookOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                        <p>Your stories will appear here</p>
+                        <p className="text-sm mt-2 text-purple-400">
+                          Use the controls on the left to generate your story
+                        </p>
+                      </div>
+                    )}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
-
-    </Layout >
+      </div>
+    </Layout>
   );
 }
