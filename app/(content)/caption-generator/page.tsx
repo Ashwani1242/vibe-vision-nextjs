@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState, useCallback, useMemo } from 'react';
+import OpenAI from 'openai';
 import { FileUpload } from "@/components/ui/file-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,27 +24,28 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import {
-  CloudIcon,
   RefreshCcw,
   Copy,
   HelpCircle,
   Wand2,
-  Share2,
   Settings2,
   Aperture,
   ImageIcon,
+  Trash2,
 } from "lucide-react";
 import { Layout } from '@/components/layout/layout';
 import { SparklesCore } from '@/components/ui/sparkles';
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-// Interfaces and Configurations
+// Enhanced type definitions
 interface Platform {
   maxLength: number;
   hashtagLimit: number;
+  description: string;
 }
 
 interface Platforms {
@@ -55,28 +56,99 @@ interface ToneOption {
   value: string;
   label: string;
   icon: string;
+  description: string;
 }
 
+interface GeneratedContent {
+  caption: string;
+  hashtags: string[];
+  imageDescription: string;
+  timestamp: number;
+}
+
+// Comprehensive platform and tone configurations
 const platforms: Platforms = {
-  instagram: { maxLength: 2200, hashtagLimit: 30 },
-  twitter: { maxLength: 280, hashtagLimit: 5 },
-  facebook: { maxLength: 63206, hashtagLimit: 10 },
-  linkedin: { maxLength: 3000, hashtagLimit: 15 }
+  instagram: {
+    maxLength: 2200,
+    hashtagLimit: 30,
+    description: "Visual-first platform focusing on aesthetics and storytelling"
+  },
+  twitter: {
+    maxLength: 280,
+    hashtagLimit: 5,
+    description: "Real-time, concise communication platform"
+  },
+  facebook: {
+    maxLength: 63206,
+    hashtagLimit: 10,
+    description: "Community and connection-oriented social network"
+  },
+  linkedin: {
+    maxLength: 3000,
+    hashtagLimit: 15,
+    description: "Professional networking and content sharing platform"
+  }
 };
 
 const toneOptions: ToneOption[] = [
-  { value: 'professional', label: 'Professional', icon: '👔' },
-  { value: 'casual', label: 'Casual', icon: '😊' },
-  { value: 'humorous', label: 'Humorous', icon: '😄' },
-  { value: 'formal', label: 'Formal', icon: '📜' },
-  { value: 'creative', label: 'Creative', icon: '🎨' },
-  { value: 'inspirational', label: 'Inspirational', icon: '✨' },
-  { value: 'technical', label: 'Technical', icon: '💻' },
-  { value: 'storytelling', label: 'Storytelling', icon: '📚' }
+  {
+    value: 'professional',
+    label: 'Professional',
+    icon: '👔',
+    description: 'Polished, formal, and expert-level communication'
+  },
+  {
+    value: 'casual',
+    label: 'Casual',
+    icon: '😊',
+    description: 'Relaxed, conversational, and approachable style'
+  },
+  {
+    value: 'humorous',
+    label: 'Humorous',
+    icon: '😄',
+    description: 'Witty, playful, and entertaining approach'
+  },
+  {
+    value: 'formal',
+    label: 'Formal',
+    icon: '📜',
+    description: 'Official, structured, and precise language'
+  },
+  {
+    value: 'creative',
+    label: 'Creative',
+    icon: '🎨',
+    description: 'Innovative, imaginative, and original content'
+  },
+  {
+    value: 'inspirational',
+    label: 'Inspirational',
+    icon: '✨',
+    description: 'Motivational, uplifting, and empowering messages'
+  },
+  {
+    value: 'technical',
+    label: 'Technical',
+    icon: '💻',
+    description: 'Detailed, precise, and specialized content'
+  },
+  {
+    value: 'storytelling',
+    label: 'Storytelling',
+    icon: '📚',
+    description: 'Narrative-driven, engaging, and immersive style'
+  }
 ];
 
+// Initialize OpenAI with secure environment variable handling
+const openai = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true // Use with caution in production
+});
+
 export default function CaptionGenerator() {
-  // State variables
+  // Enhanced state management with more comprehensive types
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedPlatform, setPlatform] = useState<string>('instagram');
@@ -87,30 +159,52 @@ export default function CaptionGenerator() {
   const [openSettings, setOpenSettings] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
-  const [imageAnalysis, setImageAnalysis] = useState<string | null>(null);
-  const [generatedCaptions, setGeneratedCaptions] = useState<string[]>([]);
-  const [generatedHashtags, setGeneratedHashtags] = useState<string[]>([]);
+
+  // Enhanced content generation tracking
+  const [generatedContents, setGeneratedContents] = useState<GeneratedContent[]>([]);
 
   const { toast } = useToast();
 
-  // File upload handler
+  // Memoized platform and tone details for performance
+  const currentPlatform = useMemo(() => platforms[selectedPlatform], [selectedPlatform]);
+
+  // Enhanced file upload handler with error checking
   const handleFileUpload = useCallback((file: File) => {
+    // Validate file type and size
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload an image (JPEG, PNG, GIF, WebP)",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (file.size > maxSize) {
+      toast({
+        title: "File Too Large",
+        description: "Image must be less than 10MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setImage(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
-      setImageAnalysis(null);
-      setGeneratedCaptions([]);
-      setGeneratedHashtags([]);
     };
     reader.readAsDataURL(file);
-  }, []);
+  }, [toast]);
 
-  // Image analysis and content generation handler
+  // Content generation with enhanced error handling
   const generateContent = async () => {
     if (!image || !tone) {
       toast({
-        title: "Error",
+        title: "Incomplete Input",
         description: "Please upload an image and select a tone",
         variant: "destructive"
       });
@@ -121,89 +215,127 @@ export default function CaptionGenerator() {
     setProgress(20);
 
     try {
-      // Create form data to send to backend
-      const formData = new FormData();
-      formData.append('image', image);
-      formData.append('platform', selectedPlatform);
-      formData.append('tone', tone);
-      formData.append('description', description);
-      formData.append('numberOfHashtags', hashtagCount.toString());
-      formData.append('captionLength', captionLength);
+      const reader = new FileReader();
+      reader.readAsDataURL(image);
+      reader.onloadend = async () => {
+        const base64Image = reader.result as string;
 
-      // Send request to backend for image analysis and content generation
-      const response = await axios.post('/api/generate-content', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setProgress(percentCompleted);
+        try {
+          const response = await openai.chat.completions.create({
+            model: "gpt-4-vision-preview",
+            messages: [
+              {
+                role: "system",
+                content: `Advanced social media content creator:
+                - Platform: ${selectedPlatform}
+                - Tone: ${tone}
+                - Caption Length: ${captionLength}
+                - Hashtag Count: ${hashtagCount}
+                
+                Generate:
+                1. Concise image description
+                2. ${hashtagCount} strategic hashtags
+                3. Engaging social media caption
+                4. Tailored to platform specifications
+                
+                Additional Context: ${description || 'No specific context provided'}`
+              },
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "image_url",
+                    image_url: { url: base64Image }
+                  },
+                  {
+                    type: "text",
+                    text: "Generate optimized social media content"
+                  }
+                ]
+              }
+            ],
+            max_tokens: 400
+          });
+
+          const outputText = response.choices[0].message.content || '';
+
+          // Enhanced parsing with fallback mechanisms
+          const sections = outputText.split('\n\n');
+          const imageDescription = sections[0] || 'No description available';
+          const hashtags = sections[1] ?
+            sections[1].split(',')
+              .map(tag => tag.trim().replace(/^#/, ''))
+              .filter(tag => tag.length > 0)
+              .slice(0, hashtagCount) :
+            [];
+          const captions = sections.slice(2).filter(caption => caption.trim().length > 0);
+
+          const newContent: GeneratedContent = {
+            caption: captions[0] || 'No caption generated',
+            hashtags: hashtags,
+            imageDescription: imageDescription,
+            timestamp: Date.now()
+          };
+
+          setGeneratedContents(prev => [newContent, ...prev]);
+          setProgress(100);
+
+          toast({
+            title: "Content Generated",
+            description: "Your social media content is ready!",
+          });
+        } catch (error) {
+          console.error('OpenAI Content generation error:', error);
+          toast({
+            title: "Generation Failed",
+            description: "Unable to generate content. Please try again.",
+            variant: "destructive"
+          });
+          setProgress(0);
         }
-      });
-
-      // Update state with generated content
-      if (response.data.imageAnalysis) {
-        setImageAnalysis(response.data.imageAnalysis);
-      }
-
-      if (response.data.captions) {
-        setGeneratedCaptions(response.data.captions);
-      }
-
-      if (response.data.hashtags) {
-        setGeneratedHashtags(response.data.hashtags);
-      }
-
-      setProgress(100);
-      toast({
-        title: "Success",
-        description: "Content generated successfully!",
-      });
+      };
     } catch (error) {
       console.error('Content generation error:', error);
       toast({
-        title: "Error",
-        description: "Failed to generate content",
+        title: "Processing Error",
+        description: "Failed to process the image",
         variant: "destructive"
       });
       setProgress(0);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  // Copy content handler
-  const handleCopyContent = useCallback((content: string | null, type: 'captions' | 'hashtags' = 'captions') => {
-    let textToCopy = content;
+  // Enhanced copy and share functionality
+  const handleCopyContent = useCallback((content: GeneratedContent) => {
+    const textToCopy = `${content.caption}\n\n${content.hashtags.map(tag => `#${tag}`).join(' ')}`;
 
-    if (!textToCopy && type === 'hashtags') {
-      // Copy all hashtags
-      textToCopy = generatedHashtags
-        .slice(0, hashtagCount)
-        .map(tag => `#${tag}`)
-        .join(' ');
-    }
-
-    if (textToCopy) {
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        toast({
-          title: "Copied",
-          description: `${type === 'captions' ? 'Caption' : 'Hashtags'} copied to clipboard`,
-        });
-      }).catch(err => {
-        toast({
-          title: "Error",
-          description: "Failed to copy",
-          variant: "destructive"
-        });
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      toast({
+        title: "Copied",
+        description: "Content copied to clipboard",
       });
-    }
-  }, [generatedHashtags, hashtagCount, toast]);
+    }).catch(() => {
+      toast({
+        title: "Copy Failed",
+        description: "Unable to copy content",
+        variant: "destructive"
+      });
+    });
+  }, [toast]);
+
+  // Clear image and reset state
+  const handleClearImage = () => {
+    setImage(null);
+    setImagePreview(null);
+    setGeneratedContents([]);
+  }
 
   // Main render
   return (
     <Layout>
-      {/* SparklesCore background */}
+      {/* Sparkle Background */}
       <div className="absolute inset-0 z-0">
         <SparklesCore
           id="caption-generator-sparkles"
@@ -215,47 +347,62 @@ export default function CaptionGenerator() {
         />
       </div>
 
-      <div className="min-h-screen py-20 px-4 relative">
+      <div className="min-h-screen py-20 px-4 relative z-10">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <h1 className="text-4xl font-bold text-center mb-8 flex items-center justify-center">
-            VibeVerse
-            <Aperture className="ml-2 text-purple-400" />
-            <Badge className='ml-3'>2.1 V</Badge>
-          </h1>
-          <p className="text-xl font-bold text-center mb-8 flex items-center justify-center">
-            AI-Powered Social Media Content Creation
-          </p>
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text">
+              VibeVerse (AI Caption Generator)
+              <Badge className='ml-3'>1.0 V</Badge>
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Upload an image and let AI generate the perfect caption for your social media posts
+            </p>
+          </div>
 
           {/* File Upload Section */}
           <div className="mb-8 border-dashed border-2 border-violet-500 rounded-lg">
             <FileUpload onFileUpload={handleFileUpload} />
           </div>
 
-          {/* Image Preview and Analysis */}
+          {/* Image Preview and Actions */}
           {imagePreview && (
-            <div className="mb-8 flex flex-col items-center">
-              <img
-                src={imagePreview}
-                alt="Upload Preview"
-                className="max-w-xs max-h-64 rounded-lg shadow-md mb-4"
-              />
-              <Button
-                onClick={generateContent}
-                variant="outline"
-                className="gap-2"
-                disabled={loading}
-              >
-                <ImageIcon className="h-4 w-4" />
-                Generate Content
-              </Button>
-              {imageAnalysis && (
-                <Card className="mt-4 w-full">
-                  <CardContent className="pt-6">
-                    <p className="text-muted-foreground">{imageAnalysis}</p>
-                  </CardContent>
-                </Card>
-              )}
+            <div className="mb-8 flex flex-col items-center relative">
+              <div className="relative">
+                <img
+                  src={imagePreview}
+                  alt="Upload Preview"
+                  className="max-w-xs max-h-64 rounded-lg shadow-md mb-4"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2"
+                  onClick={handleClearImage}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex space-x-2 mt-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={generateContent}
+                        variant="outline"
+                        className="gap-2"
+                        disabled={loading || !tone}
+                      >
+                        <ImageIcon className="h-4 w-4" />
+                        Generate Content
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Generate social media content for your image</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           )}
 
@@ -266,9 +413,10 @@ export default function CaptionGenerator() {
             </div>
           )}
 
-          {/* Controls Section */}
+          {/* Content Generation Controls */}
           <Card className="mb-8">
             <CardContent className="space-y-6 pt-6">
+              {/* Platform Selection */}
               <div className="space-y-2">
                 <Label>Platform</Label>
                 <Select
@@ -279,15 +427,21 @@ export default function CaptionGenerator() {
                     <SelectValue placeholder="Select platform" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.keys(platforms).map((platform) => (
-                      <SelectItem key={platform} value={platform}>
-                        {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    {Object.entries(platforms).map(([key, platform]) => (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center">
+                          <span className="capitalize mr-2">{key}</span>
+                          <Badge variant="outline" className="text-xs">
+                            Limit: {platform.hashtagLimit} hashtags
+                          </Badge>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Tone Selection with Descriptions */}
               <div className="space-y-2">
                 <Label>Tone</Label>
                 <Select
@@ -295,47 +449,57 @@ export default function CaptionGenerator() {
                   onValueChange={(value) => setTone(value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select tone" />
+                    <SelectValue placeholder="Select content tone" />
                   </SelectTrigger>
                   <SelectContent>
                     {toneOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        <span className="mr-2">{option.icon}</span>
-                        {option.label}
+                        <div className="flex items-center">
+                          <span className="mr-2">{option.icon}</span>
+                          <div>
+                            <div>{option.label}</div>
+                            <p className="text-xs text-muted-foreground">
+                              {option.description}
+                            </p>
+                          </div>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Additional Context */}
               <div className="space-y-2">
                 <Label>Additional Context (optional)</Label>
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add any specific details or context you'd like to include..."
-                  className="resize-none"
+                  placeholder="Provide extra details to guide content generation..."
+                  className="resize-y"
                   rows={3}
                 />
               </div>
 
+              {/* Hashtag Count Slider */}
               <div className="space-y-2">
                 <Label>Number of Hashtags</Label>
                 <Slider
                   value={[hashtagCount]}
                   onValueChange={(value) => setHashtagCount(value[0])}
                   min={5}
-                  max={platforms[selectedPlatform].hashtagLimit}
+                  max={currentPlatform.hashtagLimit}
                   step={1}
                   className="w-full"
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>5</span>
-                  <span>{platforms[selectedPlatform].hashtagLimit}</span>
+                  <span>{currentPlatform.hashtagLimit}</span>
                 </div>
               </div>
 
-              <div className="flex justify-between">
+              {/* Advanced Settings Dialog */}
+              <div className="flex justify-between items-center">
                 <Dialog open={openSettings} onOpenChange={setOpenSettings}>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="gap-2">
@@ -345,7 +509,7 @@ export default function CaptionGenerator() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Advanced Settings</DialogTitle>
+                      <DialogTitle>Advanced Content Generation</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6">
                       <div className="space-y-2">
@@ -353,20 +517,23 @@ export default function CaptionGenerator() {
                         <RadioGroup
                           value={captionLength}
                           onValueChange={setCaptionLength}
-                          className="flex space-x-4"
+                          className="grid grid-cols-3 gap-4"
                         >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="short" id="short" />
-                            <Label htmlFor="short">Short</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="medium" id="medium" />
-                            <Label htmlFor="medium">Medium</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="long" id="long" />
-                            <Label htmlFor="long">Long</Label>
-                          </div>
+                          {['short', 'medium', 'long'].map((length) => (
+                            <div key={length}>
+                              <RadioGroupItem
+                                value={length}
+                                id={length}
+                                className="peer sr-only"
+                              />
+                              <Label
+                                htmlFor={length}
+                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                              >
+                                {length.charAt(0).toUpperCase() + length.slice(1)}
+                              </Label>
+                            </div>
+                          ))}
                         </RadioGroup>
                       </div>
                     </div>
@@ -394,165 +561,129 @@ export default function CaptionGenerator() {
             </CardContent>
           </Card>
 
-          {/* Results Section */}
-          {(generatedCaptions.length > 0 || generatedHashtags.length > 0) && (
+          {/* Generated Content Section */}
+          {generatedContents.length > 0 && (
             <div className="space-y-6">
-              <Tabs defaultValue="captions">
+              <Tabs defaultValue="latest">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="captions">Captions</TabsTrigger>
-                  <TabsTrigger value="hashtags">Hashtags</TabsTrigger>
+                  <TabsTrigger value="latest">Latest Content</TabsTrigger>
+                  <TabsTrigger value="history">Generation History</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="captions" className="space-y-4">
-                  {generatedCaptions.map((caption, index) => (
-                    <Card key={index}>
-                      <CardContent className="pt-6">
-                        <p className="mb-4">{caption}</p>
+                <TabsContent value="latest">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Generated Caption</h3>
+                          <p className="text-muted-foreground">
+                            {generatedContents[0].caption}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Hashtags</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {generatedContents[0].hashtags.map((tag, index) => (
+                              <Badge
+                                key={index}
+                                variant="secondary"
+                                className="cursor-pointer"
+                              >
+                                #{tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+
                         <div className="flex justify-end space-x-2">
                           <Button
                             variant="outline"
-                            size="sm"
-                            onClick={() => handleCopyContent(caption)}
+                            onClick={() => handleCopyContent(generatedContents[0])}
                           >
                             <Copy className="h-4 w-4 mr-2" />
-                            Copy
+                            Copy Content
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              // Share functionality
-                            }}
-                          >
-                            <Share2 className="h-4 w-4 mr-2" />
-                            Share
-                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="history">
+                  {generatedContents.slice(1).map((content, _index) => (
+                    <Card key={content.timestamp} className="mb-4">
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Generated on: {new Date(content.timestamp).toLocaleString()}
+                            </p>
+                            <p>{content.caption}</p>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            {content.hashtags.map((tag, tagIndex) => (
+                              <Badge
+                                key={tagIndex}
+                                variant="secondary"
+                                className="cursor-pointer"
+                              >
+                                #{tag}
+                              </Badge>
+                            ))}
+                          </div>
+
+                          <div className="flex justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleCopyContent(content)}
+                            >
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </TabsContent>
-
-                <TabsContent value="hashtags">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {generatedHashtags.slice(0, hashtagCount).map((tag, index) => (
-                          <Badge
-                            key={index}
-                            variant="secondary"
-                            className="cursor-pointer"
-                            onClick={() => handleCopyContent(`#${tag}`, 'hashtags')}
-                          >
-                            #{tag}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleCopyContent(null, 'hashtags')}
-                        className="w-full gap-2"
-                      >
-                        <Copy className="h-4 w-4" />
-                        Copy All Hashtags
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
               </Tabs>
             </div>
           )}
 
-          {/* Platform Tips Card */}
+          {/* Platform Tips */}
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <HelpCircle className="h-5 w-5 text-purple-400" />
-                Platform Tips
+                Platform Insights
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                {selectedPlatform === 'instagram' &&
-                  'For maximum engagement on Instagram, use a mix of popular and niche hashtags. Consider adding hashtags in the first comment rather than the caption.'}
-                {selectedPlatform === 'twitter' &&
-                  'Twitter posts with 1-2 relevant hashtags tend to get more engagement than those with more. Place hashtags within the natural flow of your tweet when possible.'}
-                {selectedPlatform === 'facebook' &&
-                  'Facebook posts perform best with minimal hashtag usage. Focus on 1-2 highly relevant hashtags that align with your content.'}
-                {selectedPlatform === 'linkedin' &&
-                  'Use 3-5 relevant industry hashtags on LinkedIn. Include both broad industry terms and specific niche hashtags for better reach.'}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Export Options */}
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle>Export Options</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  className="gap-2"
-                  onClick={() => {
-                    const content = generatedCaptions.join('\n\n') + '\n\n' +
-                      generatedHashtags.slice(0, hashtagCount).map(tag => `#${tag}`).join(' ');
-                    const blob = new Blob([content], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'social-media-content.txt';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-
-                    toast({
-                      title: "Success",
-                      description: "Content saved as text file!",
-                    });
-                  }}
-                >
-                  <CloudIcon className="h-4 w-4" />
-                  Save as Text File
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="gap-2"
-                  onClick={async () => {
-                    const content = generatedCaptions[0] + '\n\n' +
-                      generatedHashtags.slice(0, hashtagCount).map(tag => `#${tag}`).join(' ');
-                    try {
-                      if (navigator.share) {
-                        await navigator.share({
-                          title: 'Generated Social Media Content',
-                          text: content,
-                        });
-                        toast({
-                          title: "Success",
-                          description: "Content shared successfully!",
-                        });
-                      } else {
-                        toast({
-                          title: "Warning",
-                          description: "Sharing is not supported on this device/browser",
-                          variant: "default",
-                        });
-                      }
-                    } catch (error) {
-                      toast({
-                        title: "Error",
-                        description: "Error sharing content",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                >
-                  <Share2 className="h-4 w-4" />
-                  Share Content
-                </Button>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2 capitalize">
+                    {selectedPlatform} Strategy
+                  </h4>
+                  <p className="text-muted-foreground">
+                    {currentPlatform.description}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Content Tips</h4>
+                  <p className="text-muted-foreground">
+                    {selectedPlatform === 'instagram' &&
+                      'Mix popular and niche hashtags. Consider adding hashtags in the first comment.'}
+                    {selectedPlatform === 'twitter' &&
+                      'Use 1-2 relevant hashtags. Place them naturally within the tweet.'}
+                    {selectedPlatform === 'facebook' &&
+                      'Minimize hashtag usage. Focus on 1-2 highly relevant tags.'}
+                    {selectedPlatform === 'linkedin' &&
+                      'Use 3-5 professional and industry-specific hashtags.'}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
