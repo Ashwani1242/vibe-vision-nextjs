@@ -3,18 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { Slider } from "../../../components/ui/slider";
 import { Textarea } from "../../../components/ui/textarea";
-import { Switch } from "../../../components/ui/switch";
 import { Label } from "../../../components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -35,7 +25,6 @@ import {
   Download,
   Share2,
   TriangleAlert,
-  Settings,
   Sparkles,
   Wand2,
   RefreshCw,
@@ -48,6 +37,14 @@ import { BASE_URL } from '@/config';
 import axios from 'axios';
 import { Layout } from '@/components/layout/layout';
 import MessageToast from '@/components/ui/MessageToast';
+
+// Genre type definition
+type Genre = {
+  value: string;
+  icon: string;
+  theme: string;
+  description: string;
+};
 
 const genres: Genre[] = [
   {
@@ -98,12 +95,12 @@ const genres: Genre[] = [
     theme: 'from-green-400 to-blue-400',
     description: 'Everyday experiences, emotions, and personal growth'
   },
-  // {
-  //   value: 'Drama',
-  //   icon: '🎭',
-  //   theme: 'from-blue-500 to-gray-700',
-  //   description: 'Emotional narratives with realistic conflicts and character depth'
-  // },
+  {
+    value: 'Drama',
+    icon: '🎭',
+    theme: 'from-blue-500 to-gray-700',
+    description: 'Emotional narratives with realistic conflicts and character depth'
+  },
   {
     value: 'Action',
     icon: '💥',
@@ -138,22 +135,18 @@ export default function EnhancedStoryGenerator() {
   const [prompt, setPrompt] = useState<string>('');
   const [generatedStory, setGeneratedStory] = useState<GeneratedStory | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
   const [darkMode, setDarkMode] = useState<boolean>(true);
 
   // UI state
   const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
   const [showHistoryDialog, setShowHistoryDialog] = useState<boolean>(false);
-  const [showSettingsDialog, setShowSettingsDialog] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('write');
 
   // Enhanced features state
   const [storyHistory, setStoryHistory] = useState<StoryHistoryItem[]>([]);
   const [audioEnabled, setAudioEnabled] = useState<boolean>(true);
-  const [autoSave, setAutoSave] = useState<boolean>(true);
   const [backgroundStyle, setBackgroundStyle] = useState<string>('gradient');
-  const [aiModel, setAiModel] = useState<string>('standard');
   const [characterLimit, setCharacterLimit] = useState<number>(2000);
 
   // Advanced settings
@@ -165,16 +158,8 @@ export default function EnhancedStoryGenerator() {
     complexity: 'medium',
   });
 
-  // Creative features
-  const [enableCharacterProfiles, setEnableCharacterProfiles] = useState<boolean>(true);
-  const [generateIllustrations, setGenerateIllustrations] = useState<boolean>(false);
-  const [musicTheme, setMusicTheme] = useState<string>('none');
-  const [language, setLanguage] = useState<string>('English');
-
   // Refs
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-
 
   const [error, setError] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
@@ -185,10 +170,6 @@ export default function EnhancedStoryGenerator() {
 
   const [toastVisible, setToastVisible] = useState(false);
 
-  const showToast = () => {
-    setToastVisible(true);
-    // The toast will auto-close after 2 seconds because of the useEffect in the Toast component
-  };
 
   useEffect(() => {
     setLocalStorageInstance(localStorage);
@@ -241,61 +222,6 @@ export default function EnhancedStoryGenerator() {
     switch (backgroundStyle) {
       case 'gradient':
         return `${baseClasses} bg-gradient-to-br ${genres.find(g => g.value === genre)?.theme || 'from-purple-600 to-blue-600'}`;
-      case 'animated':
-        return `${baseClasses} bg-[conic-gradient(at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900`;
-      case 'particles':
-        return `${baseClasses} bg-black`;
-      default:
-        return `${baseClasses} bg-gradient-to-br from-purple-600 to-blue-600`;
-    }
-  };
-
-  const handleGenerate = async () => {
-    let currentTime = Date.now();
-    const token = localStorageInstance?.getItem('token');
-    const loggedInUser = localStorageInstance?.getItem('loggedInUser');
-
-    if (!prompt.trim()) {
-      setError('Please enter a prompt.');
-      return;
-    }
-
-    setError('');
-    setLoading(true);
-
-    try {
-      showToast()
-
-      fetchData()
-
-      const response = await axios.post(
-        `${BASE_URL}/api/generate-video/story-time`,
-        {
-          prompt,
-          theme: `${genre}, with ${genreDescription}`,
-          tone: settings.tone,
-          ageGroup: settings.ageGroup,
-          userName: loggedInUser,
-          duration: settings.duration * 2,
-          currentTime
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      setVideoUrl(`${BASE_URL}/${response.data.videoUrl}`);
-      setGeneratedScript(response.data.script)
-      setVideoTitle(response.data.videoName)
-
-      console.log(response.data.data);
-    } catch (error) {
-      console.error('Error generating video:', error);
-      // setError('Failed to generate video. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -324,27 +250,6 @@ export default function EnhancedStoryGenerator() {
     }
   };
 
-
-
-  // Initialize
-  // useEffect(() => {
-  //   // Load saved stories
-  //   if (savedStories) {
-  //     setStoryHistory(JSON.parse(savedStories));
-  //   }
-
-  //   // Set theme
-  //   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  //   setDarkMode(prefersDark);
-
-  //   // Initialize audio context
-  //   if (audioEnabled) {
-  //     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-  //     const audioContext = new AudioContext();
-  //     // Additional audio setup here
-  //   }
-  // }, []);
-
   // Utility functions
   const handleCopyToClipboard = async (script: string) => {
     if (!script) return;
@@ -361,17 +266,6 @@ export default function EnhancedStoryGenerator() {
       console.error('Failed to copy:', error);
     }
   };
-
-  // const handleExport = async (format: string) => {
-  //   if (!generatedStory?.content) return;
-
-  //   // Simulated export
-  //   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-  //   await delay(1000);
-
-  //   // In a real app, implement actual export logic here
-  //   console.log(`Exporting in ${format} format...`);
-  // };
 
   return (
     <Layout>
@@ -413,66 +307,8 @@ export default function EnhancedStoryGenerator() {
                 Story Forge AI
               </h1>
               <Badge variant="outline" className="text-white">
-                v2.0
+                v1.0
               </Badge>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {/* Theme toggle */}
-              {/* <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-white/20"
-                    onClick={() => setDarkMode(!darkMode)}
-                  >
-                    {darkMode ? (
-                      <Sun className="h-5 w-5" />
-                    ) : (
-                      <Moon className="h-5 w-5" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Toggle theme</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider> */}
-
-              {/* Audio toggle */}
-              {/* <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-white/20"
-                    onClick={() => setAudioEnabled(!audioEnabled)}
-                  >
-                    {audioEnabled ? (
-                      <Volume2 className="h-5 w-5" />
-                    ) : (
-                      <VolumeX className="h-5 w-5" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Toggle sound effects</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider> */}
-
-              {/* Settings button */}
-              <Button
-                variant="outline"
-                className="bg-black/30"
-                onClick={() => setShowSettingsDialog(true)}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
             </div>
           </header>
 
@@ -489,7 +325,7 @@ export default function EnhancedStoryGenerator() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {genres.map(({ value, icon, description }) => (
                       <TooltipProvider key={value}>
                         <Tooltip>
@@ -528,101 +364,45 @@ export default function EnhancedStoryGenerator() {
                   <CardTitle className="text-white">Story Configuration</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* AI Model Selection */}
-                  {/* <div className="space-y-2">
-                  <Label className="text-purple-200">AI Model</Label>
-                  <Select value={aiModel} onValueChange={setAiModel}>
-                    <SelectTrigger className="bg-black/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="standard">Standard</SelectItem>
-                      <SelectItem value="creative">Creative</SelectItem>
-                      <SelectItem value="professional">Professional</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div> */}
-
-                  {/* Story Settings Tabs */}
-                  <Tabs defaultValue="tone" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 bg-black/30">
-                      <TabsTrigger value="tone">Tone</TabsTrigger>
-                      <TabsTrigger value="ageGroup">Age Group</TabsTrigger>
-                      <TabsTrigger value="videoDuration">Video Duration</TabsTrigger>
-                      {/* <TabsTrigger value="complexity">Complexity</TabsTrigger> */}
-                    </TabsList>
-                    <TabsContent value="tone" className="space-y-4">
-                      <div className="grid grid-cols-2 gap-2">
-                        {['Casual', 'Formal', 'Humorous', 'Dark', 'Sarcastic', 'Hilarious', 'Silly', 'Dark Comedy'].map((tone) => (
-                          <Button
-                            key={tone}
-                            variant="outline"
-                            className={`${settings.tone.toLowerCase() === tone.toLowerCase()
-                              ? 'bg-purple-600'
-                              : 'bg-black/30'
-                              }`}
-                            onClick={() => setSettings({ ...settings, tone: tone.toLowerCase() })}
-                          >
-                            {tone}
-                          </Button>
-                        ))}
-                      </div>
-                    </TabsContent>
-                    <TabsContent value="ageGroup" className="space-y-4">
-                      <div className="grid grid-cols-2 gap-2">
-                        {['Kids ( less than 12 )', 'Teens ( 13 to 18 )', 'Adults ( above 18 )'].map((ageGroup) => (
-                          <Button
-                            key={ageGroup}
-                            variant="outline"
-                            className={`${settings.ageGroup.toLowerCase() === ageGroup.toLowerCase()
-                              ? 'bg-purple-600'
-                              : 'bg-black/30'
-                              }`}
-                            onClick={() => setSettings({ ...settings, ageGroup: ageGroup.toLowerCase() })}
-                          >
-                            {ageGroup}
-                          </Button>
-                        ))}
-                      </div>
-                    </TabsContent>
-                    <TabsContent value="videoDuration" className="space-y-4">
-                      <div className="space-y-2">
-                        <Label>Video Duration (seconds)</Label>
-                        <Slider
-                          value={[settings.duration]}
-                          onValueChange={([value]) =>
-                            setSettings(prev => ({ ...prev, duration: value }))
-                          }
-                          max={120}
-                          min={5}
-                          step={1}
-                          className="w-full"
-                        />
-                        <p className="text-sm text-gray-300">
-                          Current: About {settings.duration} seconds
-                        </p>
-                      </div>
-                    </TabsContent>
-                    {/* Similar TabsContent for style, pacing, and complexity */}
-                  </Tabs>
-
-                  {/* Advanced Features */}
-                  {/* <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-purple-200">Character Profiles</Label>
-                    <Switch
-                      checked={enableCharacterProfiles}
-                      onCheckedChange={setEnableCharacterProfiles}
-                    />
+                  {/* Tone Selection */}
+                  <div className="space-y-4">
+                    <Label className="text-purple-200">Tone</Label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {['Casual', 'Formal', 'Humorous', 'Dark', 'Sarcastic', 'Hilarious', 'Silly', 'Dark Comedy'].map((tone) => (
+                        <Button
+                          key={tone}
+                          variant="outline"
+                          className={`${settings.tone.toLowerCase() === tone.toLowerCase()
+                            ? 'bg-purple-600'
+                            : 'bg-black/30'
+                            }`}
+                          onClick={() => setSettings({ ...settings, tone: tone.toLowerCase() })}
+                        >
+                          {tone}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-purple-200">AI Illustrations</Label>
-                    <Switch
-                      checked={generateIllustrations}
-                      onCheckedChange={setGenerateIllustrations}
-                    />
+
+                  {/* Age Group Selection */}
+                  <div className="space-y-4">
+                    <Label className="text-purple-200">Age Group</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['Kids ( less than 12 )', 'Teens ( 13 to 18 )', 'Adults ( above 18 )'].map((ageGroup) => (
+                        <Button
+                          key={ageGroup}
+                          variant="outline"
+                          className={`${settings.ageGroup.toLowerCase() === ageGroup.toLowerCase()
+                            ? 'bg-purple-600'
+                            : 'bg-black/30'
+                            }`}
+                          onClick={() => setSettings({ ...settings, ageGroup: ageGroup.toLowerCase() })}
+                        >
+                          {ageGroup}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
-                </div> */}
 
                   {/* Story Prompt */}
                   <div className="space-y-2">
@@ -648,7 +428,6 @@ export default function EnhancedStoryGenerator() {
                   {/* Generation Button */}
                   <Button
                     className="w-full bg-purple-600 hover:bg-purple-700"
-                    onClick={handleGenerate}
                     disabled={loading || !prompt.trim()}
                   >
                     {loading ? (
@@ -665,348 +444,246 @@ export default function EnhancedStoryGenerator() {
                   </Button>
                 </CardContent>
               </Card>
-            </div>
+              </div>
 
-            {/* Right panel - Story Display */}
-            <div className="space-y-6">
-              <Card className={`${darkMode ? 'bg-black/50' : 'bg-white/90'} backdrop-blur border-purple-500/20`}>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <BookOpen className="h-5 w-5" />
-                      Your Generated Stories and Videos
-                    </CardTitle>
-                    {/* {generatedScript && (
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={handleCopyToClipboard}
-                          className="text-white hover:bg-white/20"
-                        >
-                          {copied ? (
-                            <Check className="h-4 w-4" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    )} */}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[890px] rounded-md border border-purple-500/20 p-4 gap-4">
-
-                    {mostRecentData.length !== 0 ?
-                      mostRecentData.map((dataItem) =>
-                        < Card className='p-6 bg-black/30 mb-4'>
-                          {
-                            dataItem.status === 'success' ?
-                              (
-                                <>
-                                  <div className="prose prose-invert max-w-none py-4 rounded-xl bg-black/60 p-4 mb-4">
-                                    <h2 className="text-2xl font-bold text-purple-100 mb-4 flex justify-between">
-                                      {dataItem.userPrompt || 'Story Time Video'}
-                                      <div className="flex gap-2">
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          onClick={() => handleCopyToClipboard(dataItem.enhancedPrompt)}
-                                          className="text-white hover:bg-white/20"
-                                        >
-                                          {copied ? (
-                                            <Check className="h-4 w-4" />
-                                          ) : (
-                                            <Copy className="h-4 w-4" />
-                                          )}
-                                        </Button>
-                                      </div>
-                                    </h2>
-                                    <p className="text-purple-50 whitespace-pre-wrap leading-relaxed pr-4 max-h-40 overflow-y-auto">
-                                      {dataItem.enhancedPrompt}
-                                    </p>
-                                    {/* {generateIllustrations && (
-                                      <div className="mt-6 grid grid-cols-2 gap-4">
-                                        <img
-                                          src="/api/placeholder/400/300"
-                                          alt="AI Generated Illustration"
-                                          className="rounded-lg border border-purple-500/20"
-                                        />
-                                        <img
-                                          src="/api/placeholder/400/300"
-                                          alt="AI Generated Illustration"
-                                          className="rounded-lg border border-purple-500/20"
-                                        />
-                                      </div>
-                                    )} */}
-                                  </div>
-                                  <video
-                                    src={dataItem.videoUrl}
-                                    controls
-                                    className="w-full h-64 rounded-lg object-contain bg-black"
-                                    preload="auto"
-                                    onError={(e) => console.error("Video error:", e)}
-                                  />
-                                  <div className="grid grid-cols-2 gap-3 pt-4">
-                                    <Button
-                                      variant="secondary"
-
-                                      onClick={() => handleDownloadVideo(dataItem.videoUrl || '', dataItem.userPrompt || '')}
-                                    >
-                                      <Download className="mr-2 h-4 w-4" />
-                                      Download
-                                    </Button>
-                                    <Button
-                                      variant="secondary"
-                                      onClick={() => setShowShareDialog(true)}
-                                    >
-                                      <Share className="mr-2 h-4 w-4" />
-                                      Share
-                                    </Button>
-                                  </div>
-                                </>
-                              ) :
-                              dataItem.status === 'waiting' ?
-                                (
-                                  <div className="w-full h-96 rounded-lg bg-black/30 flex flex-col items-center justify-center">
-                                    <div
-                                      className="p-2 animate-spin drop-shadow-2xl bg-gradient-to-bl from-pink-400 via-purple-400 to-indigo-600 md:w-20 md:h-20 h-16 w-16 aspect-square rounded-full"
-                                    >
-                                      <div
-                                        className="rounded-full h-full w-full bg-slate-100 dark:bg-zinc-900 background-blur-md"
-                                      ></div>
-                                    </div>
-
-                                    <div className="loader">
-                                      <p>Generating</p>
-                                      <div className="words">
-                                        <span className="word">Story</span>
-                                        <span className="word">Speech</span>
-                                        <span className="word">Character</span>
-                                        <span className="word">Video</span>
-                                        <span className="word">Story</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )
-                                :
-                                (
-                                  <CardContent
-                                    className="bg-[#0f0f0f]/ bg-red-900/30 border-2/ border-red-600 h-fit min-h-96 w-full p-0 flex flex-col justify-center pb-4 rounded-xl relative">
-                                    <div className="text-center">
-                                      <TriangleAlert className='size-16 text-red-500 mx-auto' />
-                                      <h2 className="text-zinc-900 dark:text-white mt-4">Error Generating Content!</h2>
-                                      <p className="text-zinc-600 dark:text-zinc-400">
-                                        The server wasn't able to generate your {dataItem.contentType}!
-                                      </p>
-                                      <div className='pt-1 text-sm opacity-60'>Please Try Again!</div>
-                                      <div className='pt-1 text-xs opacity-40'>{dataItem.userPrompt}</div>
-                                    </div>
-                                    {
-                                      dataItem.contentType === 'roast-my-pic' &&
-                                      (
-                                        <img
-                                          src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
-                                          alt={dataItem.displayName || dataItem.musicTitle || ''}
-                                          className={`size-24 aspect-square rounded-xl object-cover absolute bottom-4 right-4 hidden`}
-                                        />
-                                      )
-                                    }
-                                  </CardContent>
-                                )
-                          }
-                        </ Card>
-                      )
-                      :
-                      (
-                        <div className={`text-center text-purple-300 py-20 ${loading && ' animate-pulse '}`}>
-                          <BookOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                          <p>Your stories will appear here</p>
-                          <p className="text-sm mt-2 text-purple-400">
-                            Use the controls on the left to generate your story
-                          </p>
-                        </div>
-                      )
-                    }
-                  </ScrollArea>
-
-                  {generatedScript && (
-                    <div className="mt-4 space-y-4">
-                      <div className="flex justify-between items-center">
-                        <div className="flex gap-2">
-                          {/* <Button
-                          variant="outline"
-                          className="bg-black/30"
-                          onClick={() => handleExport('pdf')}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          Export
-                        </Button> */}
-                          <Button
-                            variant="outline"
-                            className="bg-black/30"
-                            onClick={() => setShowShareDialog(true)}
-                          >
-                            <Share2 className="mr-2 h-4 w-4" />
-                            Share
-                          </Button>
-                        </div>
-                        <div className="flex gap-4 items-center">
-                          <Badge variant="outline" className="bg-black/30">
-                            {genre}
-                          </Badge>
-                          {/* <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (generatedStory) {
-                              const updatedStory = {
-                                ...generatedStory,
-                                likes: generatedStory.likes + 1
-                              };
-                              setGeneratedStory(updatedStory);
-                              if (audioEnabled) {
-                                new Audio('/sounds/like.mp3').play();
-                              }
-                            }
-                          }}
-                          className="text-white hover:bg-white/20"
-                        >
-                          <Heart className={`h-4 w-4 ${generatedStory.likes > 0 ? 'fill-current' : ''}`} />
-                        </Button> */}
-                        </div>
-                      </div>
+              {/* Right panel - Story Display */}
+              <div className="space-y-6">
+                <Card className={`${darkMode ? 'bg-black/50' : 'bg-white/90'} backdrop-blur border-purple-500/20`}>
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <BookOpen className="h-5 w-5" />
+                        Your Generated Stories and Videos
+                      </CardTitle>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[800px] rounded-md border border-purple-500/20 p-4 gap-4">
 
-          {/* Dialogs */}
-          <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-            <DialogContent className="bg-black/90 border-purple-500/20">
-              <DialogHeader>
-                <DialogTitle className="text-white">Share Your Story</DialogTitle>
-                <DialogDescription className="text-purple-200">
-                  Share your creation across platforms
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { name: 'Twitter', icon: '🐦' },
-                  { name: 'Facebook', icon: '👤' },
-                  { name: 'Reddit', icon: '🤖' },
-                  { name: 'Email', icon: '📧' }
-                ].map(platform => (
-                  <Button
-                    key={platform.name}
-                    variant="outline"
-                    className="w-full bg-black/30"
-                    onClick={() => setShowShareDialog(false)}
-                  >
-                    <span className="mr-2">{platform.icon}</span>
-                    {platform.name}
-                  </Button>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
+                      {mostRecentData.length !== 0 ?
+                        mostRecentData.map((dataItem) =>
+                          < Card className='p-6 bg-black/30 mb-4'>
+                            {
+                              dataItem.status === 'success' ?
+                                (
+                                  <>
+                                    <div className="prose prose-invert max-w-none py-4 rounded-xl bg-black/60 p-4 mb-4">
+                                      <h2 className="text-2xl font-bold text-purple-100 mb-4 flex justify-between">
+                                        {dataItem.userPrompt || 'Story Time Video'}
+                                        <div className="flex gap-2">
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleCopyToClipboard(dataItem.enhancedPrompt)}
+                                            className="text-white hover:bg-white/20"
+                                          >
+                                            {copied ? (
+                                              <Check className="h-4 w-4" />
+                                            ) : (
+                                              <Copy className="h-4 w-4" />
+                                            )}
+                                          </Button>
+                                        </div>
+                                      </h2>
+                                      <p className="text-purple-50 whitespace-pre-wrap leading-relaxed pr-4 max-h-40 overflow-y-auto">
+                                        {dataItem.enhancedPrompt}
+                                      </p>
+                                    </div>
+                                    <video
+                                      src={dataItem.videoUrl}
+                                      controls
+                                      className="w-full h-64 rounded-lg object-contain bg-black"
+                                      preload="auto"
+                                      onError={(e) => console.error("Video error:", e)}
+                                    />
+                                    <div className="grid grid-cols-2 gap-3 pt-4">
+                                      <Button
+                                        variant="secondary"
 
-          {/* Settings Dialog */}
-          <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
-            <DialogContent className="bg-black/90 border-purple-500/20">
-              <DialogHeader>
-                <DialogTitle className="text-white">Settings</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-purple-200">Background Style</Label>
-                  <Select value={backgroundStyle} onValueChange={setBackgroundStyle}>
-                    <SelectTrigger className="bg-black/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="gradient">Dynamic Gradient</SelectItem>
-                      <SelectItem value="particles">Particle Effect</SelectItem>
-                      <SelectItem value="animated">Animated Gradient</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                                        onClick={() => handleDownloadVideo(dataItem.videoUrl || '', dataItem.userPrompt || '')}
+                                      >
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Download
+                                      </Button>
+                                      <Button
+                                        variant="secondary"
+                                        onClick={() => setShowShareDialog(true)}
+                                      >
+                                        <Share className="mr-2 h-4 w-4" />
+                                        Share
+                                      </Button>
+                                    </div>
+                                  </>
+                                ) :
+                                dataItem.status === 'waiting' ?
+                                  (
+                                    <div className="w-full h-96 rounded-lg bg-black/30 flex flex-col items-center justify-center">
+                                      <div
+                                        className="p-2 animate-spin drop-shadow-2xl bg-gradient-to-bl from-pink-400 via-purple-400 to-indigo-600 md:w-20 md:h-20 h-16 w-16 aspect-square rounded-full"
+                                      >
+                                        <div
+                                          className="rounded-full h-full w-full bg-slate-100 dark:bg-zinc-900 background-blur-md"
+                                        ></div>
+                                      </div>
 
-                <div className="space-y-2">
-                  <Label className="text-purple-200">Character Limit</Label>
-                  <Slider
-                    value={[characterLimit]}
-                    min={500}
-                    max={5000}
-                    step={100}
-                    onValueChange={([value]) => setCharacterLimit(value)}
-                  />
-                  <div className="text-right text-sm text-purple-300">
-                    {characterLimit.toLocaleString()} characters
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-purple-200">Auto-save Stories</Label>
-                  <Switch
-                    checked={autoSave}
-                    onCheckedChange={setAutoSave}
-                  />
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          {/* History Dialog */}
-          <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
-            <DialogContent className="bg-black/90 border-purple-500/20 max-w-4xl">
-              <DialogHeader>
-                <DialogTitle className="text-white">Story History</DialogTitle>
-              </DialogHeader>
-              <ScrollArea className="h-[60vh]">
-                <div className="space-y-4">
-                  {storyHistory.map((item) => (
-                    <Card key={item.id} className="bg-black/50">
-                      <CardHeader>
-                        <CardTitle className="text-white text-sm flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {genres.find(g => g.value === item.genre)?.icon}
-                            <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                                      <div className="loader">
+                                        <p>Generating</p>
+                                        <div className="words">
+                                          <span className="word">Story</span>
+                                          <span className="word">Speech</span>
+                                          <span className="word">Character</span>
+                                          <span className="word">Video</span>
+                                          <span className="word">Story</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )
+                                  :
+                                  (
+                                    <CardContent
+                                      className="bg-[#0f0f0f]/ bg-red-900/30 border-2/ border-red-600 h-fit min-h-96 w-full p-0 flex flex-col justify-center pb-4 rounded-xl relative">
+                                      <div className="text-center">
+                                        <TriangleAlert className='size-16 text-red-500 mx-auto' />
+                                        <h2 className="text-zinc-900 dark:text-white mt-4">Error Generating Content!</h2>
+                                        <p className="text-zinc-600 dark:text-zinc-400">
+                                          The server wasn't able to generate your {dataItem.contentType}!
+                                        </p>
+                                        <div className='pt-1 text-sm opacity-60'>Please Try Again!</div>
+                                        <div className='pt-1 text-xs opacity-40'>{dataItem.userPrompt}</div>
+                                      </div>
+                                      {
+                                        dataItem.contentType === 'roast-my-pic' &&
+                                        (
+                                          <img
+                                            src={(dataItem.imageUrl || dataItem.thumbnail_alt) ? `${BASE_URL}/${dataItem.imageUrl || dataItem.thumbnail_alt}` : 'https://images.pexels.com/photos/1955134/pexels-photo-1955134.jpeg'}
+                                            alt={dataItem.displayName || dataItem.musicTitle || ''}
+                                            className={`size-24 aspect-square rounded-xl object-cover absolute bottom-4 right-4 hidden`}
+                                          />
+                                        )
+                                      }
+                                    </CardContent>
+                                  )
+                            }
+                          </ Card>
+                        )
+                        :
+                        (
+                          <div className={`text-center text-purple-300 py-20 ${loading && ' animate-pulse '}`}>
+                            <BookOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                            <p>Your stories will appear here</p>
+                            <p className="text-sm mt-2 text-purple-400">
+                              Use the controls on the left to generate your story
+                            </p>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setGeneratedStory(item);
-                              setPrompt(item.prompt);
-                              setGenre(item.genre);
-                              setShowHistoryDialog(false);
-                            }}
-                          >
-                            Load
-                          </Button>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <h3 className="text-purple-100 font-semibold mb-2">{item.title}</h3>
-                        <p className="text-purple-200 line-clamp-3">{item.content}</p>
-                      </CardContent>
-                    </Card>
+                        )
+                      }
+                    </ScrollArea>
+
+                    {generatedScript && (
+                      <div className="mt-4 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              className="bg-black/30"
+                              onClick={() => setShowShareDialog(true)}
+                            >
+                              <Share2 className="mr-2 h-4 w-4" />
+                              Share
+                            </Button>
+                          </div>
+                          <div className="flex gap-4 items-center">
+                            <Badge variant="outline" className="bg-black/30">
+                              {genre}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Dialogs */}
+            <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+              <DialogContent className="bg-black/90 border-purple-500/20">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Share Your Story</DialogTitle>
+                  <DialogDescription className="text-purple-200">
+                    Share your creation across platforms
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { name: 'Twitter', icon: '🐦' },
+                    { name: 'Facebook', icon: '👤' },
+                    { name: 'Reddit', icon: '🤖' },
+                    { name: 'Email', icon: '📧' }
+                  ].map(platform => (
+                    <Button
+                      key={platform.name}
+                      variant="outline"
+                      className="w-full bg-black/30"
+                      onClick={() => setShowShareDialog(false)}
+                    >
+                      <span className="mr-2">{platform.icon}</span>
+                      {platform.name}
+                    </Button>
                   ))}
                 </div>
-              </ScrollArea>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
 
-          <MessageToast
-            message="Your creation is in progress! You can keep track in your profile."
-            visible={toastVisible}
-            onClose={() => setToastVisible(false)}
-          />
+            {/* History Dialog */}
+            <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+              <DialogContent className="bg-black/90 border-purple-500/20 max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Story History</DialogTitle>
+                </DialogHeader>
+                <ScrollArea className="h-[60vh]">
+                  <div className="space-y-4">
+                    {storyHistory.map((item) => (
+                      <Card key={item.id} className="bg-black/50">
+                        <CardHeader>
+                          <CardTitle className="text-white text-sm flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {genres.find(g => g.value === item.genre)?.icon}
+                              <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setGeneratedStory(item);
+                                setPrompt(item.prompt);
+                                setGenre(item.genre);
+                                setShowHistoryDialog(false);
+                              }}
+                            >
+                              Load
+                            </Button>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <h3 className="text-purple-100 font-semibold mb-2">{item.title}</h3>
+                          <p className="text-purple-200 line-clamp-3">{item.content}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </DialogContent>
+            </Dialog>
+
+            <MessageToast
+              message="Your creation is in progress! You can keep track in your profile."
+              visible={toastVisible}
+              onClose={() => setToastVisible(false)}
+            />
+          </div>
         </div>
-      </div>
+
     </Layout >
   );
 }
