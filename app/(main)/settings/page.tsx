@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Lock,
@@ -11,13 +11,11 @@ import {
   ImagePlus,
   Trash2,
   Shield,
-  CreditCard,
   Palette,
   Users,
   Layers,
   HelpCircle
 } from 'lucide-react';
-
 import {
   Card,
   CardContent,
@@ -36,6 +34,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { Textarea } from '@/components/ui/textarea';
+import renderHelpSection from '@/components/setting/HelpSection';
 
 // Extended Settings Interface
 interface AdvancedSettings {
@@ -248,7 +247,7 @@ const SettingsPage: React.FC = () => {
   };
 
   const handlePasswordReset = () => {
-    const { currentPassword, newPassword, confirmPassword } = settings.profile.passwordReset;
+    const { newPassword, confirmPassword } = settings.profile.passwordReset;
 
     if (newPassword !== confirmPassword) {
       toast({
@@ -751,8 +750,10 @@ const SettingsPage: React.FC = () => {
             {activeSection === 'profile' && renderProfileSection()}
             {activeSection === 'privacy' && renderPrivacySection()}
             {activeSection === 'notifications' && renderNotificationsSection()}
+            {activeSection === 'help' && renderHelpSection()}
+
             {/* Placeholder for new sections */}
-            {['security', 'appearance', 'connections', 'integrations', 'help'].includes(activeSection) && (
+            {['security', 'appearance', 'connections', 'integrations'].includes(activeSection) && (
               <Card>
                 <CardHeader>
                   <CardTitle>{sections.find(s => s.id === activeSection)?.title} Section</CardTitle>

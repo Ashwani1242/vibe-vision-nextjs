@@ -1,35 +1,36 @@
-type Genre = {
-    value: string;
-    icon: string;
-    theme: string;
-    description: string;
-  };
-  
-  type StorySettings = {
-    tone: string;
-    ageGroup: string;
-    pacing: string;
-    duration: number
-    complexity: string;
-  };
-  
-  type GeneratedStory = {
-    id: string;
-    title: string;
-    content: string;
-    genre: string;
-    prompt: string;
-    settings: StorySettings;
-    createdAt: string;
-    likes: number;
-  };
-  
-  interface StoryHistoryItem extends GeneratedStory {
-    summary: string;
-    characters: string[];
-  }
+// Genre and Story-related Types
+export type Genre = {
+  value: string;
+  icon: string;
+  theme: string;
+  description: string;
+};
 
-  // types.ts
+export type StorySettings = {
+  tone: string;
+  ageGroup: string;
+  pacing: string;
+  duration: number;
+  complexity: string;
+};
+
+export type GeneratedStory = {
+  id: string;
+  title: string;
+  content: string;
+  genre: string;
+  prompt: string;
+  settings: StorySettings;
+  createdAt: string;
+  likes: number;
+};
+
+export interface StoryHistoryItem extends GeneratedStory {
+  summary: string;
+  characters: string[];
+}
+
+// Pricing and Plan-related Types
 export interface PlanDetails {
   name: string;
   price: string;
@@ -45,6 +46,7 @@ export interface Addon {
   description: string;
 }
 
+// Form and User-related Types
 export interface FormData {
   email: string;
   firstName: string;
@@ -63,16 +65,7 @@ export interface PaymentStatus {
   formData: FormData | null;
 }
 
-import { DefaultSession } from "next-auth";
-
-declare module 'next-auth' {
-  interface Session {
-      user: {
-          id: string;
-      } & DefaultSession['user'];
-  }
-}
-
+// Comedy and Script-related Types
 export type ComedyType = 'standup' | 'sketch' | 'roast' | 'musical' | 'improv' | 'sitcom';
 export type TargetAudience = 'everyone' | 'kids' | 'teens' | 'adults' | 'seniors' | 'corporate' | 'family';
 export type ToneSetting = 'funny' | 'sarcastic' | 'witty' | 'balanced';
@@ -109,4 +102,63 @@ export interface ScriptAnalysis {
   audienceEngagement: number;
   characterDevelopment: number;
   suggestions: string[];
+}
+
+// Media and Post-related Types
+export interface Media {
+  id?: string;
+  type: 'image' | 'video' | 'audio';
+  url: string;
+  thumbnail?: string;
+}
+
+export interface User {
+  id: string;
+  username: string;
+  avatar: string;
+}
+
+export interface PostStats {
+  likes: number;
+  dislikes: number;
+  comments: number;
+  shares: number;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  author: User;
+  createdAt: string;
+  likes: number;
+  replies: Comment[];
+}
+
+export interface Post {
+  [x: string]: string;
+  id: string;
+  title: string;
+  userId?: string;
+  url?: string;
+  createdAt: string;
+  likes?: number;
+  comments?: number;
+  media?: Media[];
+  content: string;
+  author?: {
+    id: string;
+    username: string;
+    avatar?: string;
+  };
+}
+
+// NextAuth Session Extension
+import { DefaultSession } from "next-auth";
+
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+    } & DefaultSession['user'];
+  }
 }

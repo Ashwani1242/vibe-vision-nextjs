@@ -1,499 +1,67 @@
-'use client';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { ScrollArea, ScrollBar } from "../../../components/ui/scroll-area";
-import { Button } from "../../../components/ui/button";
-import { Layout } from "../../../components/layout/layout";
-import { BASE_URL } from '@/config';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import EnhancedMusicPlayer from '@/components/media/music-player';
-import { getAllContent } from '@/lib/content-service';
-import { VideoPlayer } from '@/components/media/video-player';
-import { CardRenderer } from '@/components/media/card-renderer';
+"use client";
 
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  createdAt: string;
-}
+import { useState } from "react";
+import Feed from "@/components/feed/feed";
+import { Sidebar } from "@/components/feed/sidebar";
+import { RecentPosts } from "@/components/feed/recent-posts";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { usePosts } from "@/hooks/use-posts";
+import { Layout } from "@/components/layout/layout";
+import router from "next/router";
 
-interface Feature {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  gradient: string;
-  path: string;
-  bgPattern: string;
-}
-
-// PlaceholdersAndVanishInput Component
-const PlaceholdersAndVanishInput = ({
-  placeholders,
-  onChange,
-  onSubmit
-}: {
-  placeholders: string[]
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
-}) => {
-  const [currentPlaceholder, setCurrentPlaceholder] = useState(0)
-  const [value, setValue] = useState("")
-  const [animating, setAnimating] = useState(false)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const newDataRef = useRef<any[]>([])
-  const inputRef = useRef<HTMLInputElement>(null)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  const startAnimation = () => {
-    intervalRef.current = setInterval(() => {
-      setCurrentPlaceholder((prev) => (prev + 1) % placeholders.length)
-    }, 3000)
-  }
-
-  const handleVisibilityChange = () => {
-    if (document.visibilityState !== "visible" && intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    } else if (document.visibilityState === "visible") {
-      startAnimation()
-    }
-  }
-
-  useEffect(() => {
-    startAnimation()
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-    }
-  }, [placeholders])
-
-  const draw = useCallback(() => {
-    if (!inputRef.current) return
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    canvas.width = 800
-    canvas.height = 800
-    ctx.clearRect(0, 0, 800, 800)
-    const computedStyles = getComputedStyle(inputRef.current)
-
-    const fontSize = parseFloat(computedStyles.getPropertyValue("font-size"))
-    ctx.font = `${fontSize * 2}px ${computedStyles.fontFamily}`
-    ctx.fillStyle = "#FFF"
-    ctx.fillText(value, 16, 40)
-
-    const imageData = ctx.getImageData(0, 0, 800, 800)
-    const pixelData = imageData.data
-    const newData: any[] = []
-
-    for (let t = 0; t < 800; t++) {
-      let i = 4 * t * 800
-      for (let n = 0; n < 800; n++) {
-        let e = i + 4 * n
-        if (pixelData[e] !== 0 && pixelData[e + 1] !== 0 && pixelData[e + 2] !== 0) {
-          newData.push({
-            x: n,
-            y: t,
-            color: [pixelData[e], pixelData[e + 1], pixelData[e + 2], pixelData[e + 3]]
-          })
-        }
-      }
-    }
-
-    newDataRef.current = newData.map(({ x, y, color }) => ({
-      x,
-      y,
-      r: 1,
-      color: `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`
-    }))
-  }, [value])
-
-  useEffect(() => {
-    draw()
-  }, [value, draw])
-
-  const animate = (start: number) => {
-    const animateFrame = (pos: number = 0) => {
-      requestAnimationFrame(() => {
-        const newArr = []
-        for (let i = 0; i < newDataRef.current.length; i++) {
-          const current = newDataRef.current[i]
-          if (current.x < pos) {
-            newArr.push(current)
-          } else {
-            if (current.r <= 0) {
-              current.r = 0
-              continue
-            }
-            current.x += Math.random() > 0.5 ? 1 : -1
-            current.y += Math.random() > 0.5 ? 1 : -1
-            current.r -= 0.05 * Math.random()
-            newArr.push(current)
-          }
-        }
-        newDataRef.current = newArr
-        const ctx = canvasRef.current?.getContext("2d")
-        if (ctx) {
-          ctx.clearRect(pos, 0, 800, 800)
-          newDataRef.current.forEach((t) => {
-            const { x: n, y: i, r: s, color } = t
-            if (n > pos) {
-              ctx.beginPath()
-              ctx.rect(n, i, s, s)
-              ctx.fillStyle = color
-              ctx.strokeStyle = color
-              ctx.stroke()
-            }
-          })
-        }
-        if (newDataRef.current.length > 0) {
-          animateFrame(pos - 8)
-        } else {
-          setValue("")
-          setAnimating(false)
-        }
-      })
-    }
-    animateFrame(start)
-  }
-
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !animating) {
-      vanishAndSubmit()
-    }
-  }
-
-  const vanishAndSubmit = () => {
-    setAnimating(true)
-    draw()
-
-    const value = inputRef.current?.value || ""
-    if (value && inputRef.current) {
-      const maxX = newDataRef.current.reduce(
-        (prev, current) => (current.x > prev ? current.x : prev),
-        0
-      )
-      animate(maxX)
-    }
-  }
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    vanishAndSubmit()
-    onSubmit && onSubmit(e)
-  }
-
-  return (
-    <form
-      className="w-full relative max-w-xl mx-auto bg-white dark:bg-zinc-800 h-12 rounded-full overflow-hidden shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),_0px_1px_0px_0px_rgba(25,28,33,0.02),_0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200"
-      onSubmit={handleSubmit}
-    >
-      <canvas
-        className={`absolute pointer-events-none text-base transform scale-50 top-[20%] left-2 sm:left-8 origin-top-left filter invert dark:invert-0 pr-20 ${!animating ? "opacity-0" : "opacity-100"
-          }`}
-        ref={canvasRef}
-      />
-      <input
-        onChange={(e) => {
-          if (!animating) {
-            setValue(e.target.value)
-            onChange && onChange(e)
-          }
-        }}
-        onKeyDown={handleKeyDown}
-        ref={inputRef}
-        value={value}
-        type="text"
-        className={`w-full relative text-sm sm:text-base z-50 border-none dark:text-white bg-transparent text-black h-full rounded-full focus:outline-none focus:ring-0 pl-4 sm:pl-10 pr-20 ${animating && "text-transparent dark:text-transparent"
-          }`}
-      />
-      <button
-        disabled={!value}
-        type="submit"
-        className="absolute right-2 top-1/2 z-50 -translate-y-1/2 h-8 w-8 rounded-full disabled:bg-gray-100 bg-black dark:bg-zinc-900 dark:disabled:bg-zinc-800 transition duration-200 flex items-center justify-center"
-      >
-        <motion.svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-gray-300 h-4 w-4"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <motion.path
-            d="M5 12l14 0"
-            initial={{
-              strokeDasharray: "50%",
-              strokeDashoffset: "50%"
-            }}
-            animate={{
-              strokeDashoffset: value ? 0 : "50%"
-            }}
-            transition={{
-              duration: 0.3,
-              ease: "linear"
-            }}
-          />
-          <path d="M13 18l6 -6" />
-          <path d="M13 6l6 6" />
-        </motion.svg>
-      </button>
-
-      <div className="absolute inset-0 flex items-center rounded-full pointer-events-none">
-        <AnimatePresence mode="wait">
-          {!value && (
-            <motion.p
-              initial={{
-                y: 5,
-                opacity: 0
-              }}
-              key={`current-placeholder-${currentPlaceholder}`}
-              animate={{
-                y: 0,
-                opacity: 1
-              }}
-              exit={{
-                y: -15,
-                opacity: 0
-              }}
-              transition={{
-                duration: 0.3,
-                ease: "linear"
-              }}
-              className="dark:text-zinc-500 text-sm sm:text-base font-normal text-neutral-500 pl-4 sm:pl-12 text-left w-[calc(100%-2rem)] truncate"
-            >
-              {placeholders[currentPlaceholder]}
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </div>
-    </form>
-  )
-}
-
-const EntertainmentHub = () => {
-  const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState('');
-  const [videoModal, setVideoModal] = useState<boolean>(false);
-  const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null);
-  const [currentVideoContent, setCurrentVideoContent] = useState<ContentItem | null>(null);
-  const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
-  const videoModalRef = useRef<HTMLDivElement>(null);
-
-  const [currentSongIndex, setCurrentSongIndex] = useState<number | null>(null);
-  const [generatedSongs, setGeneratedSongs] = useState<Song[]>([]);
-  const currentSong: Song | null = currentSongIndex !== null ? generatedSongs[currentSongIndex] : null;
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [searchValue, setSearchValue] = useState("")
-
-  const searchPlaceholders = [
-    "Search for videos...",
-    "Find creators...",
-    "Search for Music...",
-    "Discover new AI content...",
-    "Search by tags...",
-
-  ]
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value)
-  }
-
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (searchValue.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchValue)}`)
-    }
-  }
-
-  const categories = [
-    { id: 1, contentType: '', content: 'All' },
-    { id: 2, contentType: 'roast-my-pic', content: 'Roast My Pic' },
-    { id: 3, contentType: 'jukebox', content: 'Jukebox' },
-    { id: 4, contentType: 'kids-music', content: 'Kids Music' },
-    { id: 5, contentType: 'story-time', content: 'Story Time' },
-  ];
-
-  const [data, setData] = useState<ContentItem[]>([]);
-
-  const filteredData = activeCategory
-    ? data.filter(
-      (dataItem) => dataItem.contentType === activeCategory && dataItem.status === 'success'
-    ).reverse()
-    : data.filter((dataItem) => dataItem.status === 'success').reverse();
-
-  const playGeneratedSong = (content: ContentItem) => {
-    console.log(content)
-
-    if (!isPlaying) {
-      const newSong: Song = {
-        id: content._id,
-        title: content.musicTitle || 'No Title Found',
-        genres: ['test', 'test'],
-        audioUrl: `${BASE_URL}/${content.audioUrl}` || '',
-        coverArt: `${BASE_URL}/${content.imageUrl}` || content.thumbnail_alt || '',
-        duration: audioRef.current?.duration || 180,
-        timestamp: new Date().toISOString(),
-        lyrics: content.songLyrics || 'No Lyrics Found'
-      };
-
-      setGeneratedSongs(prev => [newSong, ...prev]);
-      setCurrentSongIndex(0)
-
-      audioRef.current?.play()
-    } else {
-      audioRef.current?.pause()
-    }
-  }
-
-  const openVideoModal = (videoContent: ContentItem) => {
-    setGeneratedSongs([])
-    setCurrentVideoUrl(videoContent.videoUrl || 'Not Found');
-    setCurrentVideoContent(videoContent)
-    setVideoModal(true);
-  }
-
-  const closeVideoModal = () => {
-    setCurrentVideoUrl(null);
-    setCurrentVideoContent(null)
-    setVideoModal(false);
-  }
-
-  const fetchData = async () => {
-    const allContent = await getAllContent()
-    setData(allContent || [])
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (videoModalRef.current && !videoModalRef.current.contains(event.target as Node)) {
-        closeVideoModal();
-      }
-    };
-
-    document.addEventListener('mousedown', handleOutsideClick);
-
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-    };
-  }, [closeVideoModal])
+export default function EntertainmentHub() {
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const { posts } = usePosts();
 
   return (
     <Layout>
-      <div className="w-full bg-background pb-36">
-
-        {/* Search Bar */}
-        <div className="fle/x p-4 gap-2 overflow-hidden">
-          <div className="flex-1 max-w-2xl mx-auto">
-            <PlaceholdersAndVanishInput
-              placeholders={searchPlaceholders}
-              onChange={handleSearchChange}
-              onSubmit={handleSearchSubmit}
-            />
-          </div>
-        </div>
-
-        {/* Categories ScrollArea */}
-        <ScrollArea className="w-full border-b">
-          <div className="flex p-4 gap-2">
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={activeCategory === category.contentType ? "default" : "secondary"}
-                className="whitespace-nowrap"
-                onClick={() => setActiveCategory(category.contentType)}
-              >
-                {category.content}
-              </Button>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-
-        {/* Content Grid */}
-        <div className={`grid grid-cols-1 ${filteredData.length !== 0 && 'sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'} gap-4 p-4`}>
-          {filteredData.length !== 0 ? (
-            filteredData.map((dataItem) => (
-              <CardRenderer
-                key={dataItem._id}
-                dataItem={dataItem}
-                openVideoModal={openVideoModal}
-                playGeneratedSong={playGeneratedSong}
-                currentSong={currentSong}
+      <div className="min-h-screen bg-background">
+        <header className="relative top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-14 items-center">
+            <div className="flex flex-1 items-center space-x-4">
+              <Input
+                type="search"
+                placeholder="Search posts..."
+                className="h-9 md:w-[300px] lg:w-[400px]"
               />
-            ))
-          ) : (
-            <div className='flex flex-col w-full items-center justify-end gap-4 text-gray-300 h-96'>
-              <img className='size-20 opacity-60' src="https://img.icons8.com/external-vitaliy-gorbachev-blue-vitaly-gorbachev/60/external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev.png" alt="external-mount-fuji-wonder-of-the-world-vitaliy-gorbachev-blue-vitaly-gorbachev" />
-              Nothing to see here
+              <Button size="icon" variant="ghost">
+                <Search className="h-4 w-4" />
+              </Button>
             </div>
-          )}
-        </div>
+          </div>
+        </header>
 
-        {/* Video Modal */}
-        <VideoPlayer
-          isVisible={videoModal}
-          currentVideoUrl={currentVideoUrl}
-          currentVideoContent={currentVideoContent}
-          onClose={closeVideoModal}
-          setShowShareDialog={setShowShareDialog}
-        />
+        <main className="container py-6">
+          <div className="grid grid-cols-1 md:grid-cols-[240px_1fr_300px] gap-6">
+            <aside className="hidden md:block">
+              <Sidebar
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+              />
+            </aside>
 
-        {/* <EnhancedMusicPlayer /> */}
-        <EnhancedMusicPlayer currentSong={currentSong || null} />
-
-        {/* <Share Dialog /> */}
-        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-          <DialogContent className="bg-black/90 border-purple-500/20">
-            <DialogHeader>
-              <DialogTitle className="text-white">Share Your Story</DialogTitle>
-              <DialogDescription className="text-purple-200">
-                Share your creation across platforms
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { name: 'Twitter', icon: '🐦' },
-                { name: 'Facebook', icon: '👤' },
-                { name: 'Reddit', icon: '🤖' },
-                { name: 'Email', icon: '📧' }
-              ].map(platform => (
-                <Button
-                  key={platform.name}
-                  variant="outline"
-                  className="w-full bg-black/30"
-                  onClick={() => setShowShareDialog(false)}
-                >
-                  <span className="mr-2">{platform.icon}</span>
-                  {platform.name}
-                </Button>
-              ))}
+            <div className="space-y-3">
+              <Feed category={selectedCategory} />
             </div>
-          </DialogContent>
-        </Dialog>
 
+            <aside className="hidden md:block space-y-6">
+              <RecentPosts
+                posts={posts.slice(0, 2)}
+                onPostClick={(post) => {
+                  // Navigate to post detail page or open modal
+                  router.push(`/post/${post.id}`);
+                }}
+                onUserClick={(userId) => {
+                  // Navigate to user profile
+                  router.push(`/profile/${userId}`);
+                }}
+              />
+            </aside>
+          </div>
+        </main>
       </div>
     </Layout>
   );
-};
-
-export default EntertainmentHub;
+}

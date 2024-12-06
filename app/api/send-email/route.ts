@@ -5,6 +5,9 @@ import SubscriptionReceipt from '@/components/emails/SubscriptionReceipt';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+export const runtime = 'edge'; // Example if you want to specify runtime
+export const dynamic = 'force-dynamic'; // New dynamic/static configuration
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // CORS Configuration
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -27,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Explicitly handle POST method
     if (req.method !== 'POST') {
         res.setHeader('Allow', ['POST']);
-        res.status(405).json({ 
+        res.status(405).json({
             error: `Method ${req.method} Not Allowed`,
             allowedMethods: ['POST']
         });
@@ -85,10 +88,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
     }
 }
-
-// Ensure body parsing is enabled
-export const config = {
-    api: {
-        bodyParser: true,
-    },
-};
