@@ -26,6 +26,7 @@ import { LampContainer } from "@/components/ui/lamp";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Layout } from '@/components/layout/layout';
 import { Button } from '@/components/ui/button';
+import MusicPlayer from '@/components/media/music-player';
 
 // TypeScript interfaces
 interface Feature {
@@ -466,18 +467,29 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ feature, onClick, isLoading }
 
 // Section Components
 const TrendingSection: React.FC<SectionProps> = ({ isLoading }) => {
+    const router = useRouter();
     const [currentTrack, setCurrentTrack] = useState<typeof trendingSongs[0] | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const router = useRouter();
 
     const handlePlayPause = (song: typeof trendingSongs[0]) => {
         if (currentTrack?.id === song.id) {
+            // If clicking the same song, toggle play/pause
             setIsPlaying(!isPlaying);
+            MusicPlayer.togglePlayPause();
         } else {
+            // If new song, set current track and start playing
             setCurrentTrack(song);
             setIsPlaying(true);
+            MusicPlayer.play({
+                id: song.id,
+                title: song.title,
+                artist: song.artist,
+                coverArt: song.coverArt,
+                audioUrl: song.audioUrl // Assuming this exists in your song object
+            });
         }
     };
+
     return (
         <div className="mb-8 sm:mb-12 md:mb-16">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
@@ -486,7 +498,7 @@ const TrendingSection: React.FC<SectionProps> = ({ isLoading }) => {
             </h2>
 
             <Card className="overflow-hidden">
-            <CardHeader>
+                <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-2xl">Trending Now</CardTitle>
                         <div className="flex items-center space-x-4 ">
@@ -610,7 +622,7 @@ const TrendingSection: React.FC<SectionProps> = ({ isLoading }) => {
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </div>
-                                            </div>
+                                                </div>
                                         </motion.div>
                                         <div className="p-2 sm:p-4">
                                             <h3 className="font-medium text-sm sm:text-base truncate">{song.title}</h3>
@@ -640,7 +652,7 @@ const TrendingSection: React.FC<SectionProps> = ({ isLoading }) => {
             </Card>
         </div>
     );
-}
+};
 
 const WeeklyChallenge: React.FC<SectionProps> = ({ isLoading }) => (
     <div className="mb-16">

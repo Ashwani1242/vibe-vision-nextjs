@@ -18,6 +18,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post }: PostCardProps) {
+  console.log('Post ID in card:', post.id);
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
 
@@ -44,8 +45,8 @@ export default function PostCard({ post }: PostCardProps) {
               <img src={post.author.avatar} alt={post.author.username} />
             </Avatar>
             <div>
-              <Link href={`/u/${post.author.username}`} className="font-medium hover:underline">
-                {post.author.username}
+              <Link href={`/u/${post.author?.username}`} className="font-medium hover:underline">
+                {post.author?.username}
               </Link>
               <p className="text-sm text-muted-foreground">
                 {formatDistanceToNow(new Date(post.createdAt))} ago in{" "}
@@ -56,27 +57,38 @@ export default function PostCard({ post }: PostCardProps) {
             </div>
           </div>
 
-          <Link href={`/post/${post.id}`}>
-            <h2 className="text-xl font-semibold mt-3 hover:text-primary transition-colors">
-              {post.title}
-            </h2>
-          </Link>
+          <Link 
+            href={`/post/${post.id}`}
+            className="block mt-3 cursor-pointer"
+            onClick={(e) => {
+              if (window.getSelection()?.toString()) {
+                e.preventDefault();
+                return;
+              }
+            }}
+          >
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold hover:text-primary transition-colors">
+                {post.title}
+              </h2>
 
-          {post.media.length > 0 && (
-            <div className="mt-4">
-              {post.media.length === 1 ? (
-                <MediaPlayer media={post.media[0]} />
-              ) : (
-                <Carousel>
-                  {post.media.map((media, index) => (
-                    <MediaPlayer key={index} media={media} />
-                  ))}
-                </Carousel>
+              {post.media.length > 0 && (
+                <div>
+                  {post.media.length === 1 ? (
+                    <MediaPlayer media={post.media[0]} />
+                  ) : (
+                    <Carousel>
+                      {post.media.map((media, index) => (
+                        <MediaPlayer key={index} media={media} />
+                      ))}
+                    </Carousel>
+                  )}
+                </div>
               )}
-            </div>
-          )}
 
-          <p className="mt-3 text-muted-foreground line-clamp-3">{post.content}</p>
+              <p className="text-muted-foreground line-clamp-3">{post.content}</p>
+            </div>
+          </Link>
 
           <div className="flex items-center space-x-4 mt-4">
             <Button

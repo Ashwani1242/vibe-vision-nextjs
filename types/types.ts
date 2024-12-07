@@ -135,21 +135,21 @@ export interface Comment {
 }
 
 export interface Post {
-  [x: string]: string;
   id: string;
   title: string;
-  userId?: string;
-  url?: string;
-  createdAt: string;
-  likes?: number;
-  comments?: number;
-  media?: Media[];
   content: string;
-  author?: {
+  createdAt: string;
+  category: string;
+  tags?: string[];
+  type?: 'image' | 'video' | 'text';
+  url?: string;
+  media: Media[];
+  author: {
     id: string;
     username: string;
     avatar?: string;
   };
+  stats: PostStats;
 }
 
 // NextAuth Session Extension
@@ -161,4 +161,47 @@ declare module 'next-auth' {
       id: string;
     } & DefaultSession['user'];
   }
+}
+
+// types/types.ts
+export interface Comment {
+  id: string;
+  author: {
+    username: string;
+    avatar: string;
+  };
+  content: string;
+  createdAt: string;
+  likes: number;
+  replies: Comment[];
+  parentCommentId?: string;
+}
+
+export interface Author {
+  id: string;
+  username: string;
+  avatar: string;
+}
+
+export interface MediaItem {
+  type: 'image' | 'video';
+  url: string;
+}
+
+export interface PostStats {
+  likes: number;
+  dislikes: number;
+  comments: number;
+  shares: number;
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  content: string;
+  author: Author;
+  category: string;
+  createdAt: string;
+  media: MediaItem[];
+  stats: PostStats;
 }

@@ -102,7 +102,7 @@ const GAME_BACKGROUND_TEMPLATES: GameBackgroundTemplate[] = [
     }
 ];
 
-const DEFAULT_NEWS_DURATION = 45;
+const DEFAULT_NEWS_DURATION = 1;
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 const SUPPORTED_FILE_TYPES = [
     'image/jpeg',
@@ -347,7 +347,7 @@ export default function BrainRotGeneratorPage() {
                 <div className="max-w-7xl mx-auto space-y-8 relative">
                     {/* Page Header */}
                     <div className="text-center space-y-4">
-                        <h1 className="text-4xl md:text-5xl font-bold text-rose-700 drop-shadow-lg">
+                        <h1 className="text-4xl md:text-5xl font-bold text-fuchsia-700 drop-shadow-lg">
                             🧠 Brain Rot Knowledge Transformer 🚀
                         </h1>
                         <p className="text-xl text-white drop-shadow-md">
@@ -356,7 +356,7 @@ export default function BrainRotGeneratorPage() {
                     </div>
 
                     {/* Main Content Card */}
-                    <Card className="bg-gray-600/30 backdrop-blur-lg border-rose-700 border-2 shadow-2xl">
+                    <Card className="bg-stone-600/30 backdrop-blur-lg border-fuchsia-700 border-2 shadow-2xl">
                         <CardContent className="p-6">
                             <div className="grid md:grid-cols-2 gap-8">
                                 {/* Media Upload Section */}
@@ -371,11 +371,11 @@ export default function BrainRotGeneratorPage() {
                                                 <img
                                                     src={selectedMediaPreview}
                                                     alt="Uploaded content"
-                                                    className="w-full h-64 border-2 border-rose-700 object-contain rounded-lg"
+                                                    className="w-full h-64 border-2 border-fuchsia-700 object-contain rounded-lg"
                                                 />
                                             )}
                                             {mediaType === 'pdf' && (
-                                                <div className="w-full h-64 border-2 border-rose-700 rounded-lg flex items-center justify-center">
+                                                <div className="w-full h-64 border-2 border-fuchsia-700 rounded-lg flex items-center justify-center">
                                                     <IoDocumentTextOutline className="text-4xl text-red-500 mr-2" />
                                                     <p className="text-white">{mediaFile?.name}</p>
                                                 </div>
@@ -383,12 +383,12 @@ export default function BrainRotGeneratorPage() {
                                             {mediaType === 'video' && (
                                                 <video
                                                     src={selectedMediaPreview}
-                                                    className="w-full h-64 border-2 border-rose-700 object-contain rounded-lg"
+                                                    className="w-full h-64 border-2 border-fuchsia-700 object-contain rounded-lg"
                                                     controls
                                                 />
                                             )}
                                             {mediaType === 'document' && (
-                                                <div className="w-full h-64 border-2 border-rose-700 rounded-lg flex items-center justify-center">
+                                                <div className="w-full h-64 border-2 border-fuchsia-700 rounded-lg flex items-center justify-center">
                                                     <IoDocumentTextOutline className="text-4xl text-blue-500 mr-2" />
                                                     <p className="text-white truncate max-w-[200px]">{mediaFile?.name}</p>
                                                 </div>
@@ -411,14 +411,14 @@ export default function BrainRotGeneratorPage() {
                                         </div>
                                     ) : (
                                         <div
-                                            className="w-full h-64 border-2 border-dashed border-rose-700 rounded-lg flex flex-col items-center justify-center text-center hover:bg-gray-600/30 transition-all duration-300"
+                                            className="w-full h-64 border-2 border-dashed border-fuchsia-700 rounded-lg flex flex-col items-center justify-center text-center hover:bg-stone-600/30 transition-all duration-300"
                                             onClick={() => fileInputRef.current?.click()}
                                         >
-                                            <IoCloudUploadOutline className="text-5xl text-rose-700 mb-4" />
+                                            <IoCloudUploadOutline className="text-5xl text-fuchsia-700 mb-4" />
                                             <p className="text-white mb-2">
                                                 Drag and drop or click to upload
                                             </p>
-                                            <p className="text-sm text-gray-300">
+                                            <p className="text-sm text-stone-300">
                                                 Supports: PDF, Images, Videos, Docs (Max 25MB)
                                             </p>
                                         </div>
@@ -445,7 +445,7 @@ export default function BrainRotGeneratorPage() {
                                                 videoStyle: value as 'funny' | 'serious' | 'educational'
                                             }))}
                                         >
-                                            <SelectTrigger className="w-full bg-gray-600/30 text-white border-rose-700">
+                                            <SelectTrigger className="w-full bg-stone-600/30 text-white border-fuchsia-700">
                                                 <SelectValue placeholder="Select Video Style" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -491,7 +491,7 @@ export default function BrainRotGeneratorPage() {
 
                                     {/* Advanced Settings */}
                                     {advancedSettingsOpen && (
-                                        <div className="space-y-4 p-4 bg-gray-600/30 rounded-lg">
+                                        <div className="space-y-4 p-4 bg-stone-600/30 rounded-lg">
                                             {/* Game Background Template */}
                                             <div>
                                                 <Label className="text-white mb-2">Game Background</Label>
@@ -506,8 +506,8 @@ export default function BrainRotGeneratorPage() {
                                                                         className={cn(
                                                                             "flex flex-col h-20 w-full",
                                                                             settings.backgroundTemplate === template.id
-                                                                                ? "bg-rose-700 text-black"
-                                                                                : "bg-gray-600/30 text-white"
+                                                                                ? "bg-fuchsia-700 text-black"
+                                                                                : "bg-stone-600/30 text-white"
                                                                         )}
                                                                         onClick={() => setSettings(prev => ({
                                                                             ...prev,
@@ -554,7 +554,7 @@ export default function BrainRotGeneratorPage() {
                                                             ...prev,
                                                             studentName: e.target.value
                                                         }))}
-                                                        className="bg-gray-600/30 text-white border-rose-700"
+                                                        className="bg-stone-600/30 text-white border-fuchsia-700"
                                                     />
                                                     <Input
                                                         placeholder="Subject"
@@ -563,7 +563,7 @@ export default function BrainRotGeneratorPage() {
                                                             ...prev,
                                                             subject: e.target.value
                                                         }))}
-                                                        className="bg-gray-600/30 text-white border-rose-700"
+                                                        className="bg-stone-600/30 text-white border-fuchsia-700"
                                                     />
                                                 </div>
                                             )}
@@ -573,7 +573,7 @@ export default function BrainRotGeneratorPage() {
                                     {/* Generate Button */}
                                     <Button
                                         size="lg"
-                                        className="w-full bg-rose-700 hover:bg-rose-700 text-black"
+                                        className="w-full bg-fuchsia-700 hover:bg-fuchsia-700 text-black"
                                         onClick={handleGenerate}
                                         disabled={!mediaFile || isLoading}
                                     >
@@ -596,7 +596,7 @@ export default function BrainRotGeneratorPage() {
 
                     {/* Generated Video Section */}
                     {isVideoGenerated && generatedVideoUrl && (
-                        <div className="bg-gray-600/30 backdrop-blur-lg border-rose-700 border-2 rounded-lg p-6 mt-8">
+                        <div className="bg-stone-600/30 backdrop-blur-lg border-fuchsia-700 border-2 rounded-lg p-6 mt-8">
                             <div className="grid md:grid-cols-2 gap-6 items-center">
                                 <video
                                     src={generatedVideoUrl}
@@ -604,7 +604,7 @@ export default function BrainRotGeneratorPage() {
                                     className="w-full rounded-lg shadow-2xl"
                                 />
                                 <div className="space-y-4">
-                                    <h2 className="text-3xl font-bold text-rose-700">
+                                    <h2 className="text-3xl font-bold text-fuchsia-700">
                                         Your Brain Rot Video is Ready! 🎉
                                     </h2>
                                     <div className="flex space-x-4">
@@ -614,7 +614,7 @@ export default function BrainRotGeneratorPage() {
                                                     <Button
                                                         variant="outline"
                                                         onClick={handleCopyLink}
-                                                        className="bg-gray-600/30 text-white"
+                                                        className="bg-stone-600/30 text-white"
                                                     >
                                                         <IoLinkOutline className="mr-2" />
                                                         {copyLinkTooltip}
@@ -629,7 +629,7 @@ export default function BrainRotGeneratorPage() {
                                         <Button
                                             variant="secondary"
                                             onClick={() => window.open(generatedVideoUrl, '_blank')}
-                                            className="bg-gray-600/30 text-white"
+                                            className="bg-stone-600/30 text-white"
                                         >
                                             <IoDownloadOutline className="mr-2" />
                                             Download
@@ -638,7 +638,7 @@ export default function BrainRotGeneratorPage() {
                                     <div className="flex space-x-2">
                                         <Button
                                             variant="outline"
-                                            className="bg-gray-600/30 text-white"
+                                            className="bg-stone-600/30 text-white"
                                             onClick={() => setShareDialogOpen(true)}
                                         >
                                             <IoShareSocialOutline className="mr-2" />
@@ -653,7 +653,7 @@ export default function BrainRotGeneratorPage() {
 
                 {/* Generations Section */}
                 <div className="mt-8">
-                    <MyGenerations data={data.filter(item => item.contentType === "bikini-bottom-news").reverse()} />
+                    <MyGenerations data={data.filter(item => item.contentType === "brain-rot").reverse()} />
                 </div>
                 {/* Share Dialog */}
                 <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>

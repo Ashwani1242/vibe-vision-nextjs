@@ -2,8 +2,8 @@
 "use client"
 
 import React, {useRef, useState } from "react"
-import { cn } from "../../lib/utils";
-import Marquee from "../../components/animata/container/marquee";
+import { cn } from "@/lib/utils";
+import Marquee from "@/components/animata/container/marquee";
 import FlickeringGrid from "@/components/ui/flickering-grid";
 import Globemap from "@/components/ui/globe";
 import { motion } from "framer-motion";
@@ -28,17 +28,17 @@ import {
   TrendingUp,
 } from "lucide-react"
 
-import { Button } from "../../components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../../components/ui/card"
-import { Badge } from "../../components/ui/badge"
-import { Layout } from "../../components/layout/layout"
-import { Separator } from "../../components/ui/separator"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Layout } from "@/components/layout/layout"
+import { Separator } from "@/components/ui/separator"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../../components/ui/accordion"
+} from "@/components/ui/accordion"
 // import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
 import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect"
