@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { AudioPlayer } from "@/components/media/audio-player-feed";
 import { VideoPlayer } from "@/components/media/video-player-feed";
-import type { Media } from "@/types/types";
+import type { Media } from "@/lib/types";
 
 interface MediaPlayerProps {
   media: Media;

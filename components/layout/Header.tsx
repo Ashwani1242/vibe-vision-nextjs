@@ -176,7 +176,7 @@ export function Header({
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <img
-              src="/logo.webp"
+              src="/logo.jpg"
               alt="Vibe Vision Logo"
               className="h-8 w-8 rounded-full"
             />

@@ -48,6 +48,8 @@
     "@shadcn/ui": "^0.0.4",
     "@stripe/react-stripe-js": "^3.0.0",
     "@stripe/stripe-js": "^5.2.0",
+    "@swc/core": "^1.10.1",
+    "@swc/wasm": "^1.10.1",
     "@tabler/icons-react": "^3.21.0",
     "@tsparticles/engine": "^3.6.0",
     "@tsparticles/react": "^3.0.0",

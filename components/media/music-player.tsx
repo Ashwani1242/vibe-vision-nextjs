@@ -94,7 +94,7 @@ interface CurrentSong {
   currentSong: Song | null
 }
 
-export default function MusicPlayer({ currentSong }: CurrentSong) {
+export default function EnhancedMusicPlayer({ currentSong }: CurrentSong) {
   // State management with types
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);

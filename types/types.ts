@@ -1,20 +1,91 @@
-// Genre and Story-related Types
-export type Genre = {
+/**
+ * Type Definitions for Application
+ * Organized into logical modules with clear separation of concerns
+ */
+
+// Common Utility Types
+export type MediaType = 'image' | 'video' | 'audio' | 'text';
+export type BillingType = 'monthly' | 'yearly';
+
+// User-related Types
+export interface User {
+  id: string;
+  username: string;
+  avatar: string;
+  createdAt: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  social?: {
+    twitter?: string;
+    github?: string;
+  };
+  stats: {
+    posts: number;
+    followers: number;
+    following: number;
+  };
+}
+
+// Media Types
+export interface Media {
+  type: MediaType;
+  url: string;
+  thumbnail?: string;
+  alt?: string;
+  duration?: number;
+  content?: string;
+}
+
+// Content Interaction Types
+export interface PostStats {
+  likes: number;
+  dislikes: number;
+  comments: number;
+  shares: number;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  author: User;
+  createdAt: string;
+  likes: number;
+  replies: Comment[];
+  parentCommentId?: string;
+}
+
+// Post-related Types
+export interface Post {
+  id: string;
+  title: string;
+  content: string;
+  author: User;
+  createdAt: string;
+  category: string;
+  tags: string[];
+  media: Media[];
+  stats: PostStats;
+  type: MediaType;
+}
+
+// Story Generation Types
+export interface Genre {
   value: string;
   icon: string;
   theme: string;
   description: string;
-};
+}
 
-export type StorySettings = {
+export interface StorySettings {
   tone: string;
   ageGroup: string;
   pacing: string;
   duration: number;
   complexity: string;
-};
+}
 
-export type GeneratedStory = {
+export interface GeneratedStory {
   id: string;
   title: string;
   content: string;
@@ -23,49 +94,14 @@ export type GeneratedStory = {
   settings: StorySettings;
   createdAt: string;
   likes: number;
-};
+}
 
 export interface StoryHistoryItem extends GeneratedStory {
   summary: string;
   characters: string[];
 }
 
-// Pricing and Plan-related Types
-export interface PlanDetails {
-  name: string;
-  price: string;
-  billingType: string;
-  features: string[];
-  basePrice: string;
-  addons?: Addon[];
-}
-
-export interface Addon {
-  name: string;
-  price: number;
-  description: string;
-}
-
-// Form and User-related Types
-export interface FormData {
-  email: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-}
-
-export interface SuccessModalProps {
-  isVisible: boolean;
-  onClose: () => void;
-  formData: FormData;
-}
-
-export interface PaymentStatus {
-  success: boolean;
-  formData: FormData | null;
-}
-
-// Comedy and Script-related Types
+// Comedy and Script Types
 export type ComedyType = 'standup' | 'sketch' | 'roast' | 'musical' | 'improv' | 'sitcom';
 export type TargetAudience = 'everyone' | 'kids' | 'teens' | 'adults' | 'seniors' | 'corporate' | 'family';
 export type ToneSetting = 'funny' | 'sarcastic' | 'witty' | 'balanced';
@@ -104,56 +140,43 @@ export interface ScriptAnalysis {
   suggestions: string[];
 }
 
-// Media and Post-related Types
-export interface Media {
-  id?: string;
-  type: 'image' | 'video' | 'audio';
-  url: string;
-  thumbnail?: string;
+// Pricing and Subscription Types
+export interface Addon {
+  name: string;
+  price: number;
+  description: string;
 }
 
-export interface User {
-  id: string;
-  username: string;
-  avatar: string;
+export interface PlanDetails {
+  name: string;
+  price: string;
+  billingType: BillingType;
+  features: string[];
+  basePrice: string;
+  addons?: Addon[];
 }
 
-export interface PostStats {
-  likes: number;
-  dislikes: number;
-  comments: number;
-  shares: number;
+// Form and User Registration Types
+export interface FormData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
 }
 
-export interface Comment {
-  id: string;
-  content: string;
-  author: User;
-  createdAt: string;
-  likes: number;
-  replies: Comment[];
+export interface SuccessModalProps {
+  isVisible: boolean;
+  onClose: () => void;
+  formData: FormData;
 }
 
-export interface Post {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  category: string;
-  tags?: string[];
-  type?: 'image' | 'video' | 'text';
-  url?: string;
-  media: Media[];
-  author: {
-    id: string;
-    username: string;
-    avatar?: string;
-  };
-  stats: PostStats;
+export interface PaymentStatus {
+  success: boolean;
+  formData: FormData | null;
 }
 
 // NextAuth Session Extension
-import { DefaultSession } from "next-auth";
+import { DefaultSession } from 'next-auth';
 
 declare module 'next-auth' {
   interface Session {
@@ -161,47 +184,4 @@ declare module 'next-auth' {
       id: string;
     } & DefaultSession['user'];
   }
-}
-
-// types/types.ts
-export interface Comment {
-  id: string;
-  author: {
-    username: string;
-    avatar: string;
-  };
-  content: string;
-  createdAt: string;
-  likes: number;
-  replies: Comment[];
-  parentCommentId?: string;
-}
-
-export interface Author {
-  id: string;
-  username: string;
-  avatar: string;
-}
-
-export interface MediaItem {
-  type: 'image' | 'video';
-  url: string;
-}
-
-export interface PostStats {
-  likes: number;
-  dislikes: number;
-  comments: number;
-  shares: number;
-}
-
-export interface Post {
-  id: string;
-  title: string;
-  content: string;
-  author: Author;
-  category: string;
-  createdAt: string;
-  media: MediaItem[];
-  stats: PostStats;
 }

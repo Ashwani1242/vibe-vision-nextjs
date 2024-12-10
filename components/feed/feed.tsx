@@ -6,33 +6,34 @@ import { useEffect } from "react";
 import PostCard from "./post-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { usePosts } from "@/hooks/use-posts";
-import type { Post } from "@/types/types";
+import { Loader2 } from "lucide-react";
+import type { Post } from "@/lib/types";
 
 interface FeedProps {
   category?: string;
+  posts: Post[];
+  isLoading?: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
 }
 
-export default function Feed({ category = "all" }: FeedProps) {
-  const { ref, inView } = useInView();
-  const { posts, error, isLoadingMore, size, setSize } = usePosts(category);
+export default function Feed({ 
+  category = "all", 
+  posts,
+  isLoading,
+  hasMore,
+  onLoadMore 
+}: FeedProps) {
+  const { ref, inView } = useInView({
+    threshold: 0,
+    rootMargin: "100px",
+  });
 
   useEffect(() => {
-    if (inView && !isLoadingMore) {
-      setSize(size + 1);
+    if (inView && hasMore && !isLoading && onLoadMore) {
+      onLoadMore();
     }
-  }, [inView, isLoadingMore, setSize, size]);
-
-  if (error) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-destructive">Error loading posts</p>
-        <Button onClick={() => setSize(1)} className="mt-4">
-          Retry
-        </Button>
-      </div>
-    );
-  }
+  }, [inView, hasMore, isLoading, onLoadMore]);
 
   const filteredPosts = category === "all" 
     ? posts 
@@ -54,7 +55,7 @@ export default function Feed({ category = "all" }: FeedProps) {
         ))}
       </AnimatePresence>
 
-      {isLoadingMore && (
+      {isLoading && (
         <div className="space-y-6">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="p-4 bg-card rounded-lg space-y-4">
@@ -78,6 +79,23 @@ export default function Feed({ category = "all" }: FeedProps) {
       )}
 
       <div ref={ref} className="h-1" />
+
+      {hasMore && !isLoading && (
+        <div className="flex justify-center">
+          <Button onClick={onLoadMore} variant="outline">
+            Load More
+          </Button>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="flex justify-center">
+          <Button disabled variant="outline">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Loading more posts...
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

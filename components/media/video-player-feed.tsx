@@ -32,21 +32,19 @@ import {
     DropdownMenuRadioItem
 } from "@/components/ui/dropdown-menu";
 import { formatTime } from "@/lib/utils";
+import { useMedia } from "@/lib/contexts/media-context";
+import type { Media } from "@/lib/types";
 
 interface VideoPlayerProps {
-    src: string;
-    poster?: string;
-    onEnded?: () => void;
+    media: Media;
     captions?: Array<{ src: string; label: string; srcLang: string }>;
 }
 
 export function VideoPlayer({ 
-    src, 
-    poster, 
-    onEnded, 
+    media,
     captions = [] 
 }: VideoPlayerProps) {
-    const [isPlaying, setIsPlaying] = useState(false);
+    const { currentMedia, isPlaying: contextIsPlaying, play, pause } = useMedia();
     const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -59,6 +57,8 @@ export function VideoPlayer({
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     let controlsTimeout: NodeJS.Timeout;
+
+    const isCurrentlyPlaying = contextIsPlaying && currentMedia?.url === media.url;
 
     useEffect(() => {
         const video = videoRef.current;
@@ -78,6 +78,17 @@ export function VideoPlayer({
         };
     }, [volume, isMuted]);
 
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (isCurrentlyPlaying) {
+            video.play();
+        } else {
+            video.pause();
+        }
+    }, [isCurrentlyPlaying]);
+
     // Fullscreen effect
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -91,14 +102,11 @@ export function VideoPlayer({
     }, []);
 
     const togglePlay = () => {
-        if (!videoRef.current) return;
-
-        if (isPlaying) {
-            videoRef.current.pause();
+        if (isCurrentlyPlaying) {
+            pause();
         } else {
-            videoRef.current.play();
+            play(media);
         }
-        setIsPlaying(!isPlaying);
     };
 
     const toggleMute = () => {
@@ -153,7 +161,7 @@ export function VideoPlayer({
         setIsControlsVisible(true);
         clearTimeout(controlsTimeout);
         controlsTimeout = setTimeout(() => {
-            if (isPlaying) {
+            if (isCurrentlyPlaying) {
                 setIsControlsVisible(false);
             }
         }, 2000);
@@ -202,15 +210,14 @@ export function VideoPlayer({
             ref={containerRef}
             className="relative aspect-video bg-black rounded-lg overflow-hidden group"
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => isPlaying && setIsControlsVisible(false)}
+            onMouseLeave={() => isCurrentlyPlaying && setIsControlsVisible(false)}
         >
             <video
                 ref={videoRef}
-                src={src}
-                poster={poster}
+                src={media.url}
+                poster={media.thumbnail}
                 className="w-full h-full"
                 onTimeUpdate={handleTimeUpdate}
-                onEnded={onEnded}
                 onClick={togglePlay}
                 playsInline
             >
@@ -237,9 +244,9 @@ export function VideoPlayer({
                         variant="ghost"
                         onClick={togglePlay}
                         className="text-white hover:text-white/80"
-                        aria-label={isPlaying ? "Pause" : "Play"}
+                        aria-label={isCurrentlyPlaying ? "Pause" : "Play"}
                     >
-                        {isPlaying ? (
+                        {isCurrentlyPlaying ? (
                             <Pause className="h-5 w-5" />
                         ) : (
                             <Play className="h-5 w-5" />
