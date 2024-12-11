@@ -27,6 +27,11 @@
     --popover-foreground: 283 68% 2%;
     --ring: 283 93% 25%;
     --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
 
     /* Sidebar Theme Variables */
     --sidebar-background: 270 30% 98%;
@@ -41,35 +46,40 @@
   
   .dark {
     /* Dark Theme Variables */
-    --background: 283 47% 2%;
-    --foreground: 283 27% 98%;
-    --primary: 283 93% 25%;
-    --primary-foreground: 283 93% 85%;
-    --secondary: 283 18% 12%;
-    --secondary-foreground: 283 18% 72%;
-    --muted: 283 13% 8%;
-    --muted-foreground: 283 4% 63%;
-    --accent: 283 25% 17%;
-    --accent-foreground: 283 25% 77%;
+    --background: 271 40% 8%;
+    --foreground: 270 25% 95%;
+    --primary: 270 50% 45%;
+    --primary-foreground: 270 25% 95%;
+    --secondary: 270 20% 20%;
+    --secondary-foreground: 270 15% 75%;
+    --muted: 270 15% 15%;
+    --muted-foreground: 270 10% 70%;
+    --accent: 270 30% 30%;
+    --accent-foreground: 270 20% 85%;
     --destructive: 4 84% 49%;
     --destructive-foreground: 0 0% 100%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --card: 283 47% 3%;
-    --card-foreground: 283 27% 99%;
-    --popover: 283 47% 2%;
-    --popover-foreground: 283 27% 98%;
-    --ring: 283 93% 25%;
+    --border: 271 15% 12%;
+    --input: 271 15% 12%;
+    --card: 271 30% 10%;
+    --card-foreground: 270 25% 95%;
+    --popover: 271 40% 8%;
+    --popover-foreground: 270 25% 95%;
+    --ring: 270 50% 45%;
+    --chart-1: 271 50% 45%;
+    --chart-2: 270 40% 40%;
+    --chart-3: 271 30% 35%;
+    --chart-4: 270 60% 50%;
+    --chart-5: 271 55% 45%;
 
     /* Dark Sidebar Theme Variables */
-    --sidebar-background: 270 30% 10%;
-    --sidebar-foreground: 270 20% 90%;
-    --sidebar-primary: 270 85% 60%;
+    --sidebar-background: 271 30% 12%;
+    --sidebar-foreground: 271 25% 85%;
+    --sidebar-primary: 271 50% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 270 30% 15%;
-    --sidebar-accent-foreground: 270 20% 90%;
-    --sidebar-border: 270 30% 15%;
-    --sidebar-ring: 270 85% 60%;
+    --sidebar-accent: 271 30% 20%;
+    --sidebar-accent-foreground: 271 25% 85%;
+    --sidebar-border: 271 20% 15%;
+    --sidebar-ring: 271 50% 45%;
   }
 }
 
@@ -81,8 +91,8 @@
 
 /* Utility Classes */
 @layer utilities {
-  .border-stroke { border-color: rgba(147, 112, 219, 0.2); }
-  .dark .border-stroke-dark { border-color: rgba(147, 112, 219, 0.3); }
+  .border-stroke { border-color: rgba(98, 68, 148, 0.2); }
+  .dark .border-stroke-dark { border-color: rgba(98, 68, 148, 0.3); }
 }
 
 /* Gradient Animations */
@@ -94,10 +104,10 @@
 
 .animate-gradient {
   background: linear-gradient(-45deg, 
-    hsl(270, 85%, 60%),
-    hsl(280, 85%, 60%),
-    hsl(260, 85%, 60%),
-    hsl(270, 85%, 60%)
+    hsl(270, 50%, 45%),
+    hsl(271, 50%, 50%),
+    hsl(272, 50%, 40%),
+    hsl(270, 50%, 45%)
   );
   background-size: 400% 400%;
   animation: gradient 15s ease infinite;
@@ -105,10 +115,10 @@
 
 .dark .animate-gradient {
   background: linear-gradient(-45deg, 
-    hsl(270, 70%, 20%),
-    hsl(280, 70%, 25%),
-    hsl(260, 70%, 20%),
-    hsl(270, 70%, 20%)
+    hsl(271, 30%, 25%),
+    hsl(272, 30%, 30%),
+    hsl(273, 30%, 20%),
+    hsl(271, 30%, 25%)
   );
   background-size: 400% 400%;
   animation: gradient 15s ease infinite;
@@ -125,23 +135,95 @@
 
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom,
-    hsl(270, 85%, 60%),
-    hsl(280, 85%, 60%)
+    hsl(270, 50%, 45%),
+    hsl(271, 50%, 50%)
   );
   @apply rounded-full;
 }
 
 .dark ::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom,
-    hsl(270, 70%, 30%),
-    hsl(280, 70%, 35%)
+    hsl(271, 30%, 25%),
+    hsl(272, 30%, 30%)
   );
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom,
-    hsl(270, 90%, 65%),
-    hsl(280, 90%, 65%)
+    hsl(270, 60%, 50%),
+    hsl(271, 60%, 55%)
+  );
+}
+
+/* Global Styles */
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
+}
+
+/* Utility Classes */
+@layer utilities {
+  .border-stroke { border-color: rgba(150, 80, 200, 0.2); }
+  .dark .border-stroke-dark { border-color: rgba(150, 80, 200, 0.3); }
+}
+
+/* Gradient Animations */
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background: linear-gradient(-45deg, 
+    hsl(263, 85%, 50%),
+    hsl(273, 85%, 50%),
+    hsl(253, 85%, 50%),
+    hsl(263, 85%, 50%)
+  );
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+.dark .animate-gradient {
+  background: linear-gradient(-45deg, 
+    hsl(263, 65%, 25%),
+    hsl(273, 65%, 30%),
+    hsl(253, 65%, 25%),
+    hsl(263, 65%, 25%)
+  );
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom,
+    hsl(263, 85%, 50%),
+    hsl(273, 85%, 50%)
+  );
+  @apply rounded-full;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom,
+    hsl(263, 65%, 25%),
+    hsl(273, 65%, 30%)
+  );
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom,
+    hsl(263, 90%, 55%),
+    hsl(273, 90%, 55%)
   );
 }
 
@@ -158,7 +240,7 @@
 
 /* Loader & Animated Components */
 .loader {
-  color: rgb(124, 124, 124);
+  color: rgb(120, 120, 180);
   font-family: "Poppins", sans-serif;
   font-weight: 500;
   font-size: 25px;
@@ -191,7 +273,7 @@
   display: block;
   height: 100%;
   padding-left: 6px;
-  color: #956afa;
+  color: #a275f4;
   animation: spin_4991 4s infinite;
 }
 
@@ -252,7 +334,6 @@
   }
 }
 
-
 /* Disable autofill styles globally */
 input:-webkit-autofill {
   box-shadow: 0 0 0 30px transparent inset !important; /* Transparent background */
@@ -297,11 +378,11 @@ input:-webkit-autofill:focus {
   background-size: 400% 400%;
   background-image: linear-gradient(
     -45deg, 
-    #4F42B4, 
-    #4E5BAD, 
-    #4C74A6, 
-    #4B8DA0, 
-    #49A39A
+    #6244B4, 
+    #624EB4, 
+    #5C6AB4, 
+    #5C7EB4, 
+    #5B98B4
   );
 }
 

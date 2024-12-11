@@ -1,3 +1,32 @@
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  avatar?: string;
+  banner?: string;
+  createdAt: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  social?: {
+    twitter?: string;
+    github?: string;
+  };
+  stats: {
+    postKarma: number;
+    commentKarma: number;
+    followers: number;
+    following: number;
+  };
+  achievements: Achievement[];
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -9,25 +38,6 @@ export interface Post {
   media: Media[];
   stats: PostStats;
   type: 'text' | 'image' | 'video' | 'audio';
-}
-
-export interface User {
-  id: string;
-  username: string;
-  avatar: string;
-  createdAt: string;
-  bio?: string;
-  location?: string;
-  website?: string;
-  social?: {
-    twitter?: string;
-    github?: string;
-  };
-  stats: {
-    posts: number;
-    followers: number;
-    following: number;
-  };
 }
 
 export interface Media {
