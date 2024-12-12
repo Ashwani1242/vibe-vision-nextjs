@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   LogOut,
@@ -13,6 +13,13 @@ import {
   LibraryBig,
   SparklesIcon,
   Settings,
+  Trophy,
+  Star,
+  UserCircle,
+  ImageIcon,
+  Crown,
+  Bell,
+  Plus,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -37,7 +44,9 @@ import axios from "axios";
 import { BASE_URL } from "@/config";
 import { logout } from "@/lib/auth-service";
 import { getToken } from "@/lib/token-manager";
+import { IoTv } from "react-icons/io5";
 
+// Types and Interfaces (kept from previous implementation)
 interface Notification {
   id: number;
   title: string;
@@ -77,16 +86,16 @@ interface Breadcrumb {
   path: string;
 }
 
+
 export function Header({
   isAuthenticated = false,
 }: HeaderProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
+  const [, setNotifications] = useState<Notification[]>([
     {
       id: 1,
       title: "New follower",
@@ -100,21 +109,11 @@ export function Header({
 
   const [data, setData] = useState<ContentItem[]>([]);
 
-  const storage = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      return window.localStorage;
-    }
-    return null;
-  }, []);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(notification => ({ ...notification, isRead: true })));
-    setUnreadCount(0);
-  };
 
   const markNotificationAsRead = (id: number) => {
     setNotifications(prev =>
@@ -123,6 +122,42 @@ export function Header({
       )
     );
     setUnreadCount(prev => Math.max(0, prev - 1));
+  };
+
+  const [systemNotifications, setSystemNotifications] = useState<Notification[]>([
+    {
+      id: 1,
+      title: "Welcome to VibeVision",
+      message: "Explore and create amazing content!",
+      time: "Just now",
+      isRead: false,
+      type: "welcome",
+      avatar: "/logo.jpg",
+    },
+    {
+      id: 2,
+      title: "New Feature",
+      message: "Check out our latest upload capabilities!",
+      time: "1 hour ago",
+      isRead: false,
+      type: "feature",
+      avatar: "/logo.jpg",
+    }
+  ]);
+  const [systemUnreadCount, setSystemUnreadCount] = useState(2);
+
+  const markSystemNotificationAsRead = (id: number) => {
+    setSystemNotifications(prev =>
+      prev.map(notification =>
+        notification.id === id ? { ...notification, isRead: true } : notification
+      )
+    );
+    setSystemUnreadCount(prev => Math.max(0, prev - 1));
+  };
+
+  const markAllSystemNotificationsAsRead = () => {
+    setSystemNotifications(prev => prev.map(notification => ({ ...notification, isRead: true })));
+    setSystemUnreadCount(0);
   };
 
   const getBreadcrumbs = useMemo((): Breadcrumb[] => {
@@ -136,7 +171,7 @@ export function Header({
         path: url,
       });
       return acc;
-    }, [{ label: "Home", path: "/" }]);
+    }, [{ label: "🏠", path: "/" }]);
   }, [pathname]);
 
   const fetchData = async () => {
@@ -187,6 +222,79 @@ export function Header({
           </Link>
 
           <div className="ml-auto flex items-center gap-4">
+            {/* Upload Dialog */}
+            <div className="flex items-center">
+              <Link href="/create-post">
+                <Button
+                  variant="default"
+                  size="lg"
+                  className="flex items-center gap-2 rounded-full 
+            bg-gradient-to-r from-violet-500 from-10% via-sky-500 via-30% to-pink-500 to-90%
+            transition-all duration-300 ease-in-out
+            hover:shadow-[0_0_15px_rgba(168,85,247,0.7)] 
+            hover:shadow-violet-500 
+            hover:scale-105 
+            hover:brightness-125
+            active:scale-95"
+                >
+                  <Plus className="h-10 w-10 text-white" />
+                  <span className="text-lg text-white">Create</span>
+                </Button>
+              </Link>
+            </div>
+
+            {/* System Notifications */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {systemUnreadCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0"
+                    >
+                      {systemUnreadCount}
+                    </Badge>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="w-[400px] sm:w-[540px]">
+                <SheetHeader>
+                  <SheetTitle className="flex justify-between items-center">
+                    <span>Notifications</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={markAllSystemNotificationsAsRead}
+                    >
+                      Mark all as read
+                    </Button>
+                  </SheetTitle>
+                </SheetHeader>
+                <ScrollArea className="h-[calc(100vh-150px)] mt-4">
+                  {systemNotifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`
+                        p-4 mb-2 rounded-lg flex items-start gap-3
+                        ${notification.isRead ? 'bg-muted' : 'bg-primary/10'}
+                      `}
+                      onClick={() => markSystemNotificationAsRead(notification.id)}
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={notification.avatar} alt="Notification" />
+                        <AvatarFallback><Bell /></AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-semibold text-sm">{notification.title}</h4>
+                        <p className="text-xs text-muted-foreground">{notification.message}</p>
+                        <span className="text-xs text-muted-foreground">{notification.time}</span>
+                      </div>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
 
             {isAuthenticated && false &&
 
@@ -251,7 +359,7 @@ export function Header({
   );
 }
 
-// Extracted UserMenu component
+// Extracted UserMenu component with new features
 const UserMenu = ({
   isAuthenticated,
   username,
@@ -264,55 +372,113 @@ const UserMenu = ({
   onLogout: () => void;
   showUserMenu: boolean;
   setShowUserMenu: (show: boolean) => void;
-}) => (
-  <DropdownMenu open={showUserMenu} onOpenChange={setShowUserMenu}>
-    <DropdownMenuTrigger asChild>
-      <Button variant="ghost" size="icon">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="/avatars/user.png" alt="User" />
-          <AvatarFallback>
-            <User className="h-5 w-5" />
-          </AvatarFallback>
-        </Avatar>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="w-56">
-      {isAuthenticated ? (
-        <>
-          <DropdownMenuLabel>{username}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+}) => {
 
-          <Link href="/profile-page">
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" /> Profile
+  return (
+    <DropdownMenu open={showUserMenu} onOpenChange={setShowUserMenu}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="/avatars/user.png" alt="User" />
+            <AvatarFallback>
+              <User className="h-5 w-5" />
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-72">
+        {isAuthenticated ? (
+          <>
+            <DropdownMenuLabel className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src="/avatars/user.png" alt="User" />
+                  <AvatarFallback>
+                    <User className="h-6 w-6" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="font-semibold">{username}</div>
+                  <div className="text-xs text-muted-foreground">Free Tier</div>
+                </div>
+              </div>
+              <Link href="/premium" className="text-xs text-primary hover:underline">
+                Upgrade
+              </Link>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+
+            {/* Profile Section */}
+            <Link href="/profile">
+              <DropdownMenuItem>
+                <UserCircle className="mr-2 h-4 w-4" /> View Profile
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/edit-avatar">
+              <DropdownMenuItem>
+                <ImageIcon className="mr-2 h-4 w-4" /> Edit Avatar
+              </DropdownMenuItem>
+            </Link>
+
+            {/* Achievements */}
+            <DropdownMenuItem disabled>
+              <Trophy className="mr-2 h-4 w-4" />
+              <div className="flex justify-between w-full">
+                <span className="text-sm font-semibold">Achievements</span>
+                <Badge variant="secondary" className="ml-2">6 Unlocked</Badge>
+              </div>
             </DropdownMenuItem>
-          </Link>
-          {/* <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" /> Settings
-          </DropdownMenuItem> */}
-          <Link href="/settings">
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" /> Setting
+
+            {/* Contributor Program */}
+            <DropdownMenuItem disabled>
+              <Star className="mr-2 h-4 w-4" />
+              <div className="flex justify-between w-full">
+                <span className="text-sm font-semibold">Contributor Program</span>
+                <Badge variant="outline" className="ml-2">0 Gold</Badge>
+              </div>
             </DropdownMenuItem>
-          </Link>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-red-600" onClick={onLogout}>
-            <LogOut className="mr-2 h-4 w-4" /> Log out
-          </DropdownMenuItem>
-        </>
-      ) : (
-        <>
-          <Link href="/login">
-            <DropdownMenuItem>Log in</DropdownMenuItem>
-          </Link>
-          <Link href="/signup">
-            <DropdownMenuItem>Sign up</DropdownMenuItem>
-          </Link>
-        </>
-      )}
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+
+            {/* External Links */}
+            <DropdownMenuSeparator />
+            <Link href="/advertise">
+              <DropdownMenuItem>
+                <IoTv className="mr-2 h-4 w-4" /> Advertise on VibeVision
+              </DropdownMenuItem>
+            </Link>
+
+            {/* Settings and Premium */}
+            <DropdownMenuSeparator />
+            <Link href="/settings">
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" /> Settings
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/premium">
+              <DropdownMenuItem className="text-primary">
+                <Crown className="mr-2 h-4 w-4" /> Go Premium
+              </DropdownMenuItem>
+            </Link>
+
+            {/* Logout */}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red-600" onClick={onLogout}>
+              <LogOut className="mr-2 h-4 w-4" /> Log out
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <Link href="/login">
+              <DropdownMenuItem>Log in</DropdownMenuItem>
+            </Link>
+            <Link href="/signup">
+              <DropdownMenuItem>Sign up</DropdownMenuItem>
+            </Link>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 // Extracted NotificationsPanel component
 const NotificationsPanel = ({
@@ -320,16 +486,14 @@ const NotificationsPanel = ({
   unreadCount,
   showNotifications,
   setShowNotifications,
-  reloadFunction,
-  markNotificationAsRead
-}: {
-  data: ContentItem[];
-  unreadCount: number;
-  showNotifications: boolean;
-  setShowNotifications: (show: boolean) => void;
-  reloadFunction: () => void;
-  markNotificationAsRead: (id: number) => void;
-}) => (
+  reloadFunction }: {
+    data: ContentItem[];
+    unreadCount: number;
+    showNotifications: boolean;
+    setShowNotifications: (show: boolean) => void;
+    reloadFunction: () => void;
+    markNotificationAsRead: (id: number) => void;
+  }) => (
   <Sheet open={showNotifications} onOpenChange={setShowNotifications}>
     <SheetTrigger asChild>
       <Button variant="ghost" size="icon" className="relative">

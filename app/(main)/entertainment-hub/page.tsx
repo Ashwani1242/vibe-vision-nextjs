@@ -1,19 +1,18 @@
-
 "use client"
 import { useState } from "react";
 import Feed from "@/components/feed/feed";
 import { Sidebar } from "@/components/layout/sidebar-feed";
 import { RecentPosts } from "@/components/layout/recent-posts";
 import { SearchBar } from "@/components/search/search-bar";
-import { usePosts } from "@/lib/hooks/use-posts";
-import { useSearch } from "@/lib/hooks/use-search";
+import { useContent } from "@/hooks/use-posts";
+import { useFeedSearch } from "@/hooks/use-search";
 import { Providers } from '@/components/providers';
 import { Layout } from "@/components/layout/layout";
 
 export default function EntertainmentHub() {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const { posts, isLoadingMore, hasMore, size, setSize } = usePosts();
-  const { searchTerm, setSearchTerm, filteredPosts } = useSearch(posts);
+  const { contents, isLoadingMore, hasMore, size, setSize } = useContent();
+  const { searchTerm, setSearchTerm, filteredPosts } = useFeedSearch(contents);
 
   const handleLoadMore = () => {
     setSize(size + 1);
@@ -55,7 +54,7 @@ export default function EntertainmentHub() {
               </div>
 
               <aside className="hidden md:block space-y-6">
-                <RecentPosts posts={posts.slice(0, 5)} />
+                <RecentPosts posts={contents.slice(0, 5)} />
               </aside>
             </div>
           </main>

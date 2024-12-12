@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@/lib/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileOverview } from "@/components/profile/profile-overview";
 import { ProfileAbout } from "@/components/profile/profile-about";

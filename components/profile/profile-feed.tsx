@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUserPosts } from "@/lib/hooks/use-user-posts";
+import { useUserPosts } from "@/hooks/use-user-posts";
 import Feed from "@/components/feed/feed";
 
 interface ProfileFeedProps {

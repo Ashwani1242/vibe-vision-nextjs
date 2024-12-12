@@ -103,6 +103,15 @@ export default function MusicPlayer({
     onShuffle();
   }, [isShuffling, onShuffle]);
 
+  // Modify this to keep playing when switching to fullscreen
+  const handleFullscreen = useCallback(() => {
+    setIsFullscreen(true);
+    // Ensure the song continues playing
+    if (audioRef.current) {
+      setIsPlaying(true);
+    }
+  }, [setIsPlaying]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -182,7 +191,7 @@ export default function MusicPlayer({
             onPrevious={onPrevious}
             hasNext={hasNext}
             hasPrevious={hasPrevious}
-            onFullscreen={() => setIsFullscreen(true)}
+            onFullscreen={handleFullscreen}
             isLiked={isLiked}
             onLike={onLike}
             playlists={playlists}

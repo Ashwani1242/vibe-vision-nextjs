@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X } from 'lucide-react';
-import { useDebounce } from '@/lib/hooks/use-debounce';
+import { useDebounce } from '@/hooks/use-debounce';
 import { trendingSongs, newSongs } from '@/lib/sample-data';
 import SearchResults from './search/SearchResults';
 import { Song } from '@/types/music';

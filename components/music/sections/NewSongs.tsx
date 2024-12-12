@@ -121,7 +121,7 @@ export default function NewSongs({
             <p className="text-sm text-white/40">Stay tuned for more updates</p>
           </motion.div>
         }
-        className="space-y-4 grid grid-cols-3 gap-4"
+        className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full"
       >
         <AnimatePresence>
           {songs.map((song, index) => (

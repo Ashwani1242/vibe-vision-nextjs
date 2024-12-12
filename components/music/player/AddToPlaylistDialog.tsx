@@ -1,86 +1,91 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { PlusCircle, ListMusic } from 'lucide-react';
-import { UserPlaylist, Song } from '@/types/music';
-import CreatePlaylistDialog from '../playlist/CreatePlaylistDialog';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, X } from 'lucide-react';
+import { Song, UserPlaylist } from '@/types/music';
+import { cn } from '@/lib/utils';
 
 interface AddToPlaylistDialogProps {
   song: Song;
-  playlists?: UserPlaylist[];
-  onAddToPlaylist?: (playlistId: string, songId: string) => void;
-  onCreatePlaylist?: (playlist: Omit<UserPlaylist, 'id' | 'createdAt'>) => void;
+  playlists: UserPlaylist[];
+  onAddToPlaylist: (playlistId: string, songId: string) => void;
+  onCreatePlaylist: (playlist: Omit<UserPlaylist, 'id' | 'createdAt'>) => void;
 }
 
 export default function AddToPlaylistDialog({
   song,
-  playlists = [],
+  playlists,
   onAddToPlaylist,
   onCreatePlaylist
 }: AddToPlaylistDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-
-  const handleAddToPlaylist = (playlistId: string) => {
-    onAddToPlaylist?.(playlistId, song.id);
-    setIsOpen(false);
-  };
-
-  const handleCreatePlaylist = (playlist: Omit<UserPlaylist, 'id' | 'createdAt'>) => {
-    onCreatePlaylist?.(playlist);
-    setShowCreateDialog(false);
-    setIsOpen(false);
-  };
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          <Button variant="ghost" size="icon" className="text-white/60 hover:text-white">
-            <PlusCircle size={20} />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] bg-dark-800 text-white">
-          <DialogHeader>
-            <DialogTitle>Add to Playlist</DialogTitle>
-          </DialogHeader>
-          <div className="pt-4">
-            <Button
-              variant="ghost"
-              className="w-full justify-start mb-4"
-              onClick={() => setShowCreateDialog(true)}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsOpen(true)}
+        className="text-gray-400 hover:text-white"
+      >
+        <Plus size={20} />
+      </motion.button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            />
+
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative bg-dark-800 rounded-lg p-6 w-full max-w-md z-50"
             >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create New Playlist
-            </Button>
-            
-            <ScrollArea className="h-[300px] pr-4">
-              <div className="space-y-2">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+              >
+                <X size={20} />
+              </button>
+
+              <h2 className="text-xl font-bold mb-4">Add to Playlist</h2>
+
+              <div className="space-y-2 max-h-[60vh] overflow-y-auto">
                 {playlists.map((playlist) => (
-                  <Button
+                  <button
                     key={playlist.id}
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => handleAddToPlaylist(playlist.id)}
+                    onClick={() => {
+                      onAddToPlaylist(playlist.id, song.id);
+                      setIsOpen(false);
+                    }}
+                    className="w-full p-3 flex items-center gap-3 rounded-lg hover:bg-white/5"
                   >
-                    <ListMusic className="mr-2 h-4 w-4" />
-                    {playlist.name}
-                  </Button>
+                    <img
+                      src={playlist.imageUrl}
+                      alt={playlist.name}
+                      className="w-12 h-12 rounded"
+                    />
+                    <div className="text-left">
+                      <div className="font-medium">{playlist.name}</div>
+                      <div className="text-sm text-gray-400">
+                        {playlist.songs?.length || 0} songs
+                      </div>
+                    </div>
+                  </button>
                 ))}
               </div>
-            </ScrollArea>
+            </motion.div>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="sm:max-w-[425px] bg-dark-800 text-white">
-          <CreatePlaylistDialog onCreatePlaylist={handleCreatePlaylist} />
-        </DialogContent>
-      </Dialog>
+        )}
+      </AnimatePresence>
     </>
   );
 }

@@ -1,32 +1,30 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Layout,
-  ListMusic,
-  Radio
-} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Layout, ListMusic, Radio, Library } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Song } from '@/types/music';
 
 import MusicPlayer from './player/MusicPlayer';
 import SearchBar from './SearchBar';
-import TrendingSongs from './sections/TrendingSongs';
-import GenreSection from './sections/GenreSection';
-import PlaylistSection from './sections/PlaylistSection';
-import NewSongs from './sections/NewSongs';
+import ExploreView from './views/ExploreView';
+import PlaylistView from './views/PlaylistView';
 
 import {
   trendingSongs,
   newSongs,
   genres,
-  trendingPlaylists
+  trendingPlaylists,
+  allSongs
 } from '@/lib/sample-data';
-import { Song } from '@/types/music';
+import Link from 'next/link';
+
+type View = 'explore' | 'library' | 'radio' | 'playlists';
 
 export default function MusicExplorer() {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
-  const [currentView, setCurrentView] = useState<'explore' | 'library' | 'radio'>('explore');
+  const [currentView, setCurrentView] = useState<View>('explore');
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPlaylist, setCurrentPlaylist] = useState<Song[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -70,83 +68,44 @@ export default function MusicExplorer() {
     }
   }, [currentPlaylist, currentSong]);
 
-  const renderContent = () => {
-    switch (currentView) {
-      case 'explore':
-        return (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="space-y-12"
-          >
-            <TrendingSongs
-              songs={trendingSongs}
-              onPlaySong={(song) => handlePlaySong(song, trendingSongs)}
-            />
-            <GenreSection genres={genres} />
-            <PlaylistSection playlists={trendingPlaylists} />
-            <NewSongs
-              songs={newSongs}
-              onPlaySong={(song) => handlePlaySong(song, newSongs)}
-            />
-          </motion.div>
-        );
-      case 'library':
-        return (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="p-8 text-center"
-          >
-            <h2 className="text-2xl font-bold mb-4">Your Library</h2>
-            <p className="text-gray-400">Coming soon...</p>
-          </motion.div>
-        );
-      case 'radio':
-        return (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="p-8 text-center"
-          >
-            <h2 className="text-2xl font-bold mb-4">Radio Stations</h2>
-            <p className="text-gray-400">Coming soon...</p>
-          </motion.div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 text-white">
       <div className="container mx-auto px-4 py-8 pb-24">
-        <div className="flex items-center justify-between mb-8">
+        <div className='flex items-center'>
+          <Link href={'/'} className="flex items-center gap-2">
+            <motion.h1
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              className="text-2xl font-rubik-glitch text-transparent bg-clip-text bg-gradient-to-r from-[#4BC0C8] via-[#C779D0] to-[#FEAC5E]"
+            >
+              Vibe Vision
+            </motion.h1>
+          </Link>
+        </div>
+        <div className="flex items-center justify-between my-8 ">
+
           <motion.h1
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="text-4xl font-bold text-white"
+            className="text-4xl font-bold"
           >
             Music Explorer
           </motion.h1>
           <SearchBar 
             onPlaySong={handlePlaySong}
             currentSong={currentSong}
+            songs={allSongs}
           />
         </div>
 
         <div className="flex mb-6 space-x-4">
           {[
             { view: 'explore', icon: Layout, label: 'Explore' },
-            { view: 'library', icon: ListMusic, label: 'Library' },
-            { view: 'radio', icon: Radio, label: 'Radio' }
+            { view: 'playlists', icon: Library, label: 'Library' },
           ].map(({ view, icon: Icon, label }) => (
             <motion.button
               key={view}
-              onClick={() => setCurrentView(view as any)}
+              onClick={() => setCurrentView(view as View)}
               className={cn(
                 "flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300",
                 currentView === view
@@ -162,9 +121,22 @@ export default function MusicExplorer() {
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
-          {renderContent()}
-        </AnimatePresence>
+        {currentView === 'explore' && (
+          <ExploreView
+            trendingSongs={trendingSongs}
+            newSongs={newSongs}
+            genres={genres}
+            playlists={trendingPlaylists}
+            onPlaySong={handlePlaySong}
+            currentSong={currentSong}
+          />
+        )}
+        {currentView === 'playlists' && (
+          <PlaylistView
+            onPlaySong={handlePlaySong}
+            currentSong={currentSong}
+          />
+        )}
       </div>
 
       {currentSong && (

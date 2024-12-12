@@ -1,29 +1,23 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { UserPlaylist } from '@/types/music';
+import { Playlist, Song } from '@/types/music';
+import { trendingPlaylists } from '@/lib/sample-data';
 
 export function usePlaylists() {
-  const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
+  const [playlists, setPlaylists] = useState<Playlist[]>(trendingPlaylists);
 
-  const createPlaylist = useCallback((playlist: Omit<UserPlaylist, 'id' | 'createdAt'>) => {
-    const newPlaylist: UserPlaylist = {
-      ...playlist,
-      id: `playlist-${Date.now()}`,
-      createdAt: new Date(),
-    };
-
-    setPlaylists(prev => [...prev, newPlaylist]);
-    return newPlaylist;
+  const createPlaylist = useCallback((playlist: Playlist) => {
+    setPlaylists(prev => [...prev, { ...playlist, songs: [] }]);
   }, []);
 
-  const addSongToPlaylist = useCallback((playlistId: string, songId: string) => {
+  const addSongToPlaylist = useCallback((playlistId: string, song: Song) => {
     setPlaylists(prev => prev.map(playlist => {
       if (playlist.id === playlistId) {
-        return {
-          ...playlist,
-          songs: [...playlist.songs, songId]
-        };
+        const songs = playlist.songs || [];
+        if (!songs.some(s => s.id === song.id)) {
+          return { ...playlist, songs: [...songs, song] };
+        }
       }
       return playlist;
     }));
@@ -31,10 +25,10 @@ export function usePlaylists() {
 
   const removeSongFromPlaylist = useCallback((playlistId: string, songId: string) => {
     setPlaylists(prev => prev.map(playlist => {
-      if (playlist.id === playlistId) {
+      if (playlist.id === playlistId && playlist.songs) {
         return {
           ...playlist,
-          songs: playlist.songs.filter(id => id !== songId)
+          songs: playlist.songs.filter(song => song.id !== songId)
         };
       }
       return playlist;

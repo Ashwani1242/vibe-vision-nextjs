@@ -4,38 +4,40 @@ import { Avatar } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import Image from "next/image";
-import type { Post } from "@/lib/types";
+import type { EnhancedContentItem } from "@/hooks/use-content";
 
 interface PostHeaderProps {
-  post: Post;
+  post: EnhancedContentItem;
   isDetailView?: boolean;
 }
 
 export function PostHeader({ post, isDetailView }: PostHeaderProps) {
+  // Fallback for author information if not present
+  const authorName = post.userName || 'Anonymous';
+  const authorAvatar = post.imageUrl || '/default-avatar.png';
+
   return (
     <div className="flex items-center space-x-4">
       <Avatar className="h-10 w-10 relative">
-        {post.author.avatar && (
-          <Image
-            src={post.author.avatar}
-            alt={post.author.username}
-            fill
-            className="object-cover rounded-full"
-            sizes="40px"
-          />
-        )}
+        <Image
+          src={authorAvatar}
+          alt={authorName}
+          fill
+          className="object-cover rounded-full"
+          sizes="40px"
+        />
       </Avatar>
       <div>
         <Link
-          href={`/u/${post.author.username}`}
+          href={`/u/${authorName}`}
           className="font-medium hover:underline"
         >
-          {post.author.username}
+          {authorName}
         </Link>
         <p className="text-sm text-muted-foreground">
           {formatDistanceToNow(new Date(post.createdAt))} ago in{" "}
-          <Link href={`/r/${post.category}`} className="hover:underline">
-            r/{post.category}
+          <Link href={`/r/${post.contentType}`} className="hover:underline">
+            {post.contentType}
           </Link>
         </p>
       </div>

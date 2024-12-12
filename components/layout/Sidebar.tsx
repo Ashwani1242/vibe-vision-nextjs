@@ -98,7 +98,7 @@ const authenticatedNavItems: NavItem[] = [
     badgeVariant: "destructive",
     index: 1
   },
-  { icon: Theater, label: "AI Studio", href: "/studio", index: 2 },
+  { icon: Theater, label: "AI Studio", href: "/ai-studio", index: 2 },
   { icon: Speaker, label: "Music Explorer", href: "/music-explore", index: 3 },
   { icon: Videotape, label: "vibe Flick", href: "/vibe-flick", index: 4 },
 ]
@@ -144,8 +144,9 @@ const libraryItems: NavItem[] = [
 ]
 
 const resourcesItems: NavItem[] = [
-  { icon: Info, label: "About Vibe Vision", href: "/about", index: 0 },
+  { icon: Info, label: "About Vibe Vision", href: "/about-us", index: 0 },
   { icon: HelpCircle, label: "Help", href: "/help", index: 1 },
+  { icon: ContactRound, label: "Contact Us", href: "/contact-us", index: 1 },
   { icon: MessageCircleMore, label: "Blog", href: "/blog", index: 2 },
 ]
 const communityItems: NavItem[] = [
@@ -156,10 +157,9 @@ const communityItems: NavItem[] = [
 ]
 
 const privacyItems: NavItem[] = [
-  { icon: Shield, label: "Community Guidelines", href: "/guidelines", index: 0 },
-  { icon: ContactRound, label: "Contact Us", href: "/contact-us", index: 1 },
+  { icon: Shield, label: "Community Guidelines", href: "/community-guidelines", index: 0 },
   { icon: FileText, label: "Content Policy", href: "/content-policy", index: 3 },
-  { icon: Scale, label: "Privacy Policy", href: "/privacy", index: 4 },
+  { icon: Scale, label: "Privacy Policy", href: "/privacy-policy", index: 4 },
   { icon: FileText, label: "Terms of Service", href: "/terms", index: 5 },
   { icon: Cookie, label: "Cookie Settings", href: "/cookie-settings", index: 6 },
 ]
