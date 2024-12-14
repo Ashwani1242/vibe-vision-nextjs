@@ -44,8 +44,27 @@ module.exports = {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'bubble-up': 'bubbleUp linear infinite',
 				'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				// Complex movement animations
+				'first': 'moveVertical 30s ease infinite',
+				'second': 'moveInCircle 20s reverse infinite',
+				'third': 'moveInCircle 40s linear infinite',
+				'fourth': 'moveHorizontal 40s ease infinite',
+				'fifth': 'moveInCircle 20s ease infinite',
 			},
 			keyframes: {
+				// Complex movement animations
+				"moveHorizontal": {
+					"0%": { transform: "translateX(-30%) translateY(-10%)" },
+					"30%": { transform: "translateX(30%) translateY(10%)" },
+				},
+				"moveInCircle": {
+					"0%": { transform: "rotate(0deg)" },
+					"30%": { transform: "rotate(180deg)" },
+				},
+				"moveVertical": {
+					"0%": { transform: "translateY(-30%)" },
+					"30%": { transform: "translateY(30%)" },
+				},
 				gradientOcean: {
 					'0%': {
 						backgroundPosition: '0% 50%'

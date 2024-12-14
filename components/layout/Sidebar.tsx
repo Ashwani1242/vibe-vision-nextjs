@@ -178,7 +178,7 @@ const useNavigationGestures = (
   const flattenedItems = sections.flatMap(section => section.items)
   const currentItemIndex = flattenedItems.findIndex(item => item.href === currentPath)
 
-  const handleDragEnd = async (event: any, info: PanInfo) => {
+  const handleDragEnd = async (_event: any, info: PanInfo) => {
     const threshold = 50
     const velocity = Math.abs(info.velocity.x)
     const direction = info.offset.x > 0 ? 'right' : 'left'
@@ -231,7 +231,7 @@ const useNavigationGestures = (
     setDragDirection(null)
   }
 
-  const handleDrag = (event: any, info: PanInfo) => {
+  const handleDrag = (_event: any, info: PanInfo) => {
     setDragDirection(info.offset.x > 0 ? 'right' : 'left')
   }
 

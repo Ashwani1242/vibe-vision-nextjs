@@ -4,14 +4,14 @@ import { Avatar } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import Image from "next/image";
-import type { EnhancedContentItem } from "@/hooks/use-content";
+import type { EnhancedContentItem } from "@/hooks/use-posts";
 
 interface PostHeaderProps {
   post: EnhancedContentItem;
   isDetailView?: boolean;
 }
 
-export function PostHeader({ post, isDetailView }: PostHeaderProps) {
+export function PostHeader({ post }: PostHeaderProps) {
   // Fallback for author information if not present
   const authorName = post.userName || 'Anonymous';
   const authorAvatar = post.imageUrl || '/default-avatar.png';

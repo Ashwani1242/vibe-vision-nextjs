@@ -1,7 +1,7 @@
 'use client';
-
 import useSWRInfinite from 'swr/infinite';
-import type { ContentItem, MediaType } from '@/lib/types';
+
+export type MediaType = 'video' | 'audio' | 'image' | 'text';
 
 export interface ContentItem {
   _id: string;
@@ -49,7 +49,6 @@ export interface MediaItem {
   duration?: number;
 }
 
-const MEDIA_TYPES: MediaType[] = ['text', 'image', 'video', 'audio'];
 const POSTS_PER_PAGE = 10;
 
 const mapContentToMediaItem = (content: ContentItem): EnhancedContentItem => {
@@ -105,7 +104,7 @@ export function useContent(contentType?: string) {
 
   const { data, error, size, setSize, isLoading, isValidating } = useSWRInfinite(
     getKey,
-    ([_, page, type]) => fetchContent(page, type),
+    ([_, page, type]) => fetchContent(Number(page), type?.toString()),
     {
       revalidateOnFocus: false,
       revalidateFirstPage: false,
@@ -128,5 +127,3 @@ export function useContent(contentType?: string) {
     hasMore: contents.length > 0 && contents.length % POSTS_PER_PAGE === 0,
   };
 }
-
-export type { MediaType, ContentItem, MediaItem };
