@@ -99,10 +99,12 @@ const fetchContent = async (page: number, contentType?: string): Promise<Enhance
 
 export function useContent(contentType?: string) {
   const getKey = (pageIndex: number) => {
+    // Return null to stop fetching when no more data
+    if (pageIndex > 0 && !hasMore) return null;
     return [`/api/content?page=${pageIndex}&type=${contentType || ''}`, pageIndex, contentType];
   };
 
-  const { data, error, size, setSize, isLoading, isValidating } = useSWRInfinite(
+  const { data, error, size, setSize, isLoading, isValidating } = useSWRInfinite<EnhancedContentItem[]>(
     getKey,
     ([_, page, type]) => fetchContent(Number(page), type?.toString()),
     {
@@ -111,11 +113,20 @@ export function useContent(contentType?: string) {
       shouldRetryOnError: true,
       errorRetryCount: 2,
       errorRetryInterval: 1000,
+      initialSize: 1 // Start with first page
     }
   );
 
   const contents = data ? data.flat() : [];
-  const isLoadingMore = isLoading || isValidating;
+  const isLoadingMore = isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
+  const isEmpty = data?.[0]?.length === 0;
+  const hasMore = !isEmpty && data?.[data.length - 1]?.length === POSTS_PER_PAGE;
+
+  const loadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      setSize(size + 1);
+    }
+  };
 
   return {
     contents,
@@ -123,7 +134,8 @@ export function useContent(contentType?: string) {
     isLoadingMore,
     size,
     setSize,
-    // Check if last fetched page has exactly POSTS_PER_PAGE items
-    hasMore: contents.length > 0 && contents.length % POSTS_PER_PAGE === 0,
+    loadMore,
+    hasMore,
+    isEmpty
   };
 }

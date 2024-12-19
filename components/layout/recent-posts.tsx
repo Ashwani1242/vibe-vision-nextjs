@@ -17,14 +17,12 @@ interface RecentPostsProps {
 export function RecentPosts({ posts: initialPosts }: RecentPostsProps) {
   const [posts, setPosts] = useState(initialPosts);
 
-  const handleClearAll = () => {
-    setPosts([]);
-  };
+  const handleClearAll = () => setPosts([]);
 
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold">Recent Posts</h2>
+        <h2 className="font-semibold text-lg">Recent Posts</h2>
         {posts.length > 0 && (
           <Button
             variant="ghost"
@@ -33,7 +31,7 @@ export function RecentPosts({ posts: initialPosts }: RecentPostsProps) {
             className="text-muted-foreground hover:text-destructive"
           >
             <X className="h-4 w-4 mr-1" />
-            Clear all
+            Clear All
           </Button>
         )}
       </div>
@@ -66,14 +64,18 @@ export function RecentPosts({ posts: initialPosts }: RecentPostsProps) {
                         className="object-cover"
                         sizes="64px"
                       />
-                    ) : null}
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-muted-foreground">No Image</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium group-hover:text-primary truncate">
                       {post.title}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {formatDistanceToNow(new Date(post.createdAt))} ago
+                      {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                     </p>
                   </div>
                 </Link>
@@ -86,7 +88,7 @@ export function RecentPosts({ posts: initialPosts }: RecentPostsProps) {
             animate={{ opacity: 1 }}
             className="text-center py-8 text-muted-foreground"
           >
-            No recent posts
+            No recent posts available.
           </motion.div>
         )}
       </AnimatePresence>

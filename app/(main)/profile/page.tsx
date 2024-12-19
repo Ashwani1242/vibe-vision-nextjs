@@ -5,7 +5,6 @@ import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileOverview } from "@/components/profile/profile-overview";
 import { ProfileAbout } from "@/components/profile/profile-about";
 import { ProfileFeed } from "@/components/profile/profile-feed";
-import { ProfileActivity } from "@/components/profile/profile-activity";
 import { ProfileAchievements } from "@/components/profile/profile-achievements";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Layout } from "@/components/layout/layout";
@@ -67,7 +66,6 @@ export default function ProfilePage() {
             </div>
             <aside className="hidden md:block space-y-6">
               <ProfileAbout user={user} isOwnProfile />
-              <ProfileActivity />
             </aside>
           </div>
         </div>

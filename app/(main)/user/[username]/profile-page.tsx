@@ -5,14 +5,14 @@ import { ProfileOverview } from "@/components/profile/profile-overview";
 import { ProfileSidebar } from "@/components/profile/profile-sidebar";
 import { ProfileFeed } from "@/components/profile/profile-feed";
 import { ProfileAchievements } from "@/components/profile/profile-achievements";
-import { ProfileActivity } from "@/components/profile/profile-activity";
 import { useUser } from "@/hooks/use-user";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Layout } from "@/components/layout/layout";
 
-export function ProfilePage({ 
-  params 
-}: { 
-  params: { username: string } 
+export function ProfilePage({
+  params
+}: {
+  params: { username: string }
 }) {
   const { user, isLoading } = useUser(params.username);
 
@@ -54,23 +54,24 @@ export function ProfilePage({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <ProfileHeader user={user} />
-      <div className="container py-6">
-        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr_300px] gap-6">
-          <aside className="hidden md:block space-y-6">
-            <ProfileOverview user={user} />
-            <ProfileAchievements achievements={user.achievements} />
-          </aside>
-          <div className="space-y-6">
-            <ProfileActivity />
-            <ProfileFeed username={user.username} />
+    <Layout>
+      <div className="min-h-screen bg-background">
+        <ProfileHeader user={user} />
+        <div className="container py-6">
+          <div className="grid grid-cols-1 md:grid-cols-[300px_1fr_300px] gap-6">
+            <aside className="hidden md:block space-y-6">
+              <ProfileOverview user={user} />
+              <ProfileAchievements achievements={user.achievements} />
+            </aside>
+            <div className="space-y-6">
+              <ProfileFeed username={user.username} />
+            </div>
+            <aside className="hidden md:block space-y-6">
+              <ProfileSidebar user={user} />
+            </aside>
           </div>
-          <aside className="hidden md:block space-y-6">
-            <ProfileSidebar user={user} />
-          </aside>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }

@@ -40,3 +40,24 @@ export const CATEGORIES = [
   'sports',
   'lifestyle',
 ] as const;
+
+export const MEME_SUGGESTIONS = [
+  "Cat vibing to music with RGB lights",
+  "Surprised Pikachu but it's a corporate meeting",
+  "Gamer rage quit moment but make it aesthetic",
+  "POV: When the WiFi drops during online class"
+] as const;
+
+export const IMAGE_GENERATION_CONFIG = {
+  width: 512,
+  height: 512,
+  quality: "standard",
+  timeout: 2000,
+} as const;
+
+export const MEME_TEXT_CONFIG = {
+  maxLength: 100,
+  defaultFont: "Impact",
+  maxFontSize: 48,
+  minFontSize: 12,
+} as const;

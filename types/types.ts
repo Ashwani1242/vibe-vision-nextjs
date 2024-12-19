@@ -7,6 +7,23 @@
 export type MediaType = 'image' | 'video' | 'audio' | 'text';
 export type BillingType = 'monthly' | 'yearly';
 
+// Shared types for the application
+export interface MemeText {
+  top: string;
+  bottom: string;
+  content: string;
+  fontSize?: number;
+  color?: string;
+  fontFamily?: string;
+  text: MemeText[];
+}
+
+export interface GeneratedImage {
+  url: string;
+  prompt: string;
+  timestamp: number;
+}
+
 // User-related Types
 export interface User {
   id: string;
