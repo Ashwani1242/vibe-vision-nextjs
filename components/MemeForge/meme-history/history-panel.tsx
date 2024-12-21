@@ -15,7 +15,7 @@ interface HistoryPanelProps {
 }
 
 export function HistoryPanel({ history, onSelect, onClear }: HistoryPanelProps) {
-  const handleDelete = async (_id: string) => {
+  const handleDelete = async (id: string) => {
     // Implement delete functionality
     // This should be connected to your state management
     toast({
@@ -74,7 +74,7 @@ export function HistoryPanel({ history, onSelect, onClear }: HistoryPanelProps) 
     }
   };
 
-  const handleMakePublic = async (_meme: MemeHistory) => {
+  const handleMakePublic = async (meme: MemeHistory) => {
     // Implement public functionality
     // This should connect to your backend
     toast({

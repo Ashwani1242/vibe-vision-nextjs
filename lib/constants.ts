@@ -61,3 +61,28 @@ export const MEME_TEXT_CONFIG = {
   maxFontSize: 48,
   minFontSize: 12,
 } as const;
+
+
+export const IMAGE_STYLES = {
+  realistic: { label: "Realistic", description: "True-to-life photographic style" },
+  cartoon: { label: "Cartoon", description: "Playful animated style" },
+  abstract: { label: "Abstract", description: "Non-representational artistic style" },
+  digital: { label: "Digital Art", description: "Modern digital illustration" },
+  watercolor: { label: "Watercolor", description: "Soft watercolor painting style" },
+};
+
+export const ASPECT_RATIOS = {
+  "1:1": { label: "1:1 (Square)", dimensions: "1024×1024" },
+  "16:9": { label: "16:9 (Landscape)", dimensions: "1024×576" },
+  "9:16": { label: "9:16 (Portrait)", dimensions: "576×1024" },
+  "4:3": { label: "4:3 (Classic)", dimensions: "1024×768" },
+  "3:2": { label: "3:2 (Photography)", dimensions: "1024×683" },
+};
+
+export const COLOR_SCHEMES = {
+  vibrant: "Vibrant & Colorful",
+  muted: "Muted & Subtle",
+  monochrome: "Monochrome",
+  pastel: "Pastel Colors",
+  dark: "Dark & Moody",
+};

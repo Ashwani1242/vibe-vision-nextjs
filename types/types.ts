@@ -3,6 +3,26 @@
  * Organized into logical modules with clear separation of concerns
  */
 
+import { z } from "zod";
+
+export const formSchema = z.object({
+  imageStyle: z.string(),
+  aspectRatio: z.string(),
+  artStyle: z.string(),
+  numberOfImages: z.number().min(1).max(4),
+  purpose: z.string(),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }),
+  resolution: z.string(),
+  transparency: z.boolean(),
+  colorScheme: z.string(),
+  aiModel: z.string(),
+  prompt: z.string().optional(),
+});
+
+export type FormValues = z.infer<typeof formSchema>;
+
 // Common Utility Types
 export type MediaType = 'image' | 'video' | 'audio' | 'text';
 export type BillingType = 'monthly' | 'yearly';
